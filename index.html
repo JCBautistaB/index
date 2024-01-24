@@ -1,13 +1,24 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reconocimiento de Voz</title>
     <style>
+        #mensaje {
+            font-size: 24px;
+            color: #333;
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
+        }
+
         #corazon {
             font-size: 48px;
             color: red;
+        }
+
+        .fadeIn {
+            opacity: 1 !important;
         }
     </style>
 </head>
@@ -17,6 +28,7 @@
 
     <button onclick="startRecognition()">Comenzar reconocimiento</button>
 
+    <div id="mensaje">Yaxkin Mónica y Juan Carlos</div>
     <div id="corazon"></div>
 
     <script>
@@ -33,7 +45,7 @@
                 console.log('Transcripción: ', transcript);
 
                 if (transcript.includes('te amo')) {
-                    mostrarCorazon();
+                    mostrarMensajeYCorazon();
                 }
             };
 
@@ -48,8 +60,14 @@
             recognition.start();
         }
 
-        function mostrarCorazon() {
+        function mostrarMensajeYCorazon() {
+            const mensajeElement = document.getElementById('mensaje');
             const corazonElement = document.getElementById('corazon');
+
+            // Mostrar mensaje con animación fadeIn
+            mensajeElement.classList.add('fadeIn');
+
+            // Mostrar corazón
             corazonElement.innerHTML = '❤️';
         }
     </script>
