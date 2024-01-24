@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Speech Recognition</title>
+</head>
+<body>
+    <h1>Speech Recognition</h1>
+    <p>Hable y el sistema intentará reconocer lo que dijo.</p>
+
+    <button onclick="startRecognition()">Comenzar reconocimiento</button>
+
+    <script>
+        function startRecognition() {
+            const recognition = new webkitSpeechRecognition() || new SpeechRecognition();
+            
+            recognition.lang = 'en-US'; // Configura el idioma a inglés
+
+            recognition.onstart = function() {
+                console.log('¡Reconocimiento de voz iniciado!');
+            };
+
+            recognition.onresult = function(event) {
+                const transcript = event.results[0][0].transcript;
+                console.log('Transcripción: ', transcript);
+                alert('Transcripción: ' + transcript);
+            };
+
+            recognition.onerror = function(event) {
+                console.error('Error de reconocimiento: ', event.error);
+            };
+
+            recognition.onend = function() {
+                console.log('Reconocimiento de voz finalizado.');
+            };
+
+            recognition.start();
+        }
+    </script>
+</body>
+</html>
