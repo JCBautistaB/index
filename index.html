@@ -3,28 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Speech Recognition</title>
+    <title>Reconocimiento de Voz</title>
+    <style>
+        #corazon {
+            font-size: 48px;
+            color: red;
+        }
+    </style>
 </head>
 <body>
-    <h1>Speech Recognition</h1>
+    <h1>Reconocimiento de Voz</h1>
     <p>Hable y el sistema intentará reconocer lo que dijo.</p>
 
     <button onclick="startRecognition()">Comenzar reconocimiento</button>
 
+    <div id="corazon"></div>
+
     <script>
         function startRecognition() {
             const recognition = new webkitSpeechRecognition() || new SpeechRecognition();
-            
-            recognition.lang = 'en-US'; // Configura el idioma a inglés
+            recognition.lang = 'es-ES'; // Configura el idioma a español
 
             recognition.onstart = function() {
                 console.log('¡Reconocimiento de voz iniciado!');
             };
 
             recognition.onresult = function(event) {
-                const transcript = event.results[0][0].transcript;
+                const transcript = event.results[0][0].transcript.toLowerCase();
                 console.log('Transcripción: ', transcript);
-                alert('Transcripción: ' + transcript);
+
+                if (transcript.includes('te amo')) {
+                    mostrarCorazon();
+                }
             };
 
             recognition.onerror = function(event) {
@@ -36,6 +46,11 @@
             };
 
             recognition.start();
+        }
+
+        function mostrarCorazon() {
+            const corazonElement = document.getElementById('corazon');
+            corazonElement.innerHTML = '❤️';
         }
     </script>
 </body>
