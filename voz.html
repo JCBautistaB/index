@@ -43,6 +43,9 @@
 
                 if (transcript.includes('te amo')) {
                     mostrarAnimacionCorazon('red', '¡Hermoso! Ahora di "abrazos" para otra sorpresa.');
+                    // Reiniciar el reconocimiento de voz después de la primera parte
+                    recognition.stop();
+                    setTimeout(() => recognition.start(), 1000);
                 } else if (transcript.includes('abrazos')) {
                     mostrarAnimacionCorazon('green', '¡Increíble! Has pronunciado "abrazos" correctamente.');
                 }
