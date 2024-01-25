@@ -9,12 +9,16 @@
             font-size: 18px;
             color: #333;
             margin-bottom: 20px;
+            opacity: 0;
+            animation: fadeIn 1s ease-in-out;
         }
 
         #wordInput {
             font-size: 24px;
             padding: 10px;
             margin-bottom: 20px;
+            opacity: 0;
+            animation: slideIn 1s ease-in-out;
         }
 
         #speakButton {
@@ -22,15 +26,25 @@
             padding: 10px;
             cursor: pointer;
         }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
     </style>
 </head>
 <body>
     <h1>Práctica de Pronunciación en Inglés</h1>
     <p>Introduce una palabra en inglés y pulsa "Hablar" para practicar tu pronunciación.</p>
 
-    <div id="feedback"></div>
     <input type="text" id="wordInput" placeholder="Ingresa una palabra en inglés">
     <button id="speakButton" onclick="startSpeaking()">Hablar</button>
+    <div id="feedback"></div>
 
     <script>
         function startSpeaking() {
@@ -68,17 +82,21 @@
                 console.log('Pronunciación del usuario: ', userPronunciation);
 
                 const feedbackElement = document.getElementById('feedback');
-                if (userPronunciation === word.toLowerCase()) {
-                    feedbackElement.textContent = '¡Bien hecho! Tu pronunciación es correcta.';
-                } else {
-                    feedbackElement.textContent = `La pronunciación correcta es "${word}". Intenta de nuevo.`;
-                }
+                feedbackElement.textContent = userPronunciation === word.toLowerCase()
+                    ? '¡Bien hecho! Tu pronunciación es correcta.'
+                    : `La pronunciación correcta es "${word}". Intenta de nuevo.`;
+
+                // Mostrar retroalimentación con animación
+                feedbackElement.style.opacity = 1;
             };
 
             recognition.onerror = function(event) {
                 console.error('Error de reconocimiento: ', event.error);
                 const feedbackElement = document.getElementById('feedback');
                 feedbackElement.textContent = 'Error de reconocimiento. Inténtalo de nuevo.';
+
+                // Mostrar retroalimentación con animación
+                feedbackElement.style.opacity = 1;
             };
 
             recognition.onend = function() {
