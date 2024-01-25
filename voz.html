@@ -31,6 +31,7 @@
             font-size: 36px;
             color: #333;
             margin-top: 20px;
+            cursor: pointer;
             opacity: 0.5;
             transition: color 0.5s ease-in-out;
         }
@@ -45,7 +46,7 @@
     <h1>Reconocimiento de Voz con Animación</h1>
     <p>Di "te amo" y luego di "abrazos" para ver las animaciones de corazón.</p>
 
-    <div id="microfono">🎙️</div>
+    <div id="microfono" onclick="startRecognition()">🎙️</div>
     <div id="corazon">❤️</div>
     <div id="corazonAbrazos">❤️</div>
     <div id="feedback"></div>
@@ -114,9 +115,8 @@
             feedbackElement.style.opacity = 1;
         }
 
-        window.addEventListener('load', () => {
-            startRecognition();
-        });
+        // Inicia el reconocimiento al cargar la página (opcional)
+        window.addEventListener('load', startRecognition);
     </script>
 </body>
 </html>
