@@ -5,12 +5,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reconocimiento de Voz con Animación</title>
     <style>
+        #corazon-container {
+            display: flex;
+            align-items: center;
+            position: relative;
+        }
+
         #corazon {
             font-size: 48px;
             color: red;
             opacity: 0;
-            transition: opacity 1s ease-in-out, color 1s ease-in-out;
-            animation: heartbeat 1s infinite; /* Nueva animación de latido */
+            animation: heartbeat 1s infinite;
+            transform-origin: center;
+        }
+
+        @keyframes heartbeat {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.2);
+            }
         }
 
         #corazonAbrazos {
@@ -52,24 +67,6 @@
             color: #333;
             opacity: 0.8;
         }
-
-        @keyframes heartbeat {
-            0% {
-                transform: scale(1);
-            }
-            25% {
-                transform: scale(1.2);
-            }
-            50% {
-                transform: scale(1);
-            }
-            75% {
-                transform: scale(1.2);
-            }
-            100% {
-                transform: scale(1);
-            }
-        }
     </style>
 </head>
 <body>
@@ -81,8 +78,11 @@
         <div id="estado-microfono">Apagado</div>
     </div>
 
-    <div id="corazon">❤️</div>
-    <div id="corazonAbrazos">❤️</div>
+    <div id="corazon-container">
+        <div id="corazon">❤️</div>
+        <div id="corazonAbrazos">🤗</div>
+    </div>
+
     <div id="feedback"></div>
 
     <script>
@@ -93,8 +93,8 @@
             const estadoMicrofonoElement = document.getElementById('estado-microfono');
 
             if (!recognition) {
-                recognition = new SpeechRecognition() || new webkitSpeechRecognition();
-                recognition.lang = 'es-ES';
+                recognition = new webkitSpeechRecognition() || new SpeechRecognition();
+                recognition.lang = 'es-ES'; // Configura el idioma a español
 
                 recognition.onstart = function() {
                     console.log('¡Reconocimiento de voz iniciado!');
@@ -108,6 +108,7 @@
 
                     if (transcript.includes('te amo')) {
                         mostrarAnimacionCorazon('red', '¡Hermoso! Ahora di "abrazos" para otra sorpresa.');
+                        // Reiniciar el reconocimiento de voz después de la primera parte
                         recognition.stop();
                         setTimeout(() => {
                             recognition.start();
@@ -145,8 +146,8 @@
 
             corazonElement.style.color = color;
             corazonElement.style.opacity = 1;
-            corazonAbrazosElement.style.color = 'green'; 
-            corazonAbrazosElement.style.opacity = 0; 
+            corazonAbrazosElement.style.color = 'green'; // Cambia el color directamente
+            corazonAbrazosElement.style.opacity = 0; // Oculta el corazón de abrazos
             feedbackElement.textContent = mensaje;
             feedbackElement.style.opacity = 1;
         }
