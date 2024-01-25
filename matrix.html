@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Matrix Face</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background-color: black;
+    }
+
+    #matrix-face {
+      display: flex;
+      flex-wrap: wrap;
+    }
+
+    .matrix-digit {
+      width: 10px;
+      height: 10px;
+      background-color: #00ff00;
+      margin: 1px;
+    }
+  </style>
+</head>
+<body>
+
+<div id="matrix-face"></div>
+
+<script>
+  // Obtener el contenedor del rostro Matrix
+  const matrixFace = document.getElementById('matrix-face');
+
+  // Función para generar un dígito Matrix aleatorio
+  function createMatrixDigit() {
+    const digit = document.createElement('div');
+    digit.className = 'matrix-digit';
+    return digit;
+  }
+
+  // Función para animar el rostro Matrix
+  function animateMatrixFace() {
+    setInterval(() => {
+      const matrixDigit = createMatrixDigit();
+      matrixFace.appendChild(matrixDigit);
+
+      // Eliminar dígitos después de cierto tiempo
+      setTimeout(() => {
+        matrixDigit.remove();
+      }, 1000);
+    }, 50);
+  }
+
+  // Iniciar la animación cuando la página cargue
+  window.onload = animateMatrixFace;
+</script>
+
+</body>
+</html>
