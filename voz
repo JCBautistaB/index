@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Práctica de Pronunciación</title>
+    <style>
+        #feedback {
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        #wordInput {
+            font-size: 24px;
+            padding: 10px;
+            margin-bottom: 20px;
+        }
+
+        #speakButton {
+            font-size: 16px;
+            padding: 10px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>Práctica de Pronunciación en Inglés</h1>
+    <p>Introduce una palabra en inglés y pulsa "Hablar" para practicar tu pronunciación.</p>
+
+    <div id="feedback"></div>
+    <input type="text" id="wordInput" placeholder="Ingresa una palabra en inglés">
+    <button id="speakButton" onclick="startSpeaking()">Hablar</button>
+
+    <script>
+        function startSpeaking() {
+            const wordInput = document.getElementById('wordInput');
+            const feedbackElement = document.getElementById('feedback');
+
+            // Validar que se haya ingresado una palabra
+            const word = wordInput.value.trim();
+            if (!word) {
+                feedbackElement.textContent = 'Por favor, ingresa una palabra.';
+                return;
+            }
+
+            // Limpiar retroalimentación anterior
+            feedbackElement.textContent = '';
+
+            // Crear un nuevo objeto SpeechSynthesisUtterance
+            const utterance = new SpeechSynthesisUtterance();
+            utterance.lang = 'en-US'; // Establecer el idioma en inglés
+            utterance.text = word;
+
+            // Hablar la palabra
+            speechSynthesis.speak(utterance);
+
+            // Escuchar la pronunciación del usuario
+            listenUserPronunciation(word);
+        }
+
+        function listenUserPronunciation(word) {
+            const recognition = new webkitSpeechRecognition() || new SpeechRecognition();
+            recognition.lang = 'en-US'; // Configurar el idioma en inglés
+
+            recognition.onresult = function(event) {
+                const userPronunciation = event.results[0][0].transcript.toLowerCase();
+                console.log('Pronunciación del usuario: ', userPronunciation);
+
+                const feedbackElement = document.getElementById('feedback');
+                if (userPronunciation === word.toLowerCase()) {
+                    feedbackElement.textContent = '¡Bien hecho! Tu pronunciación es correcta.';
+                } else {
+                    feedbackElement.textContent = `La pronunciación correcta es "${word}". Intenta de nuevo.`;
+                }
+            };
+
+            recognition.onerror = function(event) {
+                console.error('Error de reconocimiento: ', event.error);
+                const feedbackElement = document.getElementById('feedback');
+                feedbackElement.textContent = 'Error de reconocimiento. Inténtalo de nuevo.';
+            };
+
+            recognition.onend = function() {
+                console.log('Reconocimiento de voz finalizado.');
+            };
+
+            recognition.start();
+        }
+    </script>
+</body>
+</html>
