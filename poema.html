@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reconocimiento de Voz con Grabación</title>
+    <title>Poema Reconocimiento de Voz</title>
     <style>
         body {
             font-family: 'Arial', sans-serif;
@@ -12,9 +12,31 @@
             background-color: #f4f4f4;
         }
 
+        h1 {
+            color: #333;
+            position: relative;
+        }
+
+        #recording-indicator {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 10px;
+            height: 10px;
+            background-color: red;
+            border-radius: 50%;
+            display: none;
+        }
+
         #output {
             font-size: 1.5em;
             margin-top: 20px;
+            white-space: pre-line;
+            border: 2px solid #ccc;
+            padding: 10px;
+            background-color: #fff;
+            border-radius: 10px;
+            min-height: 100px;
         }
 
         #microfono-container {
@@ -44,78 +66,50 @@
             opacity: 0.8;
         }
 
-        #grabar-container {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            margin-top: 20px;
-        }
-
-        #grabar {
-            font-size: 36px;
-            color: #333;
-            margin-right: 10px;
-            opacity: 0.5;
-            transition: color 0.5s ease-in-out;
-        }
-
-        #grabar.active {
-            color: red;
-            opacity: 1;
-        }
-
-        #estado-grabacion {
-            font-size: 16px;
-            color: #333;
-            opacity: 0.8;
-        }
-
-        #botones-container {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-top: 20px;
-        }
-
-        .boton {
+        #startButton, #stopButton {
             font-size: 16px;
             padding: 10px 20px;
-            margin: 0 10px;
+            margin-top: 20px;
             cursor: pointer;
-            background-color: #4CAF50;
-            color: white;
             border: none;
             border-radius: 5px;
+        }
+
+        #startButton {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        #stopButton {
+            background-color: #f44336;
+            color: white;
+            display: none;
+        }
+
+        #audioPlayer {
+            margin-top: 20px;
         }
     </style>
 </head>
 <body>
-    <h1>Reconocimiento de Voz con Grabación</h1>
+    <h1>Crear Poema con Reconocimiento de Voz<span id="recording-indicator"></span></h1>
 
     <div id="microfono-container" onclick="toggleRecognition()">
         <div id="microfono">🎙️</div>
-        <div id="estado-microfono">Apagado</div>
+        <div id="estado-microfono">Apagado | Hablar y Escribir</div>
     </div>
 
-    <div id="grabar-container" onclick="toggleRecording()">
-        <div id="grabar">🔴</div>
-        <div id="estado-grabacion">No grabando</div>
-    </div>
+    <div id="output">Poema</div>
 
-    <div id="output"></div>
+    <button id="startButton" onclick="startRecording()">Iniciar Grabación</button>
+    <button id="stopButton" onclick="stopRecording()">Detener Grabación</button>
 
-    <div id="botones-container">
-        <button class="boton" onclick="clearText()">Borrar Texto</button>
-        <button class="boton" onclick="saveAudio()">Guardar Audio</button>
-    </div>
+    <audio id="audioPlayer" controls></audio>
 
-    <script src="https://cdn.rawgit.com/mattdiamond/Recorderjs/08e7abd9/dist/recorder.js"></script>
     <script>
         let recognition;
-        let recorder;
-        let audioChunks = [];
         let savedText = '';
+        let recordingIndicator = document.getElementById('recording-indicator');
 
         function toggleRecognition() {
             const microfonoElement = document.getElementById('microfono');
@@ -130,25 +124,29 @@
                     console.log('¡Reconocimiento de voz iniciado!');
                     microfonoElement.classList.add('active');
                     estadoMicrofonoElement.textContent = 'Encendido';
+                    recordingIndicator.style.display = 'block';
                 };
 
                 recognition.onresult = function(event) {
                     const transcript = event.results[0][0].transcript.toLowerCase();
                     console.log('Transcripción: ', transcript);
                     savedText += transcript + ' ';
-                    outputElement.textContent = savedText;
+                    outputElement.innerHTML = savedText + '<br>';
                 };
 
                 recognition.onerror = function(event) {
                     console.error('Error de reconocimiento: ', event.error);
                     microfonoElement.classList.remove('active');
                     estadoMicrofonoElement.textContent = 'Error';
+                    recordingIndicator.style.display = 'none';
                 };
 
                 recognition.onend = function() {
                     console.log('Reconocimiento de voz finalizado.');
                     microfonoElement.classList.remove('active');
                     estadoMicrofonoElement.textContent = 'Apagado';
+                    savedText += '<br>';
+                    recordingIndicator.style.display = 'none';
                 };
 
                 recognition.start();
@@ -157,52 +155,47 @@
                 recognition = null;
                 microfonoElement.classList.remove('active');
                 estadoMicrofonoElement.textContent = 'Apagado';
+                recordingIndicator.style.display = 'none';
             }
         }
+    </script>
 
-        function toggleRecording() {
-            const grabarElement = document.getElementById('grabar');
-            const estadoGrabacionElement = document.getElementById('estado-grabacion');
+    <script>
+        let mediaRecorder;
+        let audioChunks = [];
 
-            if (!recorder || recorder.state === 'inactive') {
-                navigator.mediaDevices.getUserMedia({ audio: true })
-                    .then(stream => {
-                        recorder = new Recorder(stream);
-                        recorder.record();
-                        grabarElement.classList.add('active');
-                        estadoGrabacionElement.textContent = 'Grabando';
-                    })
-                    .catch(error => console.error('Error al acceder al micrófono: ', error));
-            } else {
-                recorder.stop();
-                recorder.exportWAV(blob => {
-                    audioChunks.push(blob);
-                    recorder.clear();
-                });
-                grabarElement.classList.remove('active');
-                estadoGrabacionElement.textContent = 'No grabando';
-            }
+        const startButton = document.getElementById('startButton');
+        const stopButton = document.getElementById('stopButton');
+        const audioPlayer = document.getElementById('audioPlayer');
+
+        function startRecording() {
+            navigator.mediaDevices.getUserMedia({ audio: true })
+                .then(stream => {
+                    mediaRecorder = new MediaRecorder(stream);
+
+                    mediaRecorder.ondataavailable = event => {
+                        if (event.data.size > 0) {
+                            audioChunks.push(event.data);
+                        }
+                    };
+
+                    mediaRecorder.onstop = () => {
+                        const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                        const audioUrl = URL.createObjectURL(audioBlob);
+                        audioPlayer.src = audioUrl;
+                    };
+
+                    mediaRecorder.start();
+                    startButton.style.display = 'none';
+                    stopButton.style.display = 'inline-block';
+                })
+                .catch(error => console.error('Error al acceder al micrófono: ', error));
         }
 
-        function clearText() {
-            savedText = '';
-            document.getElementById('output').textContent = '';
-        }
-
-        function saveAudio() {
-            if (audioChunks.length > 0) {
-                const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
-                const audioUrl = URL.createObjectURL(audioBlob);
-                const a = document.createElement('a');
-                document.body.appendChild(a);
-                a.style = 'display: none';
-                a.href = audioUrl;
-                a.download = 'grabacion.wav';
-                a.click();
-                window.URL.revokeObjectURL(audioUrl);
-            } else {
-                console.log('No hay grabación para guardar.');
-            }
+        function stopRecording() {
+            mediaRecorder.stop();
+            startButton.style.display = 'inline-block';
+            stopButton.style.display = 'none';
         }
     </script>
 </body>
