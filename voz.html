@@ -27,11 +27,16 @@
             transition: opacity 1s ease-in-out;
         }
 
+        #microfono-container {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+
         #microfono {
             font-size: 36px;
             color: #333;
-            margin-top: 20px;
-            cursor: pointer;
+            margin-right: 10px;
             opacity: 0.5;
             transition: color 0.5s ease-in-out;
         }
@@ -40,57 +45,79 @@
             color: green;
             opacity: 1;
         }
+
+        #estado-microfono {
+            font-size: 16px;
+            color: #333;
+            opacity: 0.8;
+        }
     </style>
 </head>
 <body>
     <h1>Reconocimiento de Voz con Animación</h1>
     <p>Di "te amo" y luego di "abrazos" para ver las animaciones de corazón.</p>
 
-    <div id="microfono" onclick="startRecognition()">🎙️</div>
+    <div id="microfono-container" onclick="toggleRecognition()">
+        <div id="microfono">🎙️</div>
+        <div id="estado-microfono">Apagado</div>
+    </div>
+
     <div id="corazon">❤️</div>
     <div id="corazonAbrazos">❤️</div>
     <div id="feedback"></div>
 
     <script>
-        function startRecognition() {
+        let recognition;
+
+        function toggleRecognition() {
             const microfonoElement = document.getElementById('microfono');
-            microfonoElement.classList.add('active');
+            const estadoMicrofonoElement = document.getElementById('estado-microfono');
 
-            const recognition = new webkitSpeechRecognition() || new SpeechRecognition();
-            recognition.lang = 'es-ES'; // Configura el idioma a español
+            if (!recognition) {
+                recognition = new webkitSpeechRecognition() || new SpeechRecognition();
+                recognition.lang = 'es-ES'; // Configura el idioma a español
 
-            recognition.onstart = function() {
-                console.log('¡Reconocimiento de voz iniciado!');
-            };
+                recognition.onstart = function() {
+                    console.log('¡Reconocimiento de voz iniciado!');
+                    microfonoElement.classList.add('active');
+                    estadoMicrofonoElement.textContent = 'Encendido';
+                };
 
-            recognition.onresult = function(event) {
-                const transcript = event.results[0][0].transcript.toLowerCase();
-                console.log('Transcripción: ', transcript);
+                recognition.onresult = function(event) {
+                    const transcript = event.results[0][0].transcript.toLowerCase();
+                    console.log('Transcripción: ', transcript);
 
-                if (transcript.includes('te amo')) {
-                    mostrarAnimacionCorazon('red', '¡Hermoso! Ahora di "abrazos" para otra sorpresa.');
-                    // Reiniciar el reconocimiento de voz después de la primera parte
-                    recognition.stop();
-                    setTimeout(() => {
-                        recognition.start();
-                        microfonoElement.classList.add('active');
-                    }, 1000);
-                } else if (transcript.includes('abrazos')) {
-                    mostrarAnimacionCorazonAbrazos();
-                }
-            };
+                    if (transcript.includes('te amo')) {
+                        mostrarAnimacionCorazon('red', '¡Hermoso! Ahora di "abrazos" para otra sorpresa.');
+                        // Reiniciar el reconocimiento de voz después de la primera parte
+                        recognition.stop();
+                        setTimeout(() => {
+                            recognition.start();
+                        }, 1000);
+                    } else if (transcript.includes('abrazos')) {
+                        mostrarAnimacionCorazonAbrazos();
+                    }
+                };
 
-            recognition.onerror = function(event) {
-                console.error('Error de reconocimiento: ', event.error);
+                recognition.onerror = function(event) {
+                    console.error('Error de reconocimiento: ', event.error);
+                    microfonoElement.classList.remove('active');
+                    estadoMicrofonoElement.textContent = 'Error';
+                };
+
+                recognition.onend = function() {
+                    console.log('Reconocimiento de voz finalizado.');
+                    microfonoElement.classList.remove('active');
+                    estadoMicrofonoElement.textContent = 'Apagado';
+                };
+
+                recognition.start();
+            } else {
+                recognition.stop();
+                recognition = null;
                 microfonoElement.classList.remove('active');
-            };
-
-            recognition.onend = function() {
-                console.log('Reconocimiento de voz finalizado.');
-                microfonoElement.classList.remove('active');
-            };
-
-            recognition.start();
+                estadoMicrofonoElement.textContent = 'Apagado';
+            }
         }
 
         function mostrarAnimacionCorazon(color, mensaje) {
@@ -114,9 +141,6 @@
             feedbackElement.textContent = '¡Increíble! Has pronunciado "abrazos" correctamente.';
             feedbackElement.style.opacity = 1;
         }
-
-        // Inicia el reconocimiento al cargar la página (opcional)
-        window.addEventListener('load', startRecognition);
     </script>
 </body>
 </html>
