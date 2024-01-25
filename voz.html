@@ -12,6 +12,13 @@
             transition: opacity 1s ease-in-out, color 1s ease-in-out;
         }
 
+        #corazonAbrazos {
+            font-size: 48px;
+            color: green;
+            opacity: 0;
+            transition: opacity 1s ease-in-out, color 1s ease-in-out;
+        }
+
         #feedback {
             font-size: 18px;
             color: #333;
@@ -40,6 +47,7 @@
 
     <div id="microfono">🎙️</div>
     <div id="corazon">❤️</div>
+    <div id="corazonAbrazos">❤️</div>
     <div id="feedback"></div>
 
     <script>
@@ -67,7 +75,7 @@
                         microfonoElement.classList.add('active');
                     }, 1000);
                 } else if (transcript.includes('abrazos')) {
-                    mostrarAnimacionCorazon('green', '¡Increíble! Has pronunciado "abrazos" correctamente.');
+                    mostrarAnimacionCorazonAbrazos();
                 }
             };
 
@@ -86,11 +94,23 @@
 
         function mostrarAnimacionCorazon(color, mensaje) {
             const corazonElement = document.getElementById('corazon');
+            const corazonAbrazosElement = document.getElementById('corazonAbrazos');
             const feedbackElement = document.getElementById('feedback');
 
             corazonElement.style.color = color;
             corazonElement.style.opacity = 1;
+            corazonAbrazosElement.style.opacity = 0; // Oculta el corazón de abrazos
             feedbackElement.textContent = mensaje;
+            feedbackElement.style.opacity = 1;
+        }
+
+        function mostrarAnimacionCorazonAbrazos() {
+            const corazonAbrazosElement = document.getElementById('corazonAbrazos');
+            const feedbackElement = document.getElementById('feedback');
+
+            corazonAbrazosElement.style.color = 'green';
+            corazonAbrazosElement.style.opacity = 1;
+            feedbackElement.textContent = '¡Increíble! Has pronunciado "abrazos" correctamente.';
             feedbackElement.style.opacity = 1;
         }
 
