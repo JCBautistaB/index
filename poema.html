@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reconocimiento de Voz con Grabación</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            text-align: center;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+
+        #output {
+            font-size: 1.5em;
+            margin-top: 20px;
+        }
+
+        #microfono-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        #microfono {
+            font-size: 36px;
+            color: #333;
+            margin-right: 10px;
+            opacity: 0.5;
+            transition: color 0.5s ease-in-out;
+        }
+
+        #microfono.active {
+            color: green;
+            opacity: 1;
+        }
+
+        #estado-microfono {
+            font-size: 16px;
+            color: #333;
+            opacity: 0.8;
+        }
+
+        #grabar-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        #grabar {
+            font-size: 36px;
+            color: #333;
+            margin-right: 10px;
+            opacity: 0.5;
+            transition: color 0.5s ease-in-out;
+        }
+
+        #grabar.active {
+            color: red;
+            opacity: 1;
+        }
+
+        #estado-grabacion {
+            font-size: 16px;
+            color: #333;
+            opacity: 0.8;
+        }
+
+        #botones-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .boton {
+            font-size: 16px;
+            padding: 10px 20px;
+            margin: 0 10px;
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Reconocimiento de Voz con Grabación</h1>
+
+    <div id="microfono-container" onclick="toggleRecognition()">
+        <div id="microfono">🎙️</div>
+        <div id="estado-microfono">Apagado</div>
+    </div>
+
+    <div id="grabar-container" onclick="toggleRecording()">
+        <div id="grabar">🔴</div>
+        <div id="estado-grabacion">No grabando</div>
+    </div>
+
+    <div id="output"></div>
+
+    <div id="botones-container">
+        <button class="boton" onclick="clearText()">Borrar Texto</button>
+        <button class="boton" onclick="saveAudio()">Guardar Audio</button>
+    </div>
+
+    <script src="https://cdn.rawgit.com/mattdiamond/Recorderjs/08e7abd9/dist/recorder.js"></script>
+    <script>
+        let recognition;
+        let recorder;
+        let audioChunks = [];
+        let savedText = '';
+
+        function toggleRecognition() {
+            const microfonoElement = document.getElementById('microfono');
+            const estadoMicrofonoElement = document.getElementById('estado-microfono');
+            const outputElement = document.getElementById('output');
+
+            if (!recognition) {
+                recognition = new webkitSpeechRecognition() || new SpeechRecognition();
+                recognition.lang = 'es-ES';
+
+                recognition.onstart = function() {
+                    console.log('¡Reconocimiento de voz iniciado!');
+                    microfonoElement.classList.add('active');
+                    estadoMicrofonoElement.textContent = 'Encendido';
+                };
+
+                recognition.onresult = function(event) {
+                    const transcript = event.results[0][0].transcript.toLowerCase();
+                    console.log('Transcripción: ', transcript);
+                    savedText += transcript + ' ';
+                    outputElement.textContent = savedText;
+                };
+
+                recognition.onerror = function(event) {
+                    console.error('Error de reconocimiento: ', event.error);
+                    microfonoElement.classList.remove('active');
+                    estadoMicrofonoElement.textContent = 'Error';
+                };
+
+                recognition.onend = function() {
+                    console.log('Reconocimiento de voz finalizado.');
+                    microfonoElement.classList.remove('active');
+                    estadoMicrofonoElement.textContent = 'Apagado';
+                };
+
+                recognition.start();
+            } else {
+                recognition.stop();
+                recognition = null;
+                microfonoElement.classList.remove('active');
+                estadoMicrofonoElement.textContent = 'Apagado';
+            }
+        }
+
+        function toggleRecording() {
+            const grabarElement = document.getElementById('grabar');
+            const estadoGrabacionElement = document.getElementById('estado-grabacion');
+
+            if (!recorder || recorder.state === 'inactive') {
+                navigator.mediaDevices.getUserMedia({ audio: true })
+                    .then(stream => {
+                        recorder = new Recorder(stream);
+                        recorder.record();
+                        grabarElement.classList.add('active');
+                        estadoGrabacionElement.textContent = 'Grabando';
+                    })
+                    .catch(error => console.error('Error al acceder al micrófono: ', error));
+            } else {
+                recorder.stop();
+                recorder.exportWAV(blob => {
+                    audioChunks.push(blob);
+                    recorder.clear();
+                });
+                grabarElement.classList.remove('active');
+                estadoGrabacionElement.textContent = 'No grabando';
+            }
+        }
+
+        function clearText() {
+            savedText = '';
+            document.getElementById('output').textContent = '';
+        }
+
+        function saveAudio() {
+            if (audioChunks.length > 0) {
+                const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                const audioUrl = URL.createObjectURL(audioBlob);
+                const a = document.createElement('a');
+                document.body.appendChild(a);
+                a.style = 'display: none';
+                a.href = audioUrl;
+                a.download = 'grabacion.wav';
+                a.click();
+                window.URL.revokeObjectURL(audioUrl);
+            } else {
+                console.log('No hay grabación para guardar.');
+            }
+        }
+    </script>
+</body>
+</html>
