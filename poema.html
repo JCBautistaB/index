@@ -92,21 +92,25 @@
     </style>
 </head>
 <body>
-    <h1>Crear Poema con Reconocimiento de Voz<span id="recording-indicator"></span></h1>
+<h1>Crear Poema con Reconocimiento de Voz<span id="recording-indicator"></span></h1>
 
     <div id="microfono-container" onclick="toggleRecognition()">
         <div id="microfono">🎙️</div>
         <div id="estado-microfono">Apagado | Hablar y Escribir</div>
     </div>
 
-    <div id="output">Poema</div>
+    <div id="output">
+      <p>Bajo el manto del cielo radiante,  el sol despierta con su luz vibrante.  Sus rayos danzan, cálidos abrazos,  pintando el día con destellos abrazos.</p>
+      <p>En el lienzo del cielo azul profundo,  el sol es el artista, el ser fecundo.  Ilumina montañas y valles serenos,  tejiendo auroras con sus dedos buenos.</p>
+      <p>En el alba, besa las flores del rocío,  susurra secretos al viento y al río.  Cautiva con sus tonos dorados,  los campos, los mares, los cielos amados.</p>
+    </div>
 
-    <button id="startButton" onclick="startRecording()">Iniciar Grabación</button>
-    <button id="stopButton" onclick="stopRecording()">Detener Grabación</button>
+<button id="startButton" onclick="startRecording()">Iniciar Grabación</button>
+<button id="stopButton" onclick="stopRecording()">Detener Grabación</button>
 
-    <audio id="audioPlayer" controls></audio>
+<audio id="audioPlayer" controls></audio>
 
-    <script>
+<script>
         let recognition;
         let savedText = '';
         let recordingIndicator = document.getElementById('recording-indicator');
@@ -160,7 +164,7 @@
         }
     </script>
 
-    <script>
+<script>
         let mediaRecorder;
         let audioChunks = [];
 
