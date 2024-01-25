@@ -1,102 +1,55 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Práctica de Pronunciación</title>
+    <title>Reconocimiento de Voz con Animación</title>
     <style>
+        #corazon {
+            font-size: 48px;
+            color: red;
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
+        }
+
         #feedback {
             font-size: 18px;
             color: #333;
-            margin-bottom: 20px;
+            margin-top: 20px;
             opacity: 0;
-            animation: fadeIn 1s ease-in-out;
-        }
-
-        #wordInput {
-            font-size: 24px;
-            padding: 10px;
-            margin-bottom: 20px;
-            opacity: 0;
-            animation: slideIn 1s ease-in-out;
-        }
-
-        #speakButton {
-            font-size: 16px;
-            padding: 10px;
-            cursor: pointer;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateY(-20px); }
-            to { opacity: 1; transform: translateY(0); }
+            transition: opacity 1s ease-in-out;
         }
     </style>
 </head>
 <body>
-    <h1>Práctica de Pronunciación en Inglés</h1>
-    <p>Introduce una palabra en inglés y pulsa "Hablar" para practicar tu pronunciación.</p>
+    <h1>Reconocimiento de Voz con Animación</h1>
+    <p>Di "te amo" o "abrazos" para ver la animación de corazón.</p>
 
-    <input type="text" id="wordInput" placeholder="Ingresa una palabra en inglés">
-    <button id="speakButton" onclick="startSpeaking()">Hablar</button>
+    <div id="corazon">❤️</div>
     <div id="feedback"></div>
 
     <script>
-        function startSpeaking() {
-            const wordInput = document.getElementById('wordInput');
-            const feedbackElement = document.getElementById('feedback');
-
-            // Validar que se haya ingresado una palabra
-            const word = wordInput.value.trim();
-            if (!word) {
-                feedbackElement.textContent = 'Por favor, ingresa una palabra.';
-                return;
-            }
-
-            // Limpiar retroalimentación anterior
-            feedbackElement.textContent = '';
-
-            // Crear un nuevo objeto SpeechSynthesisUtterance
-            const utterance = new SpeechSynthesisUtterance();
-            utterance.lang = 'en-US'; // Establecer el idioma en inglés
-            utterance.text = word;
-
-            // Hablar la palabra
-            speechSynthesis.speak(utterance);
-
-            // Escuchar la pronunciación del usuario
-            listenUserPronunciation(word);
-        }
-
-        function listenUserPronunciation(word) {
+        function startRecognition() {
             const recognition = new webkitSpeechRecognition() || new SpeechRecognition();
-            recognition.lang = 'en-US'; // Configurar el idioma en inglés
+            recognition.lang = 'es-ES'; // Configura el idioma a español
+
+            recognition.onstart = function() {
+                console.log('¡Reconocimiento de voz iniciado!');
+            };
 
             recognition.onresult = function(event) {
-                const userPronunciation = event.results[0][0].transcript.toLowerCase();
-                console.log('Pronunciación del usuario: ', userPronunciation);
+                const transcript = event.results[0][0].transcript.toLowerCase();
+                console.log('Transcripción: ', transcript);
 
-                const feedbackElement = document.getElementById('feedback');
-                feedbackElement.textContent = userPronunciation === word.toLowerCase()
-                    ? '¡Bien hecho! Tu pronunciación es correcta.'
-                    : `La pronunciación correcta es "${word}". Intenta de nuevo.`;
-
-                // Mostrar retroalimentación con animación
-                feedbackElement.style.opacity = 1;
+                if (transcript.includes('te amo')) {
+                    mostrarAnimacionCorazon();
+                } else if (transcript.includes('abrazos')) {
+                    mostrarAnimacionCorazon();
+                }
             };
 
             recognition.onerror = function(event) {
                 console.error('Error de reconocimiento: ', event.error);
-                const feedbackElement = document.getElementById('feedback');
-                feedbackElement.textContent = 'Error de reconocimiento. Inténtalo de nuevo.';
-
-                // Mostrar retroalimentación con animación
-                feedbackElement.style.opacity = 1;
             };
 
             recognition.onend = function() {
@@ -105,6 +58,19 @@
 
             recognition.start();
         }
+
+        function mostrarAnimacionCorazon() {
+            const corazonElement = document.getElementById('corazon');
+            const feedbackElement = document.getElementById('feedback');
+
+            corazonElement.style.opacity = 1;
+            feedbackElement.textContent = '¡Hermoso! Ahora di "abrazos" para otra sorpresa.';
+            feedbackElement.style.opacity = 1;
+        }
+
+        window.addEventListener('load', () => {
+            startRecognition();
+        });
     </script>
 </body>
 </html>
