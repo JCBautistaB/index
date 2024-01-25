@@ -19,17 +19,34 @@
             opacity: 0;
             transition: opacity 1s ease-in-out;
         }
+
+        #microfono {
+            font-size: 36px;
+            color: #333;
+            margin-top: 20px;
+            opacity: 0.5;
+            transition: color 0.5s ease-in-out;
+        }
+
+        #microfono.active {
+            color: green;
+            opacity: 1;
+        }
     </style>
 </head>
 <body>
     <h1>Reconocimiento de Voz con Animación</h1>
     <p>Di "te amo" y luego di "abrazos" para ver las animaciones de corazón.</p>
 
+    <div id="microfono">🎙️</div>
     <div id="corazon">❤️</div>
     <div id="feedback"></div>
 
     <script>
         function startRecognition() {
+            const microfonoElement = document.getElementById('microfono');
+            microfonoElement.classList.add('active');
+
             const recognition = new webkitSpeechRecognition() || new SpeechRecognition();
             recognition.lang = 'es-ES'; // Configura el idioma a español
 
@@ -45,7 +62,10 @@
                     mostrarAnimacionCorazon('red', '¡Hermoso! Ahora di "abrazos" para otra sorpresa.');
                     // Reiniciar el reconocimiento de voz después de la primera parte
                     recognition.stop();
-                    setTimeout(() => recognition.start(), 1000);
+                    setTimeout(() => {
+                        recognition.start();
+                        microfonoElement.classList.add('active');
+                    }, 1000);
                 } else if (transcript.includes('abrazos')) {
                     mostrarAnimacionCorazon('green', '¡Increíble! Has pronunciado "abrazos" correctamente.');
                 }
@@ -53,10 +73,12 @@
 
             recognition.onerror = function(event) {
                 console.error('Error de reconocimiento: ', event.error);
+                microfonoElement.classList.remove('active');
             };
 
             recognition.onend = function() {
                 console.log('Reconocimiento de voz finalizado.');
+                microfonoElement.classList.remove('active');
             };
 
             recognition.start();
