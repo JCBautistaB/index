@@ -9,7 +9,7 @@
             font-size: 48px;
             color: red;
             opacity: 0;
-            transition: opacity 1s ease-in-out;
+            transition: opacity 1s ease-in-out, color 1s ease-in-out;
         }
 
         #feedback {
@@ -23,7 +23,7 @@
 </head>
 <body>
     <h1>Reconocimiento de Voz con Animación</h1>
-    <p>Di "te amo" o "abrazos" para ver la animación de corazón.</p>
+    <p>Di "te amo" y luego di "abrazos" para ver las animaciones de corazón.</p>
 
     <div id="corazon">❤️</div>
     <div id="feedback"></div>
@@ -42,9 +42,9 @@
                 console.log('Transcripción: ', transcript);
 
                 if (transcript.includes('te amo')) {
-                    mostrarAnimacionCorazon();
+                    mostrarAnimacionCorazon('red', '¡Hermoso! Ahora di "abrazos" para otra sorpresa.');
                 } else if (transcript.includes('abrazos')) {
-                    mostrarAnimacionCorazon();
+                    mostrarAnimacionCorazon('green', '¡Increíble! Has pronunciado "abrazos" correctamente.');
                 }
             };
 
@@ -59,12 +59,13 @@
             recognition.start();
         }
 
-        function mostrarAnimacionCorazon() {
+        function mostrarAnimacionCorazon(color, mensaje) {
             const corazonElement = document.getElementById('corazon');
             const feedbackElement = document.getElementById('feedback');
 
+            corazonElement.style.color = color;
             corazonElement.style.opacity = 1;
-            feedbackElement.textContent = '¡Hermoso! Ahora di "abrazos" para otra sorpresa.';
+            feedbackElement.textContent = mensaje;
             feedbackElement.style.opacity = 1;
         }
 
