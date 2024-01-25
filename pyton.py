@@ -1,16 +1,14 @@
-def calcular_pago_por_hora(tarifa_deseada, horas_diarias):
-    dias_trabajados_por_semana = 5
-    semanas_al_mes = 4
-    horas_mensuales = horas_diarias * dias_trabajados_por_semana * semanas_al_mes
-    pago_mensual = tarifa_deseada * horas_mensuales
-    return pago_mensual
+import statistics
 
-# Configuración
-tarifa_deseada = float(input("Ingresa tu tarifa por hora en USD: "))
-horas_diarias = float(input("Ingresa las horas que trabajarás diariamente: "))
+# Datos de precios de renta (en dólares)
+precios_renta = [1200, 1300, 1100, 1400, 1500, 1600, 1300, 1250, 1350, 1450]
 
-# Calcular el pago mensual
-pago_mensual = calcular_pago_por_hora(tarifa_deseada, horas_diarias)
+# Estadísticas descriptivas
+media = statistics.mean(precios_renta)
+mediana = statistics.median(precios_renta)
+desviacion_estandar = statistics.stdev(precios_renta)
 
-print(f"Tu tarifa por hora es de ${tarifa_deseada} USD.")
-print(f"Si trabajas {horas_diarias} horas al día, tu estimación de ingresos mensuales sería de ${pago_mensual:.2f} USD.")
+# Imprimir resultados
+print(f"Media de precios de renta: ${media:.2f}")
+print(f"Mediana de precios de renta: ${mediana:.2f}")
+print(f"Desviación estándar de precios de renta: ${desviacion_estandar:.2f}")
