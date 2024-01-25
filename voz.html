@@ -51,6 +51,33 @@
             color: #333;
             opacity: 0.8;
         }
+
+        .heart-beat {
+            font-size: 80px;
+            color: red;
+            text-align: center;
+            animation: heartbeat 1s infinite;
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
+        }
+
+        @keyframes heartbeat {
+            0% {
+                transform: scale(1);
+            }
+            25% {
+                transform: scale(1.2);
+            }
+            50% {
+                transform: scale(1);
+            }
+            75% {
+                transform: scale(1.2);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
     </style>
 </head>
 <body>
@@ -62,7 +89,7 @@
         <div id="estado-microfono">Apagado</div>
     </div>
 
-    <div id="corazon">❤️</div>
+    <div id="corazon" class="heart-beat"></div>
     <div id="corazonAbrazos">❤️</div>
     <div id="feedback"></div>
 
@@ -75,7 +102,7 @@
 
             if (!recognition) {
                 recognition = new webkitSpeechRecognition() || new SpeechRecognition();
-                recognition.lang = 'es-ES'; // Configura el idioma a español
+                recognition.lang = 'es-ES';
 
                 recognition.onstart = function() {
                     console.log('¡Reconocimiento de voz iniciado!');
@@ -89,7 +116,6 @@
 
                     if (transcript.includes('te amo')) {
                         mostrarAnimacionCorazon('red', '¡Hermoso! Ahora di "abrazos" para otra sorpresa.');
-                        // Reiniciar el reconocimiento de voz después de la primera parte
                         recognition.stop();
                         setTimeout(() => {
                             recognition.start();
@@ -127,8 +153,10 @@
 
             corazonElement.style.color = color;
             corazonElement.style.opacity = 1;
-            corazonAbrazosElement.style.color = 'green'; // Cambia el color directamente
-            corazonAbrazosElement.style.opacity = 0; // Oculta el corazón de abrazos
+            corazonElement.classList.add('heart-beat'); // Agregar la clase de animación
+
+            corazonAbrazosElement.style.color = 'green';
+            corazonAbrazosElement.style.opacity = 0;
             feedbackElement.textContent = mensaje;
             feedbackElement.style.opacity = 1;
         }
