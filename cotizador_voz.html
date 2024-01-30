@@ -141,6 +141,43 @@
       updateOutputWords();
       alert('Datos borrados correctamente.');
     }
+
+  function onResume() {
+  if (recognition) {
+    recognition.start();
+    startSum();
+  }
+}
+
+function startSum() {
+  // Restablecer la suma total al iniciar el reconocimiento de voz
+  let total = 0;
+
+  recognition.onresult = (event) => {
+    const transcript = event.results[event.results.length - 1][0].transcript.trim();
+    const matchedWord = findWordByTranscript(transcript);
+
+    if (matchedWord) {
+      total += matchedWord.value;
+      outputRecognition.textContent = `Palabra Dictada: ${matchedWord.word}, Valor: ${matchedWord.value}`;
+    } else {
+      outputRecognition.textContent = `Palabra Dictada: ${transcript}, No se encontró coincidencia para la palabra dictada.`;
+    }
+
+    // Actualizar el área de texto con el nuevo total
+    outputTotal.textContent = `Total: ${total}`;
+
+    // Calcular impuestos
+    const iva = total * 0.165;
+    const isr = total * 0.02;
+    const totalConImpuestos = total + iva + isr;
+
+    // Mostrar resultados de impuestos
+    outputTaxes.textContent = `Total con Impuestos: ${totalConImpuestos.toFixed(2)} (IVA: ${iva.toFixed(2)}, ISR: ${isr.toFixed(2)})`;
+  };
+}
+
+  
   </script>
 </body>
 </html>
