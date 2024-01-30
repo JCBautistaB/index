@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Reconocimiento de Voz con Impuestos</title>
+  <title>Reconocimiento de Voz con Impuestos y Almacenamiento Local</title>
   <style>
     body {
       font-family: 'Arial', sans-serif;
@@ -23,7 +23,7 @@
   </style>
 </head>
 <body>
-  <h1>Reconocimiento de Voz con Impuestos</h1>
+  <h1>Reconocimiento de Voz con Impuestos y Almacenamiento Local</h1>
   <label for="wordInput">Palabra:</label>
   <input type="text" id="wordInput" placeholder="Ingresa una palabra">
 
@@ -40,24 +40,31 @@
 
   <script>
     let words = [];
-    let total = 0;
-    let recognition;
+
+    // Cargar datos almacenados localmente al inicio
+    window.onload = function() {
+      loadStoredData();
+    };
+
+    function loadStoredData() {
+      const storedData = localStorage.getItem('words');
+      if (storedData) {
+        words = JSON.parse(storedData);
+        updateOutputWords();
+      }
+    }
 
     function addWord() {
       const wordInput = document.getElementById('wordInput');
       const valueInput = document.getElementById('valueInput');
-      const outputWords = document.getElementById('outputWords');
 
       const word = wordInput.value.trim();
       const value = Number(valueInput.value.trim());
 
       if (word !== '' && !isNaN(value)) {
         words.push({ word, value });
-
-        // Actualizar el área de texto con los valores de las palabras
-        outputWords.textContent = words.map(item => `${item.word}: ${item.value}`).join('\n');
-
-        // Limpiar los campos de entrada
+        saveDataToLocalStorage();
+        updateOutputWords();
         wordInput.value = '';
         valueInput.value = '';
       }
@@ -69,10 +76,10 @@
       const outputTaxes = document.getElementById('outputTaxes');
 
       // Restablecer la suma total al iniciar el reconocimiento de voz
-      total = 0;
+      let total = 0;
 
       if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-        recognition = new webkitSpeechRecognition() || new SpeechRecognition();
+        const recognition = new webkitSpeechRecognition() || new SpeechRecognition();
 
         recognition.lang = 'es-ES';
         recognition.continuous = true;
@@ -108,6 +115,15 @@
 
     function findWordByTranscript(transcript) {
       return words.find(item => transcript.toLowerCase().includes(item.word.toLowerCase()));
+    }
+
+    function saveDataToLocalStorage() {
+      localStorage.setItem('words', JSON.stringify(words.map(item => ({ word: item.word, value: item.value }))));
+    }
+
+    function updateOutputWords() {
+      const outputWords = document.getElementById('outputWords');
+      outputWords.textContent = words.map(item => `${item.word}: ${item.value}`).join('\n');
     }
   </script>
 </body>
