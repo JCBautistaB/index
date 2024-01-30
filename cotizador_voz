@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Ventas</title>
+</head>
+<body>
+    <h1>Sistema de Ventas con Reconocimiento de Voz</h1>
+
+    <button onclick="iniciarReconocimiento()">Iniciar Reconocimiento de Voz</button>
+    <div id="mensaje"></div>
+    <div id="sumaTotal"></div>
+
+    <script>
+        let costoEmpaque = 0.0;
+        let costoProducto = 0.0;
+        let sumaRealizada = false;
+        let sumaTotal = 0.0;
+
+        function iniciarReconocimiento() {
+            const reconocimiento = new webkitSpeechRecognition() || new SpeechRecognition();
+            reconocimiento.lang = 'es-ES';
+
+            reconocimiento.onresult = function(event) {
+                const comando = event.results[0][0].transcript.toLowerCase();
+
+                let costoIndividual = 0.0;
+
+                if (comando.includes("empaque sencillo")) {
+                    costoIndividual = 10.0;
+                    costoEmpaque += costoIndividual;
+                    sumaRealizada = true;
+                } else if (comando.includes("producto")) {
+                    costoIndividual = 25.0;
+                    costoProducto += costoIndividual;
+                    sumaRealizada = true;
+                }
+
+                mostrarResultado(comando, costoIndividual);
+            };
+
+            reconocimiento.onerror = function(event) {
+                document.getElementById('mensaje').innerHTML = "Error en el reconocimiento de voz.";
+            };
+
+            reconocimiento.start();
+        }
+
+        function mostrarResultado(comando, costoIndividual) {
+            if (sumaRealizada) {
+                document.getElementById('mensaje').innerHTML += `${comando} $${costoIndividual.toFixed(2)} <br/>`;
+                sumaTotal += costoIndividual;
+                document.getElementById('sumaTotal').innerHTML = `Suma Total: $${sumaTotal.toFixed(2)} <br/><br/>`;
+                sumaRealizada = false;
+            } else if (costoIndividual > 0) {
+                document.getElementById('mensaje').innerHTML += `${comando} $${costoIndividual.toFixed(2)} <br/>`;
+            }
+        }
+    </script>
+</body>
+</html>
