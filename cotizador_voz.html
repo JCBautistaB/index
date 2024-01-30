@@ -32,6 +32,7 @@
 
   <button onclick="addWord()">Agregar Palabra</button>
   <button onclick="startSpeechRecognition()">Iniciar Reconocimiento de Voz</button>
+  <button onclick="stopSpeechRecognition()">Detener Reconocimiento de Voz</button>
   <button onclick="resetData()">Borrar Datos</button>
 
   <div id="outputWords"></div>
@@ -41,6 +42,7 @@
 
   <script>
     let words = [];
+    let recognition;
 
     // Cargar datos almacenados localmente al inicio
     window.onload = function() {
@@ -80,7 +82,7 @@
       let total = 0;
 
       if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-        const recognition = new webkitSpeechRecognition() || new SpeechRecognition();
+        recognition = new webkitSpeechRecognition() || new SpeechRecognition();
 
         recognition.lang = 'es-ES';
         recognition.continuous = true;
@@ -114,6 +116,12 @@
       }
     }
 
+    function stopSpeechRecognition() {
+      if (recognition) {
+        recognition.stop();
+      }
+    }
+
     function findWordByTranscript(transcript) {
       return words.find(item => transcript.toLowerCase().includes(item.word.toLowerCase()));
     }
@@ -124,7 +132,7 @@
 
     function updateOutputWords() {
       const outputWords = document.getElementById('outputWords');
-      outputWords.textContent = words.map(item => `${item.word}: ${item.value}`).join('\n');
+      outputWords.textContent = words.map(item => `${item.word}: ${item.value}`).join(' | ');
     }
 
     function resetData() {
