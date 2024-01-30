@@ -32,6 +32,7 @@
 
   <button onclick="addWord()">Agregar Palabra</button>
   <button onclick="startSpeechRecognition()">Iniciar Reconocimiento de Voz</button>
+  <button onclick="resetData()">Borrar Datos</button>
 
   <div id="outputWords"></div>
   <div id="outputRecognition"></div>
@@ -124,6 +125,13 @@
     function updateOutputWords() {
       const outputWords = document.getElementById('outputWords');
       outputWords.textContent = words.map(item => `${item.word}: ${item.value}`).join('\n');
+    }
+
+    function resetData() {
+      words = [];
+      saveDataToLocalStorage();
+      updateOutputWords();
+      alert('Datos borrados correctamente.');
     }
   </script>
 </body>
