@@ -1,62 +1,104 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Ventas</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reconocimiento de Voz con Suma de Valores</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      text-align: center;
+    }
+
+    #wordInput, #valueInput {
+      margin-bottom: 10px;
+    }
+
+    #outputWords, #outputRecognition, #outputTotal {
+      margin-top: 20px;
+      padding: 10px;
+      border: 1px solid #ddd;
+      min-height: 50px;
+    }
+  </style>
 </head>
 <body>
-    <h1>Sistema de Ventas con Reconocimiento de Voz</h1>
+  <h1>Reconocimiento de Voz con Suma de Valores</h1>
+  <label for="wordInput">Palabra:</label>
+  <input type="text" id="wordInput" placeholder="Ingresa una palabra">
 
-    <button onclick="iniciarReconocimiento()">Iniciar Reconocimiento de Voz</button>
-    <div id="mensaje"></div>
-    <div id="sumaTotal"></div>
+  <label for="valueInput">Valor Numérico:</label>
+  <input type="number" id="valueInput" placeholder="Ingresa un valor numérico">
 
-    <script>
-        let costoEmpaque = 0.0;
-        let costoProducto = 0.0;
-        let sumaRealizada = false;
-        let sumaTotal = 0.0;
+  <button onclick="addWord()">Agregar Palabra</button>
+  <button onclick="startSpeechRecognition()">Iniciar Reconocimiento de Voz</button>
 
-        function iniciarReconocimiento() {
-            const reconocimiento = new webkitSpeechRecognition() || new SpeechRecognition();
-            reconocimiento.lang = 'es-ES';
+  <div id="outputWords"></div>
+  <div id="outputRecognition"></div>
+  <div id="outputTotal"></div>
 
-            reconocimiento.onresult = function(event) {
-                const comando = event.results[0][0].transcript.toLowerCase();
+  <script>
+    let words = [];
+    let total = 0;
+    let recognition;
 
-                let costoIndividual = 0.0;
+    function addWord() {
+      const wordInput = document.getElementById('wordInput');
+      const valueInput = document.getElementById('valueInput');
+      const outputWords = document.getElementById('outputWords');
 
-                if (comando.includes("empaque sencillo")) {
-                    costoIndividual = 10.0;
-                    costoEmpaque += costoIndividual;
-                    sumaRealizada = true;
-                } else if (comando.includes("producto")) {
-                    costoIndividual = 25.0;
-                    costoProducto += costoIndividual;
-                    sumaRealizada = true;
-                }
+      const word = wordInput.value.trim();
+      const value = Number(valueInput.value.trim());
 
-                mostrarResultado(comando, costoIndividual);
-            };
+      if (word !== '' && !isNaN(value)) {
+        words.push({ word, value });
 
-            reconocimiento.onerror = function(event) {
-                document.getElementById('mensaje').innerHTML = "Error en el reconocimiento de voz.";
-            };
+        // Actualizar el área de texto con los valores de las palabras
+        outputWords.textContent = words.map(item => `${item.word}: ${item.value}`).join('\n');
 
-            reconocimiento.start();
-        }
+        // Limpiar los campos de entrada
+        wordInput.value = '';
+        valueInput.value = '';
+      }
+    }
 
-        function mostrarResultado(comando, costoIndividual) {
-            if (sumaRealizada) {
-                document.getElementById('mensaje').innerHTML += `${comando} $${costoIndividual.toFixed(2)} <br/>`;
-                sumaTotal += costoIndividual;
-                document.getElementById('sumaTotal').innerHTML = `Suma Total: $${sumaTotal.toFixed(2)} <br/><br/>`;
-                sumaRealizada = false;
-            } else if (costoIndividual > 0) {
-                document.getElementById('mensaje').innerHTML += `${comando} $${costoIndividual.toFixed(2)} <br/>`;
-            }
-        }
-    </script>
+    function startSpeechRecognition() {
+      const outputRecognition = document.getElementById('outputRecognition');
+      const outputTotal = document.getElementById('outputTotal');
+
+      // Restablecer la suma total al iniciar el reconocimiento de voz
+      total = 0;
+
+      if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+        recognition = new webkitSpeechRecognition() || new SpeechRecognition();
+
+        recognition.lang = 'es-ES';
+        recognition.continuous = true;
+
+        recognition.onresult = (event) => {
+          const transcript = event.results[event.results.length - 1][0].transcript.trim();
+          const matchedWord = findWordByTranscript(transcript);
+
+          if (matchedWord) {
+            total += matchedWord.value;
+            outputRecognition.textContent = `Palabra Dictada: ${matchedWord.word}, Valor: ${matchedWord.value}`;
+          } else {
+            outputRecognition.textContent = `Palabra Dictada: ${transcript}, No se encontró coincidencia para la palabra dictada.`;
+          }
+
+          // Actualizar el área de texto con el nuevo total
+          outputTotal.textContent = `Total: ${total}`;
+        };
+
+        recognition.start();
+      } else {
+        outputRecognition.textContent = 'El reconocimiento de voz no está soportado en este navegador.';
+      }
+    }
+
+    function findWordByTranscript(transcript) {
+      return words.find(item => transcript.toLowerCase().includes(item.word.toLowerCase()));
+    }
+  </script>
 </body>
 </html>
