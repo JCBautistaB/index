@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Reconocimiento de Voz con Impuestos y Almacenamiento Local</title>
+  <title>Reconocimiento de Voz con Impuestos y Almacenamiento Local #</title>
   <style>
     body {
       font-family: 'Arial', sans-serif;
@@ -55,6 +55,11 @@
         words = JSON.parse(storedData);
         updateOutputWords();
       }
+
+      const storedTotal = localStorage.getItem('total');
+      if (storedTotal) {
+        updateTotal(Number(storedTotal));
+      }
     }
 
     function addWord() {
@@ -99,7 +104,7 @@
           }
 
           // Actualizar el área de texto con el nuevo total
-          outputTotal.textContent = `Total: ${total}`;
+          updateTotal(total);
 
           // Calcular impuestos
           const iva = total * 0.165;
@@ -111,7 +116,6 @@
         };
 
         recognition.start();
-        startSum();  // Iniciar la suma
       } else {
         outputRecognition.textContent = 'El reconocimiento de voz no está soportado en este navegador.';
       }
@@ -121,10 +125,6 @@
       if (recognition) {
         recognition.stop();
       }
-    }
-
-    function startSum() {
-      recognition.onresult();  // Esta función ya está configurada en startSpeechRecognition
     }
 
     function findWordByTranscript(transcript) {
@@ -140,10 +140,17 @@
       outputWords.textContent = words.map(item => `${item.word}: ${item.value}`).join(' | ');
     }
 
+    function updateTotal(newTotal) {
+      const outputTotal = document.getElementById('outputTotal');
+      outputTotal.textContent = `Total: ${newTotal.toFixed(2)}`;
+      localStorage.setItem('total', newTotal);
+    }
+
     function resetData() {
       words = [];
       saveDataToLocalStorage();
       updateOutputWords();
+      localStorage.removeItem('total');
       alert('Datos borrados correctamente.');
     }
   </script>
