@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Reconocimiento de Voz con Suma de Valores</title>
+  <title>Reconocimiento de Voz con Impuestos</title>
   <style>
     body {
       font-family: 'Arial', sans-serif;
@@ -14,7 +14,7 @@
       margin-bottom: 10px;
     }
 
-    #outputWords, #outputRecognition, #outputTotal {
+    #outputWords, #outputRecognition, #outputTotal, #outputTaxes {
       margin-top: 20px;
       padding: 10px;
       border: 1px solid #ddd;
@@ -23,7 +23,7 @@
   </style>
 </head>
 <body>
-  <h1>Reconocimiento de Voz con Suma de Valores</h1>
+  <h1>Reconocimiento de Voz con Impuestos</h1>
   <label for="wordInput">Palabra:</label>
   <input type="text" id="wordInput" placeholder="Ingresa una palabra">
 
@@ -36,6 +36,7 @@
   <div id="outputWords"></div>
   <div id="outputRecognition"></div>
   <div id="outputTotal"></div>
+  <div id="outputTaxes"></div>
 
   <script>
     let words = [];
@@ -65,6 +66,7 @@
     function startSpeechRecognition() {
       const outputRecognition = document.getElementById('outputRecognition');
       const outputTotal = document.getElementById('outputTotal');
+      const outputTaxes = document.getElementById('outputTaxes');
 
       // Restablecer la suma total al iniciar el reconocimiento de voz
       total = 0;
@@ -88,6 +90,14 @@
 
           // Actualizar el área de texto con el nuevo total
           outputTotal.textContent = `Total: ${total}`;
+
+          // Calcular impuestos
+          const iva = total * 0.165;
+          const isr = total * 0.02;
+          const totalConImpuestos = total + iva + isr;
+
+          // Mostrar resultados de impuestos
+          outputTaxes.textContent = `Total con Impuestos: ${totalConImpuestos.toFixed(2)} (IVA: ${iva.toFixed(2)}, ISR: ${isr.toFixed(2)})`;
         };
 
         recognition.start();
