@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Reconocimiento de Voz con Impuestos y Almacenamiento Local #</title>
+  <title>Reconocimiento de Voz con Impuestos y Almacenamiento Local</title>
   <style>
     body {
       font-family: 'Arial', sans-serif;
@@ -23,7 +23,7 @@
   </style>
 </head>
 <body>
-  <h1>Reconocimiento de Voz con Impuestos y Almacenamiento Local</h1>
+  <h1>Reconocimiento de Voz con Impuestos y Almacenamiento Local x</h1>
   <label for="wordInput">Palabra:</label>
   <input type="text" id="wordInput" placeholder="Ingresa una palabra">
 
@@ -43,10 +43,14 @@
   <script>
     let words = [];
     let recognition;
+    let total = 0;  // Variable para almacenar el total actual
+    const wordInput = document.getElementById('wordInput');
+    const valueInput = document.getElementById('valueInput');
 
     // Cargar datos almacenados localmente al inicio
     window.onload = function() {
       loadStoredData();
+      updateOutputTotal();
     };
 
     function loadStoredData() {
@@ -58,16 +62,13 @@
 
       const storedTotal = localStorage.getItem('total');
       if (storedTotal) {
-        updateTotal(Number(storedTotal));
+        total = parseFloat(storedTotal);
       }
     }
 
     function addWord() {
-      const wordInput = document.getElementById('wordInput');
-      const valueInput = document.getElementById('valueInput');
-
       const word = wordInput.value.trim();
-      const value = Number(valueInput.value.trim());
+      const value = parseFloat(valueInput.value.trim());
 
       if (word !== '' && !isNaN(value)) {
         words.push({ word, value });
@@ -80,11 +81,7 @@
 
     function startSpeechRecognition() {
       const outputRecognition = document.getElementById('outputRecognition');
-      const outputTotal = document.getElementById('outputTotal');
       const outputTaxes = document.getElementById('outputTaxes');
-
-      // Restablecer la suma total al iniciar el reconocimiento de voz
-      let total = 0;
 
       if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
         recognition = new webkitSpeechRecognition() || new SpeechRecognition();
@@ -104,7 +101,7 @@
           }
 
           // Actualizar el área de texto con el nuevo total
-          updateTotal(total);
+          updateOutputTotal();
 
           // Calcular impuestos
           const iva = total * 0.165;
@@ -140,16 +137,18 @@
       outputWords.textContent = words.map(item => `${item.word}: ${item.value}`).join(' | ');
     }
 
-    function updateTotal(newTotal) {
+    function updateOutputTotal() {
       const outputTotal = document.getElementById('outputTotal');
-      outputTotal.textContent = `Total: ${newTotal.toFixed(2)}`;
-      localStorage.setItem('total', newTotal);
+      outputTotal.textContent = `Total: ${total.toFixed(2)}`;
+      localStorage.setItem('total', total.toString());
     }
 
     function resetData() {
       words = [];
       saveDataToLocalStorage();
       updateOutputWords();
+      total = 0;
+      updateOutputTotal();
       localStorage.removeItem('total');
       alert('Datos borrados correctamente.');
     }
