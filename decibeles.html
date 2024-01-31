@@ -6,7 +6,7 @@
     <title>Detector de Audio</title>
 </head>
 <body>
-    <h1>Detector de Audio xx</h1>
+    <h1>Detector de Audio</h1>
     <button onclick="startAudioDetection()">Iniciar Detección</button>
     <button onclick="stopAudioDetection()">Detener Detección</button>
     <div id="powerDisplay">Potencia de Audio: 0 dB</div>
@@ -31,7 +31,7 @@
                     analyser.connect(audioContext.destination);
 
                     analyser.fftSize = 256;
-                    analyser.smoothingTimeConstant = 0.8; // Ajusta este valor según sea necesario
+                    analyser.smoothingTimeConstant = 0.5; // Ajusta este valor según sea necesario
 
                     const bufferLength = analyser.frequencyBinCount;
                     const dataArray = new Uint8Array(bufferLength);
@@ -42,14 +42,14 @@
                         analyser.getByteTimeDomainData(dataArray);
 
                         // Calcula la potencia del audio en dB
-                        const rms = Math.sqrt(Array.from(dataArray).reduce((sum, sample) => sum + sample * sample, 0) / dataArray.length);
+                        const rms = Math.sqrt(Array.from(dataArray).reduce((sum, sample) => sum + Math.abs(sample) * Math.abs(sample), 0) / dataArray.length);
                         const dB = 20 * Math.log10(rms / 128.0); // Se ajusta para normalizar a 0-1
 
                         // Muestra la potencia del audio en la interfaz
                         document.getElementById('powerDisplay').innerText = `Potencia de Audio: ${dB.toFixed(2)} dB`;
 
-                        // Ajusta el umbral de detección según tus necesidades (por ejemplo, 1 dB)
-                        const umbralDeteccion = 1;
+                        // Ajusta el umbral de detección según tus necesidades (por ejemplo, 0.1 dB)
+                        const umbralDeteccion = 0.1;
 
                         // Verifica si la potencia supera el umbral y registra el evento
                         if (dB > umbralDeteccion) {
