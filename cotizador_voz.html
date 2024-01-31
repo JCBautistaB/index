@@ -23,7 +23,7 @@
   </style>
 </head>
 <body>
-  <h1>Reconocimiento de Voz con Impuestos y Almacenamiento Localxxx</h1>
+  <h1>Reconocimiento de Voz con Impuestos y Almacenamiento Locals</h1>
   <label for="wordInput">Palabra:</label>
   <input type="text" id="wordInput" placeholder="Ingresa una palabra">
 
@@ -60,10 +60,7 @@
         updateOutputWords();
       }
 
-      const storedTotal = localStorage.getItem('total');
-      if (storedTotal) {
-        total = parseFloat(storedTotal);
-      }
+      // No cargar el total al inicio, lo calcularemos dinámicamente
     }
 
     function addWord() {
@@ -82,9 +79,6 @@
     function startSpeechRecognition() {
       const outputRecognition = document.getElementById('outputRecognition');
       const outputTaxes = document.getElementById('outputTaxes');
-
-      // Limpiar el total al iniciar el reconocimiento de voz
-      clearTotal();
 
       if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
         recognition = new webkitSpeechRecognition() || new SpeechRecognition();
@@ -124,14 +118,7 @@
     function stopSpeechRecognition() {
       if (recognition) {
         recognition.stop();
-        // Limpiar el total al detener el reconocimiento de voz
-        clearTotal();
       }
-    }
-
-    function clearTotal() {
-      total = 0;
-      updateOutputTotal();
     }
 
     function findWordByTranscript(transcript) {
@@ -150,15 +137,14 @@
     function updateOutputTotal() {
       const outputTotal = document.getElementById('outputTotal');
       outputTotal.textContent = `Total: ${total.toFixed(2)}`;
-      localStorage.setItem('total', total.toString());
     }
 
     function resetData() {
       words = [];
       saveDataToLocalStorage();
       updateOutputWords();
-      clearTotal();  // Limpiar el total al reiniciar los datos
-      localStorage.removeItem('total');
+      total = 0;
+      updateOutputTotal();
       alert('Datos borrados correctamente.');
     }
   </script>
