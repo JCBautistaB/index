@@ -20,10 +20,22 @@
       border: 1px solid #ddd;
       min-height: 50px;
     }
+
+    .wordItem {
+      margin-bottom: 5px;
+    }
+
+    .editInput {
+      margin-right: 5px;
+    }
+
+    .editButton {
+      margin-left: 5px;
+    }
   </style>
 </head>
 <body>
-  <h1>Reconocimiento de Voz con Impuestos y Almacenamiento Locals</h1>
+  <h1>Reconocimiento de Voz con Impuestos y Almacenamiento Local</h1>
   <label for="wordInput">Palabra:</label>
   <input type="text" id="wordInput" placeholder="Ingresa una palabra">
 
@@ -68,11 +80,24 @@
       const value = parseFloat(valueInput.value.trim());
 
       if (word !== '' && !isNaN(value)) {
+        // Verificar si la palabra ya existe
+        const existingWord = words.find(item => item.word.toLowerCase() === word.toLowerCase());
+
+        if (existingWord) {
+          alert('Palabra duplicada. Por favor, edite la palabra existente.');
+          return;
+        }
+
+        // Agregar una nueva palabra
         words.push({ word, value });
         saveDataToLocalStorage();
         updateOutputWords();
         wordInput.value = '';
         valueInput.value = '';
+
+        // Habilitar la edición del primer campo de texto después de agregar una palabra
+        wordInput.readOnly = false;
+        wordInput.focus();
       }
     }
 
@@ -131,12 +156,75 @@
 
     function updateOutputWords() {
       const outputWords = document.getElementById('outputWords');
-      outputWords.textContent = words.map(item => `${item.word}: ${item.value}`).join(' | ');
+      outputWords.innerHTML = ''; // Limpiar el contenido actual
+
+      words.forEach(item => {
+        const wordItem = document.createElement('div');
+        wordItem.className = 'wordItem';
+
+        const editInput = document.createElement('input');
+        editInput.className = 'editInput';
+        editInput.type = 'text';
+        editInput.value = item.word;
+
+        const valueInput = document.createElement('input');
+        valueInput.type = 'number';
+        valueInput.value = item.value;
+
+        const editButton = document.createElement('button');
+        editButton.className = 'editButton';
+        editButton.textContent = 'Editar';
+        editButton.onclick = function() {
+          // Actualizar la palabra con los nuevos valores
+          const newWord = editInput.value.trim();
+          const newValue = parseFloat(valueInput.value.trim());
+
+          if (newWord !== '' && !isNaN(newValue)) {
+            item.word = newWord;
+            item.value = newValue;
+            saveDataToLocalStorage();
+            updateOutputWords();
+
+            // Calcular el total después de editar una palabra solo si el reconocimiento de voz está iniciado
+            if (recognition && isRecognitionStarted) {
+              calculateTotal();
+            }
+          }
+        };
+
+        const deleteButton = document.createElement('button');
+        deleteButton.textContent = 'Eliminar';
+        deleteButton.onclick = function() {
+          // Eliminar la palabra
+          words = words.filter(w => w !== item);
+          saveDataToLocalStorage();
+          updateOutputWords();
+
+          // Calcular el total después de eliminar una palabra solo si el reconocimiento de voz está iniciado
+          if (recognition && isRecognitionStarted) {
+            calculateTotal();
+          }
+        };
+
+        wordItem.appendChild(editInput);
+        wordItem.appendChild(valueInput);
+        wordItem.appendChild(editButton);
+        wordItem.appendChild(deleteButton);
+
+        outputWords.appendChild(wordItem);
+      });
+    }
+
+    function calculateTotal() {
+      // Calcular el total basado solo en las palabras existentes
+      total = words.reduce((acc, item) => acc + item.value, 0);
+      updateOutputTotal();
     }
 
     function updateOutputTotal() {
       const outputTotal = document.getElementById('outputTotal');
       outputTotal.textContent = `Total: ${total.toFixed(2)}`;
+      localStorage.setItem('total', total.toString());
     }
 
     function resetData() {
@@ -146,6 +234,10 @@
       total = 0;
       updateOutputTotal();
       alert('Datos borrados correctamente.');
+
+      // Habilitar la edición del primer campo de texto después de reiniciar los datos
+      wordInput.readOnly = false;
+      wordInput.focus();
     }
   </script>
 </body>
