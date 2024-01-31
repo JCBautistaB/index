@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Reconocimiento de Voz con Impuestos y Almacenamiento Localxx</title>
+  <title>Reconocimiento de Voz con Impuestos y Almacenamiento Local</title>
   <style>
     body {
       font-family: 'Arial', sans-serif;
@@ -23,7 +23,7 @@
   </style>
 </head>
 <body>
-  <h1>Reconocimiento de Voz con Impuestos y Almacenamiento Local</h1>
+  <h1>Reconocimiento de Voz con Impuestos y Almacenamiento Localxxx</h1>
   <label for="wordInput">Palabra:</label>
   <input type="text" id="wordInput" placeholder="Ingresa una palabra">
 
@@ -83,6 +83,9 @@
       const outputRecognition = document.getElementById('outputRecognition');
       const outputTaxes = document.getElementById('outputTaxes');
 
+      // Limpiar el total al iniciar el reconocimiento de voz
+      clearTotal();
+
       if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
         recognition = new webkitSpeechRecognition() || new SpeechRecognition();
 
@@ -121,7 +124,14 @@
     function stopSpeechRecognition() {
       if (recognition) {
         recognition.stop();
+        // Limpiar el total al detener el reconocimiento de voz
+        clearTotal();
       }
+    }
+
+    function clearTotal() {
+      total = 0;
+      updateOutputTotal();
     }
 
     function findWordByTranscript(transcript) {
@@ -147,8 +157,7 @@
       words = [];
       saveDataToLocalStorage();
       updateOutputWords();
-      total = 0;
-      updateOutputTotal();
+      clearTotal();  // Limpiar el total al reiniciar los datos
       localStorage.removeItem('total');
       alert('Datos borrados correctamente.');
     }
