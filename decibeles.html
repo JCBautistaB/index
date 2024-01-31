@@ -6,7 +6,7 @@
     <title>Detector de Audio</title>
 </head>
 <body>
-    <h1>Detector de Audio</h1>
+    <h1>Detector de Audio xx</h1>
     <button onclick="startAudioDetection()">Iniciar Detección</button>
     <button onclick="stopAudioDetection()">Detener Detección</button>
     <div id="powerDisplay">Potencia de Audio: 0 dB</div>
@@ -31,6 +31,7 @@
                     analyser.connect(audioContext.destination);
 
                     analyser.fftSize = 256;
+                    analyser.smoothingTimeConstant = 0.8; // Ajusta este valor según sea necesario
 
                     const bufferLength = analyser.frequencyBinCount;
                     const dataArray = new Uint8Array(bufferLength);
