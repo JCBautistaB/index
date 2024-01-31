@@ -6,7 +6,7 @@
     <title>Detector de Audio</title>
 </head>
 <body>
-    <h1>Detector de Audio</h1>
+    <h1>Detector de Audio x</h1>
     <button onclick="startAudioDetection()">Iniciar Detección</button>
     <button onclick="stopAudioDetection()">Detener Detección</button>
     <div id="powerDisplay">Potencia de Audio: 0 dB</div>
@@ -41,7 +41,7 @@
                         analyser.getByteTimeDomainData(dataArray);
 
                         // Calcula la potencia del audio en dB
-                        const rms = Math.sqrt(Array.from(dataArray).map(sample => sample * sample).reduce((sum, sample) => sum + sample, 0) / dataArray.length);
+                        const rms = Math.sqrt(Array.from(dataArray).reduce((sum, sample) => sum + sample * sample, 0) / dataArray.length);
                         const dB = 20 * Math.log10(rms / 255.0);
 
                         // Muestra la potencia del audio en la interfaz
