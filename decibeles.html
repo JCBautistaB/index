@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detector de Audio</title>
+</head>
+<body>
+    <h1>Detector de Audio</h1>
+    <button onclick="startAudioDetection()">Iniciar Detección</button>
+    <button onclick="stopAudioDetection()">Detener Detección</button>
+    <div id="powerDisplay">Potencia de Audio: 0 dB</div>
+    <div id="eventLog"></div>
+
+    <script>
+        let audioContext;
+        let analyser;
+        let microphoneStream;
+        let eventLogElement;
+
+        function startAudioDetection() {
+            eventLogElement = document.getElementById('eventLog');
+
+            navigator.mediaDevices.getUserMedia({ audio: true })
+                .then(function (stream) {
+                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    analyser = audioContext.createAnalyser();
+                    microphoneStream = audioContext.createMediaStreamSource(stream);
+
+                    microphoneStream.connect(analyser);
+                    analyser.connect(audioContext.destination);
+
+                    analyser.fftSize = 256;
+
+                    const bufferLength = analyser.frequencyBinCount;
+                    const dataArray = new Uint8Array(bufferLength);
+
+                    analyser.getByteTimeDomainData(dataArray);
+
+                    function detectAudio() {
+                        analyser.getByteTimeDomainData(dataArray);
+
+                        // Calcula la potencia del audio en dB
+                        const rms = Math.sqrt(Array.from(dataArray).map(sample => sample * sample).reduce((sum, sample) => sum + sample, 0) / dataArray.length);
+                        const dB = 20 * Math.log10(rms / 255.0);
+
+                        // Muestra la potencia del audio en la interfaz
+                        document.getElementById('powerDisplay').innerText = `Potencia de Audio: ${dB.toFixed(2)} dB`;
+
+                        // Verifica si la potencia supera los 10 dB y registra el evento
+                        if (dB > 10) {
+                            logEvent(`Evento detectado a las ${getCurrentTime()}`);
+                        }
+
+                        requestAnimationFrame(detectAudio);
+                    }
+
+                    detectAudio();
+                })
+                .catch(function (err) {
+                    console.error("Error al obtener acceso al micrófono:", err);
+                });
+        }
+
+        function stopAudioDetection() {
+            if (microphoneStream) {
+                microphoneStream.disconnect();
+                analyser.disconnect();
+                audioContext.close().then(() => {
+                    console.log("Detección de audio detenida.");
+                });
+            }
+        }
+
+        function logEvent(message) {
+            const eventItem = document.createElement('div');
+            eventItem.innerText = message;
+            eventLogElement.appendChild(eventItem);
+        }
+
+        function getCurrentTime() {
+            const now = new Date();
+            const timeString = `${now.getHours()}:${now.getMinutes()}:${now.getSeconds()}`;
+            return timeString;
+        }
+    </script>
+</body>
+</html>
