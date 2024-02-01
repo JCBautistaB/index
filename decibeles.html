@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,6 +7,9 @@
 </head>
 <body>
     <h1>Detector de Audio Independencia</h1>
+    <label for="umbralInput">Umbral de Decibelios:</label>
+    <input type="range" id="umbralInput" min="0" max="100" value="10" step="1" oninput="updateUmbral()">
+    <span id="umbralValue">1.0</span>
     <div id="eventCounter">Veces que se ha superado el umbral: 0</div>
     <br/>
     <button onclick="startAudioDetection()">Iniciar Detección</button>
@@ -22,7 +25,14 @@
         let eventCounterElement;
         let count = 0;
         let lastSpeechTime = 0;
-        const speechCooldownDuration = 3000; // Tiempo en milisegundos para ignorar detecciones después de la síntesis de voz
+        const speechCooldownDuration = 7000; // Tiempo en milisegundos para ignorar detecciones después de la síntesis de voz
+        let umbralDecibelios = 1.0;
+        let umbralValue = document.getElementById('umbralValue');
+
+        function updateUmbral() {
+            umbralDecibelios = parseFloat((parseInt(document.getElementById('umbralInput').value) / 10).toFixed(1));
+            umbralValue.textContent = umbralDecibelios.toFixed(1);
+        }
 
         function startAudioDetection() {
             eventLogElement = document.getElementById('eventLog');
@@ -55,11 +65,8 @@
                         // Muestra la potencia del audio en la interfaz
                         document.getElementById('powerDisplay').innerText = `Potencia de Audio: ${dB.toFixed(2)} dB`;
 
-                        // Ajusta el umbral de detección según tus necesidades (por ejemplo, 1 dB)
-                        const umbralDeteccion = 1;
-
                         // Verifica si la potencia supera el umbral y registra el evento
-                        if (dB > umbralDeteccion && !isSpeechCooldownActive()) {
+                        if (dB > umbralDecibelios && !isSpeechCooldownActive()) {
                             const evento = `Evento detectado a las ${getCurrentTime()} con potencia ${dB.toFixed(2)} dB`;
                             logEvent(evento);
                             count++;
@@ -81,6 +88,7 @@
             if (microphoneStream) {
                 microphoneStream.disconnect();
                 analyser.disconnect();
+
                 audioContext.close().then(() => {
                     console.log("Detección de audio detenida.");
                 });
@@ -154,7 +162,7 @@
             const options = { hour: 'numeric', minute: 'numeric', hour12: true };
             const dateTimeString = now.toLocaleString('en-US', options);
             const synth = window.speechSynthesis;
-            const utterance = new SpeechSynthesisUtterance(`Hora actual: ${dateTimeString}`);
+            const utterance = new SpeechSynthesisUtterance(`Vecinos afectados por ruido excesivo y olores toxicos generando informe  Hora actual: ${dateTimeString}`);
             synth.speak(utterance);
         }
     </script>
