@@ -54,7 +54,7 @@
                         document.getElementById('powerDisplay').innerText = `Potencia de Audio: ${dB.toFixed(2)} dB`;
 
                         // Ajusta el umbral de detección según tus necesidades (por ejemplo, 1 dB)
-                        const umbralDeteccion = 1;
+                        const umbralDeteccion = 0.5;
 
                         // Verifica si la potencia supera el umbral y registra el evento
                         if (dB > umbralDeteccion) {
