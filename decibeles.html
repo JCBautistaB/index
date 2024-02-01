@@ -6,13 +6,12 @@
     <title>Detector de Audio</title>
 </head>
 <body>
-    <h1>Detector de Audio i</h1>
-    <div id="eventCounter">Veces que se ha superado el umbral: 0</div>
+    <h1>Detector de Audio</h1>
     <button onclick="startAudioDetection()">Iniciar Detección</button>
     <button onclick="stopAudioDetection()">Detener Detección</button>
     <div id="powerDisplay">Potencia de Audio: 0 dB</div>
     <div id="eventLog"></div>
-    
+    <div id="eventCounter">Veces que se ha superado el umbral: 0</div>
 
     <script>
         let audioContext;
@@ -21,6 +20,8 @@
         let eventLogElement;
         let eventCounterElement;
         let count = 0;
+        let lastSpeechTime = 0;
+        const speechCooldownDuration = 3000; // Tiempo en milisegundos para ignorar detecciones después de la síntesis de voz
 
         function startAudioDetection() {
             eventLogElement = document.getElementById('eventLog');
@@ -54,10 +55,10 @@
                         document.getElementById('powerDisplay').innerText = `Potencia de Audio: ${dB.toFixed(2)} dB`;
 
                         // Ajusta el umbral de detección según tus necesidades (por ejemplo, 1 dB)
-                        const umbralDeteccion = 0.1;
+                        const umbralDeteccion = 1;
 
                         // Verifica si la potencia supera el umbral y registra el evento
-                        if (dB > umbralDeteccion) {
+                        if (dB > umbralDeteccion && !isSpeechCooldownActive()) {
                             const evento = `Evento detectado a las ${getCurrentTime()} con potencia ${dB.toFixed(2)} dB`;
                             logEvent(evento);
                             count++;
@@ -100,8 +101,16 @@
         function readEventCount() {
             // Utiliza la API de Web Speech para leer en voz alta el número de eventos detectados
             const synth = window.speechSynthesis;
-            const utterance = new SpeechSynthesisUtterance(`Generando informe Número de eventos detectados: ${count}`);
+            const utterance = new SpeechSynthesisUtterance(`Número de eventos detectados: ${count}`);
             synth.speak(utterance);
+
+            // Registra el tiempo de la última síntesis de voz
+            lastSpeechTime = Date.now();
+        }
+
+        function isSpeechCooldownActive() {
+            // Verifica si el tiempo transcurrido desde la última síntesis de voz es menor que el período de espera
+            return Date.now() - lastSpeechTime < speechCooldownDuration;
         }
 
         function getCurrentTime() {
