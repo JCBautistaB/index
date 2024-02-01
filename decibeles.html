@@ -103,7 +103,7 @@
         function readEventCount() {
             // Utiliza la API de Web Speech para leer en voz alta el número de eventos detectados
             const synth = window.speechSynthesis;
-            const utterance = new SpeechSynthesisUtterance(`Número de eventos detectados: ${count}`);
+            const utterance = new SpeechSynthesisUtterance(`Vecinos afectados por ruido excesivo Generando informe Número de eventos detectados: ${count}`);
             synth.speak(utterance);
 
             // Registra el tiempo de la última síntesis de voz
