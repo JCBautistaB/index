@@ -57,7 +57,7 @@
                         document.getElementById('powerDisplay').innerText = `Potencia de Audio: ${dB.toFixed(2)} dB`;
 
                         // Ajusta el umbral de detección según tus necesidades (por ejemplo, 1 dB)
-                        const umbralDeteccion = 0.2;
+                        const umbralDeteccion = 0.1;
 
                         // Verifica si la potencia supera el umbral y registra el evento
                         if (dB > umbralDeteccion && !isSpeechCooldownActive()) {
@@ -103,7 +103,7 @@
         function readEventCount() {
             // Utiliza la API de Web Speech para leer en voz alta el número de eventos detectados
             const synth = window.speechSynthesis;
-            const utterance = new SpeechSynthesisUtterance(`Vecinos afectados por ruido excesivo Generando informe Número de eventos detectados: ${count}`);
+            const utterance = new SpeechSynthesisUtterance(`Vecinos afectados por ruido excesivo y olores tóxicos Generando informe Número de eventos detectados: ${count}`);
             synth.speak(utterance);
 
             // Registra el tiempo de la última síntesis de voz
