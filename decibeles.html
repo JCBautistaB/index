@@ -6,7 +6,7 @@
     <title>Detector de Audio</title>
 </head>
 <body>
-    <h1>Detector de Audio</h1>
+    <h1>Detector de Audio Independencia</h1>
     <button onclick="startAudioDetection()">Iniciar Detección</button>
     <button onclick="stopAudioDetection()">Detener Detección</button>
     <div id="powerDisplay">Potencia de Audio: 0 dB</div>
@@ -55,7 +55,7 @@
                         document.getElementById('powerDisplay').innerText = `Potencia de Audio: ${dB.toFixed(2)} dB`;
 
                         // Ajusta el umbral de detección según tus necesidades (por ejemplo, 1 dB)
-                        const umbralDeteccion = 1;
+                        const umbralDeteccion = 0.5;
 
                         // Verifica si la potencia supera el umbral y registra el evento
                         if (dB > umbralDeteccion && !isSpeechCooldownActive()) {
