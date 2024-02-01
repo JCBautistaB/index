@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Detector de Audio</title>
+    <title>Detector de Audio Independencia</title>
 </head>
 <body>
     <h1>Detector de Audio Independencia</h1>
@@ -13,7 +13,6 @@
     <button onclick="stopAudioDetection()">Detener Detección</button>
     <div id="powerDisplay">Potencia de Audio: 0 dB</div>
     <div id="eventLog"></div>
-    
 
     <script>
         let audioContext;
@@ -57,7 +56,7 @@
                         document.getElementById('powerDisplay').innerText = `Potencia de Audio: ${dB.toFixed(2)} dB`;
 
                         // Ajusta el umbral de detección según tus necesidades (por ejemplo, 1 dB)
-                        const umbralDeteccion = 0.02;
+                        const umbralDeteccion = 1;
 
                         // Verifica si la potencia supera el umbral y registra el evento
                         if (dB > umbralDeteccion && !isSpeechCooldownActive()) {
@@ -101,9 +100,19 @@
         }
 
         function readEventCount() {
-            // Utiliza la API de Web Speech para leer en voz alta el número de eventos detectados
+            // Pausa temporalmente la detección de audio durante la síntesis de voz
+            pauseAudioDetection();
+
+            // Utiliza la API de Web Speech para leer en voz alta el número de eventos detectados con un mensaje personalizado
             const synth = window.speechSynthesis;
-            const utterance = new SpeechSynthesisUtterance(`Vecinos afectados por ruido excesivo y olores tóxicos Generando informe Número de eventos detectados: ${count}`);
+            const message = `Evento detectado. Número total de eventos: ${count}.`;
+            const utterance = new SpeechSynthesisUtterance(message);
+            utterance.onend = () => {
+                // Después de leer el mensaje, reanuda la detección de audio
+                resumeAudioDetection();
+                // Lee la fecha y hora de una manera más simple
+                readDateTime();
+            };
             synth.speak(utterance);
 
             // Registra el tiempo de la última síntesis de voz
@@ -117,9 +126,36 @@
 
         function getCurrentTime() {
             const now = new Date();
-            const date = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}-${now.getDate().toString().padStart(2, '0')}`;
-            const time = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
-            return `${date} ${time}`;
+            const hours = now.getHours();
+            const minutes = now.getMinutes();
+            const ampm = hours >= 12 ? 'pm' : 'am';
+            const hourText = hours % 12 === 0 ? 12 : hours % 12;
+            const minuteText = minutes < 10 ? `0${minutes}` : minutes;
+            return `${hourText}:${minuteText} ${ampm}`;
+        }
+
+        function pauseAudioDetection() {
+            // Pausa la detección de audio desconectando el micrófono
+            if (microphoneStream) {
+                microphoneStream.disconnect();
+            }
+        }
+
+        function resumeAudioDetection() {
+            // Reanuda la detección de audio reconectando el micrófono
+            if (microphoneStream && analyser) {
+                microphoneStream.connect(analyser);
+            }
+        }
+
+        function readDateTime() {
+            // Lee la fecha y hora de una manera más simple
+            const now = new Date();
+            const options = { hour: 'numeric', minute: 'numeric', hour12: true };
+            const dateTimeString = now.toLocaleString('en-US', options);
+            const synth = window.speechSynthesis;
+            const utterance = new SpeechSynthesisUtterance(`Hora actual: ${dateTimeString}`);
+            synth.speak(utterance);
         }
     </script>
 </body>
