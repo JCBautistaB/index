@@ -15,8 +15,8 @@
     <label for="customMessage">Mensaje Personalizado:</label>
     <input type="text" id="customMessage" placeholder="Ingresa tu mensaje">
     <br/>
-    <label for="cooldownInput">Tiempo de Espera (en milisegundos):</label>
-    <input type="number" id="cooldownInput" placeholder="30000">
+    <label for="cooldownInput">Tiempo de Espera (en segundos):</label>
+    <input type="number" id="cooldownInput" placeholder="30"> <!-- Valor predeterminado es 30 segundos -->
     <br/>
     <button onclick="startAudioDetection()">Iniciar Detección</button>
     <button onclick="stopAudioDetection()">Detener Detección</button>
@@ -42,7 +42,7 @@
         let eventCounterElement;
         let count = 0;
         let lastSpeechTime = 0;
-        let speechCooldownDuration = 30000; // Valor predeterminado
+        let speechCooldownDuration = 30000; // Valor predeterminado en milisegundos
         let umbralDecibelios = 1.0;
         let umbralValue = document.getElementById('umbralValue');
 
@@ -56,7 +56,7 @@
             eventCounterElement = document.getElementById('eventCounter');
 
             const cooldownInput = document.getElementById('cooldownInput').value;
-            speechCooldownDuration = cooldownInput || 30000; // Usar 30000 si no se proporciona un valor
+            speechCooldownDuration = (cooldownInput || 30) * 1000; // Convertir a milisegundos, usar 30 segundos si no se proporciona un valor
 
             navigator.mediaDevices.getUserMedia({ audio: true })
                 .then(function (stream) {
@@ -127,7 +127,7 @@
 
             const synth = window.speechSynthesis;
             const customMessage = document.getElementById('customMessage').value || "Mensaje predeterminado";
-            const message = `${customMessage}. Generando Informe: ${count}.`;
+            const message = `Dario, tu empresa afecta a los Vecinos con Ruido Excesivo y Olores Tóxicos. ${customMessage}. Generando Informe: ${count}.`;
             const utterance = new SpeechSynthesisUtterance(message);
             utterance.onend = () => {
                 resumeAudioDetection();
