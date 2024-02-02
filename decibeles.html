@@ -15,6 +15,9 @@
     <label for="customMessage">Mensaje Personalizado:</label>
     <input type="text" id="customMessage" placeholder="Ingresa tu mensaje">
     <br/>
+    <label for="cooldownInput">Tiempo de Espera (en milisegundos):</label>
+    <input type="number" id="cooldownInput" placeholder="30000">
+    <br/>
     <button onclick="startAudioDetection()">Iniciar Detección</button>
     <button onclick="stopAudioDetection()">Detener Detección</button>
     <button onclick="saveInformation()">Guardar Información</button>
@@ -39,7 +42,7 @@
         let eventCounterElement;
         let count = 0;
         let lastSpeechTime = 0;
-        const speechCooldownDuration = 30000;
+        let speechCooldownDuration = 30000; // Valor predeterminado
         let umbralDecibelios = 1.0;
         let umbralValue = document.getElementById('umbralValue');
 
@@ -51,6 +54,9 @@
         function startAudioDetection() {
             eventLogElement = document.getElementById('eventLog');
             eventCounterElement = document.getElementById('eventCounter');
+
+            const cooldownInput = document.getElementById('cooldownInput').value;
+            speechCooldownDuration = cooldownInput || 30000; // Usar 30000 si no se proporciona un valor
 
             navigator.mediaDevices.getUserMedia({ audio: true })
                 .then(function (stream) {
