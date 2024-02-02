@@ -12,11 +12,13 @@
     <span id="umbralValue">1.0</span>
     <div id="eventCounter">Veces que se ha superado el umbral: 0</div>
     <br/>
+    <label for="customMessage">Mensaje Personalizado:</label>
+    <input type="text" id="customMessage" placeholder="Ingresa tu mensaje">
+    <br/>
     <button onclick="startAudioDetection()">Iniciar Detección</button>
     <button onclick="stopAudioDetection()">Detener Detección</button>
     <button onclick="saveInformation()">Guardar Información</button>
     <div id="powerDisplay">Potencia de Audio: 0 dB</div>
-    
     
     <hr>
 
@@ -118,7 +120,8 @@
             pauseAudioDetection();
 
             const synth = window.speechSynthesis;
-            const message = `Dario tu empresa afecta a los Vecinos con Ruido Excesivo y Olores Tóxicos. Generando Informe: ${count}.`;
+            const customMessage = document.getElementById('customMessage').value || "Mensaje predeterminado";
+            const message = `${customMessage}. Generando Informe: ${count}.`;
             const utterance = new SpeechSynthesisUtterance(message);
             utterance.onend = () => {
                 resumeAudioDetection();
