@@ -17,11 +17,13 @@
     <br/>
     <label for="cooldownInput">Tiempo de Espera (en segundos):</label>
     <input type="number" id="cooldownInput" placeholder="30"> <!-- Valor predeterminado es 30 segundos -->
+     <div id="countdownTimer"></div> <!-- Agregado: Mostrará el tiempo restante -->
     <br/>
     <button onclick="startAudioDetection()">Iniciar Detección</button>
     <button onclick="stopAudioDetection()">Detener Detección</button>
     <button onclick="saveInformation()">Guardar Información</button>
     <div id="powerDisplay">Potencia de Audio: 0 dB</div>
+   
     
     <hr>
 
@@ -45,6 +47,7 @@
         let speechCooldownDuration = 30000; // Valor predeterminado en milisegundos
         let umbralDecibelios = 1.0;
         let umbralValue = document.getElementById('umbralValue');
+        let countdownInterval;
 
         function updateUmbral() {
             umbralDecibelios = parseFloat((parseInt(document.getElementById('umbralInput').value) / 10).toFixed(1));
@@ -89,6 +92,7 @@
                             count++;
                             updateEventCounter();
                             readEventCount();
+                            startCountdownTimer();
                         }
 
                         requestAnimationFrame(detectAudio);
@@ -101,6 +105,22 @@
                 });
         }
 
+        function startCountdownTimer() {
+            const countdownElement = document.getElementById('countdownTimer');
+            let remainingTime = speechCooldownDuration / 1000; // Convertir a segundos
+            countdownElement.innerText = `Nuevo intento en: ${remainingTime} segundos`;
+
+            countdownInterval = setInterval(() => {
+                remainingTime--;
+                countdownElement.innerText = `Nuevo intento en: ${remainingTime} segundos`;
+
+                if (remainingTime <= 0) {
+                    clearInterval(countdownInterval);
+                    countdownElement.innerText = ''; // Ocultar el contador cuando llega a cero
+                }
+            }, 1000);
+        }
+
         function stopAudioDetection() {
             if (microphoneStream) {
                 microphoneStream.disconnect();
@@ -109,6 +129,7 @@
                     console.log("Detección de audio detenida.");
                 });
             }
+            clearInterval(countdownInterval); // Detener el contador cuando se detiene la detección de audio
         }
 
         function logEvent(message) {
@@ -127,7 +148,7 @@
 
             const synth = window.speechSynthesis;
             const customMessage = document.getElementById('customMessage').value || "Mensaje predeterminado";
-            const message = `Dario, tu empresa afecta a los Vecinos con Ruido Excesivo y Olores Tóxicos. ${customMessage}. Generando Informe: ${count}.`;
+            const message = `${customMessage}. Generando Informe: ${count}.`;
             const utterance = new SpeechSynthesisUtterance(message);
             utterance.onend = () => {
                 resumeAudioDetection();
