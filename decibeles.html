@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Detector de Audio Independencia</title>
+    <title>Detector y Grabadora de Audio</title>
 </head>
 <body>
     <h1>Detector de Audio Independencia</h1>
@@ -14,9 +14,20 @@
     <br/>
     <button onclick="startAudioDetection()">Iniciar Detección</button>
     <button onclick="stopAudioDetection()">Detener Detección</button>
-    <div id="powerDisplay">Potencia de Audio: 0 dB</div>
-    <div id="eventLog"></div>
     <button onclick="saveInformation()">Guardar Información</button>
+    <div id="powerDisplay">Potencia de Audio: 0 dB</div>
+    
+    
+    <hr>
+
+    <h1>Grabadora de Audio</h1>
+    <button id="startRecord">Iniciar Grabación</button>
+    <button id="stopRecord" disabled>Detener Grabación</button>
+    <audio id="audioPlayer" controls></audio>
+    
+    <hr>
+    
+    <div id="eventLog"></div>
 
     <script>
         let audioContext;
@@ -26,7 +37,7 @@
         let eventCounterElement;
         let count = 0;
         let lastSpeechTime = 0;
-        const speechCooldownDuration = 30000; // Tiempo en milisegundos para ignorar detecciones después de la síntesis de voz
+        const speechCooldownDuration = 30000;
         let umbralDecibelios = 1.0;
         let umbralValue = document.getElementById('umbralValue');
 
@@ -49,7 +60,7 @@
                     analyser.connect(audioContext.destination);
 
                     analyser.fftSize = 256;
-                    analyser.smoothingTimeConstant = 0.5; // Ajusta este valor según sea necesario
+                    analyser.smoothingTimeConstant = 0.5;
 
                     const bufferLength = analyser.frequencyBinCount;
                     const dataArray = new Uint8Array(bufferLength);
@@ -59,14 +70,11 @@
                     function detectAudio() {
                         analyser.getByteTimeDomainData(dataArray);
 
-                        // Calcula la potencia del audio en dB
                         const rms = Math.sqrt(Array.from(dataArray).reduce((sum, sample) => sum + Math.abs(sample) * Math.abs(sample), 0) / dataArray.length);
-                        const dB = 20 * Math.log10(rms / 128.0); // Se ajusta para normalizar a 0-1
+                        const dB = 20 * Math.log10(rms / 128.0);
 
-                        // Muestra la potencia del audio en la interfaz
                         document.getElementById('powerDisplay').innerText = `Potencia de Audio: ${dB.toFixed(2)} dB`;
 
-                        // Verifica si la potencia supera el umbral y registra el evento
                         if (dB > umbralDecibelios && !isSpeechCooldownActive()) {
                             const evento = `Evento detectado a las ${getCurrentTime()} con potencia ${dB.toFixed(2)} dB`;
                             logEvent(evento);
@@ -99,7 +107,6 @@
             const eventItem = document.createElement('div');
             eventItem.innerText = message;
 
-            // Inserta el nuevo evento al principio de la lista
             eventLogElement.insertBefore(eventItem, eventLogElement.firstChild);
         }
 
@@ -108,27 +115,21 @@
         }
 
         function readEventCount() {
-            // Pausa temporalmente la detección de audio durante la síntesis de voz
             pauseAudioDetection();
 
-            // Utiliza la API de Web Speech para leer en voz alta el número de eventos detectados con un mensaje personalizado
             const synth = window.speechSynthesis;
-            const message = `Dario tu empresa afecta a los Vecinos con Ruido Execivo y Olores Toxicos. Generando Informe: ${count}.`;
+            const message = `Dario tu empresa afecta a los Vecinos con Ruido Excesivo y Olores Tóxicos. Generando Informe: ${count}.`;
             const utterance = new SpeechSynthesisUtterance(message);
             utterance.onend = () => {
-                // Después de leer el mensaje, reanuda la detección de audio
                 resumeAudioDetection();
-                // Lee la fecha y hora de una manera más simple
                 readDateTime();
             };
             synth.speak(utterance);
 
-            // Registra el tiempo de la última síntesis de voz
             lastSpeechTime = Date.now();
         }
 
         function isSpeechCooldownActive() {
-            // Verifica si el tiempo transcurrido desde la última síntesis de voz es menor que el período de espera
             return Date.now() - lastSpeechTime < speechCooldownDuration;
         }
 
@@ -143,21 +144,18 @@
         }
 
         function pauseAudioDetection() {
-            // Pausa la detección de audio desconectando el micrófono
             if (microphoneStream) {
                 microphoneStream.disconnect();
             }
         }
 
         function resumeAudioDetection() {
-            // Reanuda la detección de audio reconectando el micrófono
             if (microphoneStream && analyser) {
                 microphoneStream.connect(analyser);
             }
         }
 
         function readDateTime() {
-            // Lee la fecha y hora de una manera más simple
             const now = new Date();
             const options = { hour: 'numeric', minute: 'numeric', hour12: true };
             const dateTimeString = now.toLocaleString('en-MX', options);
@@ -168,18 +166,53 @@
 
         function saveInformation() {
             const events = Array.from(document.getElementById('eventLog').children).map(event => event.innerText);
-            const content = `Registro de eventos:\n${events.join('\n')}`;
+            const content = `Registro de eventos con el detector de audio:\n${events.join('\n')}`;
 
-            // Crear un Blob con el contenido del archivo
             const blob = new Blob([content], { type: 'text/plain' });
 
-            // Crear un enlace de descarga
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
             link.download = 'registro_eventos.txt';
 
-            // Simular un clic en el enlace para iniciar la descarga
             link.click();
+        }
+
+        let mediaRecorder;
+        let audioChunks = [];
+
+        const startRecordButton = document.getElementById('startRecord');
+        const stopRecordButton = document.getElementById('stopRecord');
+        const audioPlayer = document.getElementById('audioPlayer');
+
+        startRecordButton.addEventListener('click', startRecording);
+        stopRecordButton.addEventListener('click', stopRecording);
+
+        async function startRecording() {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+
+            mediaRecorder = new MediaRecorder(stream);
+
+            mediaRecorder.ondataavailable = (event) => {
+                if (event.data.size > 0) {
+                    audioChunks.push(event.data);
+                }
+            };
+
+            mediaRecorder.onstop = () => {
+                const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                const audioUrl = URL.createObjectURL(audioBlob);
+                audioPlayer.src = audioUrl;
+            };
+
+            mediaRecorder.start();
+            startRecordButton.disabled = true;
+            stopRecordButton.disabled = false;
+        }
+
+        function stopRecording() {
+            mediaRecorder.stop();
+            startRecordButton.disabled = false;
+            stopRecordButton.disabled = true;
         }
     </script>
 </body>
