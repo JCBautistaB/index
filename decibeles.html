@@ -16,6 +16,7 @@
     <button onclick="stopAudioDetection()">Detener Detección</button>
     <div id="powerDisplay">Potencia de Audio: 0 dB</div>
     <div id="eventLog"></div>
+    <button onclick="saveInformation()">Guardar Información</button>
 
     <script>
         let audioContext;
@@ -25,7 +26,7 @@
         let eventCounterElement;
         let count = 0;
         let lastSpeechTime = 0;
-        const speechCooldownDuration = 7000; // Tiempo en milisegundos para ignorar detecciones después de la síntesis de voz
+        const speechCooldownDuration = 30000; // Tiempo en milisegundos para ignorar detecciones después de la síntesis de voz
         let umbralDecibelios = 1.0;
         let umbralValue = document.getElementById('umbralValue');
 
@@ -88,7 +89,6 @@
             if (microphoneStream) {
                 microphoneStream.disconnect();
                 analyser.disconnect();
-
                 audioContext.close().then(() => {
                     console.log("Detección de audio detenida.");
                 });
@@ -113,7 +113,7 @@
 
             // Utiliza la API de Web Speech para leer en voz alta el número de eventos detectados con un mensaje personalizado
             const synth = window.speechSynthesis;
-            const message = `Evento detectado. Número total de eventos: ${count}.`;
+            const message = `Dario tu empresa afecta a los Vecinos con Ruido Execivo y Olores Toxicos. Generando Informe: ${count}.`;
             const utterance = new SpeechSynthesisUtterance(message);
             utterance.onend = () => {
                 // Después de leer el mensaje, reanuda la detección de audio
@@ -160,10 +160,26 @@
             // Lee la fecha y hora de una manera más simple
             const now = new Date();
             const options = { hour: 'numeric', minute: 'numeric', hour12: true };
-            const dateTimeString = now.toLocaleString('en-US', options);
+            const dateTimeString = now.toLocaleString('en-MX', options);
             const synth = window.speechSynthesis;
-            const utterance = new SpeechSynthesisUtterance(`Vecinos afectados por ruido excesivo y olores toxicos generando informe  Hora actual: ${dateTimeString}`);
+            const utterance = new SpeechSynthesisUtterance(`Hora actual: ${dateTimeString}`);
             synth.speak(utterance);
+        }
+
+        function saveInformation() {
+            const events = Array.from(document.getElementById('eventLog').children).map(event => event.innerText);
+            const content = `Registro de eventos:\n${events.join('\n')}`;
+
+            // Crear un Blob con el contenido del archivo
+            const blob = new Blob([content], { type: 'text/plain' });
+
+            // Crear un enlace de descarga
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'registro_eventos.txt';
+
+            // Simular un clic en el enlace para iniciar la descarga
+            link.click();
         }
     </script>
 </body>
