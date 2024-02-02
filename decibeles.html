@@ -79,24 +79,24 @@
                     analyser.getByteTimeDomainData(dataArray);
 
                     function detectAudio() {
-                        analyser.getByteTimeDomainData(dataArray);
+    analyser.getByteTimeDomainData(dataArray);
 
-                        const rms = Math.sqrt(Array.from(dataArray).reduce((sum, sample) => sum + Math.abs(sample) * Math.abs(sample), 0) / dataArray.length);
-                        const dB = 20 * Math.log10(rms / 128.0);
+    const rms = Math.sqrt(Array.from(dataArray).reduce((sum, sample) => sum + Math.abs(sample) * Math.abs(sample), 0) / dataArray.length);
+    const dB = 20 * Math.log10(rms / 128.0);
 
-                        document.getElementById('powerDisplay').innerText = `Potencia de Audio: ${dB.toFixed(2)} dB`;
+    document.getElementById('powerDisplay').innerText = `Potencia de Audio: ${dB.toFixed(2)} dB`;
 
-                        if (dB > umbralDecibelios && !isSpeechCooldownActive()) {
-                            const evento = `Evento detectado a las ${getCurrentTime()} con potencia ${dB.toFixed(2)} dB`;
-                            logEvent(evento);
-                            count++;
-                            updateEventCounter();
-                            readEventCount();
-                            startCountdownTimer();
-                        }
+    if (dB > umbralDecibelios && !isSpeechCooldownActive()) {
+        count++;
+        const evento = `Evento #${count} detectado a las ${getCurrentTime()} con potencia ${dB.toFixed(2)} dB`;
+        logEvent(evento);
+        updateEventCounter();
+        readEventCount();
+        startCountdownTimer();
+    }
 
-                        requestAnimationFrame(detectAudio);
-                    }
+    requestAnimationFrame(detectAudio);
+}
 
                     detectAudio();
                 })
