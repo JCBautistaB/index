@@ -6,7 +6,7 @@
     <title>Detector y Grabadora de Audio</title>
 </head>
 <body>
-    <h1>Detector de Audio Independencia</h1>
+    <h1>Detector de Audio Independenciax mOVIL</h1>
     <label for="umbralInput">Umbral de Decibelios:</label>
     <input type="range" id="umbralInput" min="0" max="100" value="10" step="1" oninput="updateUmbral()">
     <span id="umbralValue">1.0</span>
@@ -19,20 +19,16 @@
     <input type="number" id="cooldownInput" placeholder="30"> <!-- Valor predeterminado es 30 segundos -->
 
     <div id="countdownTimer"></div> <!-- Agregado: Mostrará el tiempo restante -->
-
-    <!-- Agregado: Botón para solicitar permisos -->
-    <button onclick="requestMicrophonePermission()">Permitir acceso al micrófono</button>
-
+    
     <br/>
     <button onclick="startAudioDetection()">Iniciar Detección</button>
     <button onclick="stopAudioDetection()">Detener Detección</button>
     <button onclick="saveInformation()">Guardar Información</button>
     <div id="powerDisplay">Potencia de Audio: 0 dB</div>
-
+    
     <hr>
 
     <h1>Grabadora de Audio</h1>
-    <!-- Agregar campo de texto para la palabra clave 'Inicia' y 'Alto' -->
     <label for="startKeywordInput">Palabra Clave para 'Inicia':</label>
     <input type="text" id="startKeywordInput" placeholder="inicia">
     <br/>
@@ -41,12 +37,11 @@
     <br/>
     <button id="startRecord" onclick="startRecording()">Iniciar Grabación</button>
     <button id="stopRecord" onclick="stopRecording()" disabled>Detener Grabación</button>
-    <span id="recordingIndicator" style="color: red; font-weight: bold;"></span> <!-- Nuevo: Indicador visual -->
+    <span id="recordingIndicator" style="color: red; font-weight: bold;"></span>
     <audio id="audioPlayer" controls></audio>
-    <p>Palabra clave reconocida: <span id="keywordRecognized"></span></p>
-
+    
     <hr>
-
+    
     <div id="eventLog"></div>
 
     <script>
@@ -57,7 +52,7 @@
         let eventCounterElement;
         let count = 0;
         let lastSpeechTime = 0;
-        let speechCooldownDuration = 30000; // Valor predeterminado en milisegundos
+        let speechCooldownDuration = 30000;
         let umbralDecibelios = 1.0;
         let umbralValue = document.getElementById('umbralValue');
         let countdownInterval;
@@ -69,12 +64,11 @@
             umbralValue.textContent = umbralDecibelios.toFixed(1);
         }
 
-        async function requestMicrophonePermission() {
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                // Continuar con la lógica de audio después de obtener el permiso
-            } catch (error) {
-                console.error("Error al obtener acceso al micrófono:", error);
+        function speakCustomMessage() {
+            const customMessage = document.getElementById('customMessage').value;
+            if (customMessage.trim() !== '') {
+                const utterance = new SpeechSynthesisUtterance(customMessage);
+                speechSynthesis.speak(utterance);
             }
         }
 
@@ -83,9 +77,8 @@
             eventCounterElement = document.getElementById('eventCounter');
 
             const cooldownInput = document.getElementById('cooldownInput').value;
-            speechCooldownDuration = (cooldownInput || 30) * 1000; // Convertir a milisegundos, usar 30 segundos si no se proporciona un valor
+            speechCooldownDuration = (cooldownInput || 30) * 1000;
 
-            // Obtener las palabras clave del campo de texto
             startKeyword = document.getElementById('startKeywordInput').value.trim().toLowerCase();
             stopKeyword = document.getElementById('stopKeywordInput').value.trim().toLowerCase();
 
@@ -117,191 +110,213 @@
                         if (dB > umbralDecibelios && !isSpeechCooldownActive()) {
                             count++;
                             const now = new Date();
-                            const formattedDateTime = formatDateTime(now).split(',')[0]; // Mostrar solo la fecha sin la hora
-                            const hours = now.getHours();
-                            const hourText = hours % 12 === 0 ? 12 : hours % 12;
-                            const minutes = now.getMinutes();
-                            const seconds = now.getSeconds();
-                            const minuteText = minutes < 10 ? `0${minutes}` : minutes;
-                            const secondText = seconds < 10 ? `0${seconds}` : seconds;
-
-                            const ampm = hours >= 12 ? 'PM' : 'AM'; // Obtener AM o PM
-                            const dBValue = document.getElementById('powerDisplay').innerText.split(' ')[3]; // Obtener el valor de potencia
-                            const evento = `${count}|${dBValue}|${formattedDateTime}|${hourText}:${minuteText}:${secondText}|${ampm}`; // Modificar el formato del mensaje
+                            const formattedDateTime = formatDateTime(now);
+                            const dBValue = document.getElementById('powerDisplay').innerText.split(' ')[3];
+                            const evento = `Evento #${count} | potencia ${dBValue} dB | ${formattedDateTime}`;
                             logEvent(evento);
                             updateEventCounter();
                             startCountdownTimer();
-                            readEventCount();  // Llama a readEventCount solo aquí
+                            readEventCount();
+                            speakCustomMessage();
                         }
 
                         requestAnimationFrame(detectAudio);
                     }
 
                     detectAudio();
-                    startSpeechRecognition(); // Agregado: Iniciar reconocimiento de voz
-
+                    startSpeechRecognition();
                 })
                 .catch(function (err) {
-                    console.error('Error al obtener acceso al micrófono: ', err);
+                    console.error("Error al obtener acceso al micrófono:", err);
                 });
         }
 
         function startSpeechRecognition() {
-            const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition || window.mozSpeechRecognition || window.msSpeechRecognition)();
+            recognition = new webkitSpeechRecognition();
+            recognition.continuous = false;
+            recognition.interimResults = false;
             recognition.lang = 'es-ES';
 
-            recognition.onstart = function () {
-                console.log('El reconocimiento de voz está activo.');
-            };
-
             recognition.onresult = function (event) {
-                const result = event.results[event.resultIndex];
-                const transcript = result[0].transcript.toLowerCase();
-
-                console.log('Transcripción de voz:', transcript);
+                const transcript = event.results[0][0].transcript.toLowerCase();
+                console.log("Texto transcribido:", transcript);
 
                 if (transcript.includes(startKeyword)) {
-                    // Iniciar grabación al detectar la palabra clave de inicio
-                    startRecording();
+                    handleKeywordAction('start');
                 } else if (transcript.includes(stopKeyword)) {
-                    // Detener grabación al detectar la palabra clave de detención
-                    stopRecording();
+                    handleKeywordAction('stop');
                 }
             };
 
-            recognition.onerror = function (event) {
-                console.error('Error en el reconocimiento de voz:', event.error);
-            };
-
             recognition.onend = function () {
-                console.log('El reconocimiento de voz ha finalizado.');
-                // Reiniciar el reconocimiento de voz después de un breve retraso
-                setTimeout(startSpeechRecognition, 1000);
+                if (isRecording) {
+                    recognition.start();
+                }
             };
 
             recognition.start();
         }
 
-        function startCountdownTimer() {
-            let countdown = speechCooldownDuration / 1000; // Convertir a segundos
-            const countdownTimerElement = document.getElementById('countdownTimer');
-
-            countdownInterval = setInterval(function () {
-                countdownTimerElement.textContent = `Tiempo restante: ${countdown} segundos`;
-
-                if (countdown <= 0) {
-                    clearInterval(countdownInterval);
-                    countdownTimerElement.textContent = ''; // Limpiar el temporizador
-                }
-
-                countdown--;
-            }, 1000);
+        function handleKeywordAction(action) {
+            if (action === 'start') {
+                startRecording();
+            } else if (action === 'stop') {
+                stopRecording();
+            }
         }
 
-        function isSpeechCooldownActive() {
-            const currentTime = new Date().getTime();
-            return currentTime - lastSpeechTime < speechCooldownDuration;
+        let recognition;
+        let isRecording = false;
+
+        function stopSpeechRecognition() {
+            if (recognition) {
+                recognition.stop();
+            }
         }
 
         function stopAudioDetection() {
-            if (audioContext) {
-                audioContext.close();
-                analyser.disconnect();
+            if (microphoneStream) {
                 microphoneStream.disconnect();
-                clearInterval(countdownInterval); // Detener el temporizador de cuenta regresiva
-                document.getElementById('countdownTimer').textContent = ''; // Limpiar el temporizador
-                document.getElementById('powerDisplay').innerText = 'Potencia de Audio: 0 dB'; // Restaurar visualización de potencia
-                count = 0;
-                updateEventCounter();
-                lastSpeechTime = 0; // Restablecer el tiempo del último discurso
+                analyser.disconnect();
+                audioContext.close().then(() => {
+                    console.log("Detección de audio detenida.");
+                });
             }
+            clearInterval(countdownInterval);
+            stopSpeechRecognition();
+        }
 
-            stopSpeechRecognition(); // Detener el reconocimiento de voz
+        function logEvent(message) {
+            const eventItem = document.createElement('div');
+            eventItem.innerText = message;
+
+            eventLogElement.insertBefore(eventItem, eventLogElement.firstChild);
         }
 
         function updateEventCounter() {
-            eventCounterElement.textContent = `Veces que se ha superado el umbral: ${count}`;
-        }
-
-        function logEvent(event) {
-            if (eventLogElement) {
-                const p = document.createElement('p');
-                p.textContent = event;
-                eventLogElement.appendChild(p);
-            }
+            eventCounterElement.innerText = `Veces que se ha superado el umbral: ${count}`;
         }
 
         function readEventCount() {
-            const message = `La potencia de audio ha superado el umbral ${count} veces.`;
-            responsiveVoice.speak(message, "Spanish Female");
-            lastSpeechTime = new Date().getTime(); // Actualizar el tiempo del último discurso
+            pauseAudioDetection();
+
+            const synth = window.speechSynthesis;
+            const now = new Date();
+            const formattedDateTime = formatDateTime(now);
+            const dBValue = document.getElementById('powerDisplay').innerText.split(' ')[3];
+
+            const message = `Evento #${count} | potencia ${dBValue} dB | ${formattedDateTime}`;
+
+            const utterance = new SpeechSynthesisUtterance(message);
+            utterance.onend = () => {
+                resumeAudioDetection();
+                startSpeechRecognition();
+            };
+            synth.speak(utterance);
+
+            lastSpeechTime = Date.now();
         }
 
-        function stopSpeechRecognition() {
-            const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition || window.mozSpeechRecognition || window.msSpeechRecognition)();
-            recognition.stop();
+        function isSpeechCooldownActive() {
+            return Date.now() - lastSpeechTime < speechCooldownDuration;
         }
 
-        function saveInformation() {
-            // Lógica para guardar información
-            console.log('Información guardada.');
+        function getCurrentTime() {
+            const now = new Date();
+            const hours = now.getHours();
+            const minutes = now.getMinutes();
+            const ampm = hours >= 12 ? 'pm' : 'am';
+            const hourText = hours % 12 === 0 ? 12 : hours % 12;
+            const minuteText = minutes < 10 ? `0${minutes}` : minutes;
+            return `${hourText}:${minuteText} ${ampm}`;
         }
 
-        // Funciones para la grabadora de audio
-        let mediaRecorder;
-        let audioChunks = [];
-
-        function startRecording() {
-            const startRecordButton = document.getElementById('startRecord');
-            const stopRecordButton = document.getElementById('stopRecord');
-            const recordingIndicator = document.getElementById('recordingIndicator');
-
-            startRecordButton.disabled = true;
-            stopRecordButton.disabled = false;
-
-            audioChunks = []; // Limpiar los fragmentos de audio anteriores
-
-            const constraints = { audio: true };
-            navigator.mediaDevices.getUserMedia(constraints)
-                .then(function (stream) {
-                    mediaRecorder = new MediaRecorder(stream);
-
-                    mediaRecorder.ondataavailable = function (event) {
-                        if (event.data.size > 0) {
-                            audioChunks.push(event.data);
-                        }
-                    };
-
-                    mediaRecorder.onstop = function () {
-                        const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
-                        const audioUrl = URL.createObjectURL(audioBlob);
-
-                        document.getElementById('audioPlayer').src = audioUrl;
-                        document.getElementById('keywordRecognized').innerText = ''; // Limpiar la palabra clave reconocida
-                        recordingIndicator.innerText = ''; // Limpiar el indicador visual
-                        responsiveVoice.speak("Grabación completada", "Spanish Female"); // Agregado: Mensaje de voz
-
-                        startRecordButton.disabled = false;
-                        stopRecordButton.disabled = true;
-                    };
-
-                    mediaRecorder.start();
-                    recordingIndicator.innerText = 'Grabando...'; // Agregado: Indicador visual
-                })
-                .catch(function (err) {
-                    console.error('Error al iniciar la grabación: ', err);
-                });
+        function formatDateTime(date) {
+            const options = { year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric', hour12: true };
+            return date.toLocaleString('en-MX', options);
         }
 
-        function stopRecording() {
-            if (mediaRecorder && mediaRecorder.state !== 'inactive') {
-                mediaRecorder.stop();
+        function pauseAudioDetection() {
+            if (microphoneStream) {
+                microphoneStream.disconnect();
             }
         }
 
-        function formatDateTime(dateTime) {
-            const options = { year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric', hour12: true };
-            return new Intl.DateTimeFormat('es-ES', options).format(dateTime);
+        function resumeAudioDetection() {
+            if (microphoneStream && analyser) {
+                microphoneStream.connect(analyser);
+            }
+        }
+
+        function saveInformation() {
+            const events = Array.from(document.getElementById('eventLog').children).map(event => event.innerText);
+            const content = `Registro de eventos con el detector de audio:\n${events.join('\n')}`;
+
+            const blob = new Blob([content], { type: 'text/plain' });
+
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'registro_eventos.txt';
+
+            link.click();
+        }
+
+        let mediaRecorder;
+        let audioChunks = [];
+
+        const startRecordButton = document.getElementById('startRecord');
+        const stopRecordButton = document.getElementById('stopRecord');
+        const audioPlayer = document.getElementById('audioPlayer');
+
+        startRecordButton.addEventListener('click', startRecording);
+        stopRecordButton.addEventListener('click', stopRecording);
+
+        async function startRecording() {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+
+            mediaRecorder = new MediaRecorder(stream);
+
+            mediaRecorder.ondataavailable = (event) => {
+                if (event.data.size > 0) {
+                    audioChunks.push(event.data);
+                }
+            };
+
+            mediaRecorder.onstop = () => {
+                const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                const audioUrl = URL.createObjectURL(audioBlob);
+                audioPlayer.src = audioUrl;
+            };
+
+            mediaRecorder.start();
+            startRecordButton.disabled = true;
+            stopRecordButton.disabled = false;
+            document.getElementById('recordingIndicator').innerText = 'Grabando';
+            isRecording = true;
+        }
+
+        function stopRecording() {
+            mediaRecorder.stop();
+            startRecordButton.disabled = false;
+            stopRecordButton.disabled = true;
+            audioChunks = [];
+            document.getElementById('recordingIndicator').innerText = '';
+            isRecording = false;
+        }
+
+        function startCountdownTimer() {
+            let countdownTime = parseInt(document.getElementById('cooldownInput').value || 30);
+            const countdownTimerElement = document.getElementById('countdownTimer');
+
+            countdownInterval = setInterval(() => {
+                countdownTimerElement.textContent = `Próxima detección en: ${countdownTime} segundos`;
+                countdownTime--;
+
+                if (countdownTime < 0) {
+                    clearInterval(countdownInterval);
+                    countdownTimerElement.textContent = '';
+                }
+            }, 1000);
         }
     </script>
 </body>
