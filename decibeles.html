@@ -17,9 +17,8 @@
     <br/>
     <label for="cooldownInput">Tiempo de Espera (en segundos):</label>
     <input type="number" id="cooldownInput" placeholder="30"> <!-- Valor predeterminado es 30 segundos -->
-    
-     <div id="countdownTimer"></div> <!-- Agregado: Mostrará el tiempo restante -->
-    
+
+    <div id="countdownTimer"></div> <!-- Agregado: Mostrará el tiempo restante -->
     
     <br/>
     <button onclick="startAudioDetection()">Iniciar Detección</button>
@@ -30,14 +29,22 @@
     <hr>
 
     <h1>Grabadora de Audio</h1>
+     <!-- Agregar campo de texto para la palabra clave 'Inicia' y 'Alto' -->
+    <label for="startKeywordInput">Palabra Clave para 'Inicia':</label>
+    <input type="text" id="startKeywordInput" placeholder="inicia">
+    <br/>
+    <label for="stopKeywordInput">Palabra Clave para 'Alto':</label>
+    <input type="text" id="stopKeywordInput" placeholder="para">
+    <br/>
     <button id="startRecord" onclick="startRecording()">Iniciar Grabación</button>
     <button id="stopRecord" onclick="stopRecording()" disabled>Detener Grabación</button>
     <span id="recordingIndicator" style="color: red; font-weight: bold;"></span> <!-- Nuevo: Indicador visual -->
     <audio id="audioPlayer" controls></audio>
+    <p>Palabra clave reconocida: <span id="keywordRecognized"></span></p>
+
     
     <hr>
     
-   
     <div id="eventLog"></div>
 
     <script>
@@ -52,6 +59,8 @@
         let umbralDecibelios = 1.0;
         let umbralValue = document.getElementById('umbralValue');
         let countdownInterval;
+        let startKeyword;
+        let stopKeyword;
 
         function updateUmbral() {
             umbralDecibelios = parseFloat((parseInt(document.getElementById('umbralInput').value) / 10).toFixed(1));
@@ -64,6 +73,10 @@
 
             const cooldownInput = document.getElementById('cooldownInput').value;
             speechCooldownDuration = (cooldownInput || 30) * 1000; // Convertir a milisegundos, usar 30 segundos si no se proporciona un valor
+
+            // Obtener las palabras clave del campo de texto
+            startKeyword = document.getElementById('startKeywordInput').value.trim().toLowerCase();
+            stopKeyword = document.getElementById('stopKeywordInput').value.trim().toLowerCase();
 
             navigator.mediaDevices.getUserMedia({ audio: true })
                 .then(function (stream) {
@@ -92,11 +105,22 @@
 
                         if (dB > umbralDecibelios && !isSpeechCooldownActive()) {
                             count++;
-                            const evento = `Evento #${count} detectado a las ${getCurrentTime()} con potencia ${dB.toFixed(2)} dB`;
+                            const now = new Date();
+                            const formattedDateTime = formatDateTime(now).split(',')[0]; // Mostrar solo la fecha sin la hora
+                            const hours = now.getHours();
+                            const hourText = hours % 12 === 0 ? 12 : hours % 12;
+                            const minutes = now.getMinutes();
+                            const seconds = now.getSeconds();
+                            const minuteText = minutes < 10 ? `0${minutes}` : minutes;
+                            const secondText = seconds < 10 ? `0${seconds}` : seconds;
+
+                            const ampm = hours >= 12 ? 'PM' : 'AM'; // Obtener AM o PM
+                            const dBValue = document.getElementById('powerDisplay').innerText.split(' ')[3]; // Obtener el valor de potencia
+                            const evento = `${count}|${dBValue}|${formattedDateTime}|${hourText}:${minuteText}:${secondText}|${ampm}`; // Modificar el formato del mensaje
                             logEvent(evento);
                             updateEventCounter();
-                            readEventCount();
                             startCountdownTimer();
+                            readEventCount();  // Llama a readEventCount solo aquí
                         }
 
                         requestAnimationFrame(detectAudio);
@@ -110,32 +134,78 @@
                 });
         }
 
-        function startSpeechRecognition() {
-            recognition = new webkitSpeechRecognition();
-            recognition.continuous = false;
-            recognition.interimResults = false;
-            recognition.lang = 'es-ES';
+        
+		
+		
+		
+		
+		
+		function startSpeechRecognition() {
+    recognition = new webkitSpeechRecognition();
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    recognition.lang = 'es-ES';
 
-          recognition.onresult = function (event) {
+    let isStartKeywordDetected = false;
+
+    recognition.onresult = function (event) {
         const transcript = event.results[0][0].transcript.toLowerCase();
-        console.log("Texto transcribido:", transcript); // Nuevo: Mostrar el texto transcribido en la consola
+        console.log("Texto transcribido:", transcript);
 
-        if (transcript.includes('inicio')) {
-            startRecording();
-			startSpeechRecognition();
-        } else if (transcript.includes('inicia')) {
-            stopRecording();
-			 startSpeechRecognition(); // Reiniciar el reconocimiento de voz después de que se complete la grabación
+        if (!isStartKeywordDetected) {
+            if (transcript.includes(startKeyword)) {
+                console.log('Inicia detectado');
+                isStartKeywordDetected = true;
+                handleKeywordAction('start');
+            }
+        } else {
+            if (transcript.includes(stopKeyword)) {
+                console.log('Para detectado después de Inicia');
+                isStartKeywordDetected = false;
+                handleKeywordAction('stop');
+            } else if (transcript.includes(startKeyword)) {
+                console.log('Reiniciar detectado');
+                isStartKeywordDetected = true;
+                handleKeywordAction('start');
+            }
         }
     };
-            recognition.onend = function () {
-                if (isRecording) {
-                    recognition.start();
-                }
-            };
 
+    recognition.onend = function () {
+        if (isRecording) {
             recognition.start();
         }
+    };
+
+    recognition.start();
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+       function handleKeywordAction(action) {
+    const keywordRecognizedElement = document.getElementById('keywordRecognized');
+    keywordRecognizedElement.textContent = action === 'start' ? 'Inicia' : 'Para';
+
+    if (action === 'start') {
+        startRecording();
+    } else if (action === 'stop') {
+        stopRecording();
+    }
+    // Puedes agregar más palabras clave y acciones según sea necesario
+}
+
 
         let recognition;
         let isRecording = false;
@@ -173,12 +243,18 @@
             pauseAudioDetection();
 
             const synth = window.speechSynthesis;
+            const now = new Date();
+            const formattedDateTime = formatDateTime(now).split(',')[0]; // Mostrar solo la fecha sin la hora
+            const currentTime = getCurrentTime(); // Obtener la hora actual
+            const dBValue = document.getElementById('powerDisplay').innerText.split(' ')[3]; // Obtener el valor de potencia
             const customMessage = document.getElementById('customMessage').value || "Mensaje predeterminado";
-            const message = `${customMessage}. Generando Informe: ${count}.`;
-            const utterance = new SpeechSynthesisUtterance(message);
+
+            // Construir el mensaje con la fecha, el valor de potencia, la hora y el mensaje personalizado
+            const message = `${customMessage} Evento ${count} ${formattedDateTime} a las ${currentTime}`;
+
+            const utterance = new SpeechSynthesisUtterance(message.replace(/,/g, ' |')); // Reemplazar comas por barras verticales
             utterance.onend = () => {
                 resumeAudioDetection();
-                readDateTime();
                 startSpeechRecognition(); // Reiniciar el reconocimiento de voz después de que se complete el mensaje
             };
             synth.speak(utterance);
@@ -200,6 +276,11 @@
             return `${hourText}:${minuteText} ${ampm}`;
         }
 
+        function formatDateTime(date) {
+            const options = { year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric', hour12: true };
+            return date.toLocaleString('en-MX', options);
+        }
+
         function pauseAudioDetection() {
             if (microphoneStream) {
                 microphoneStream.disconnect();
@@ -210,15 +291,6 @@
             if (microphoneStream && analyser) {
                 microphoneStream.connect(analyser);
             }
-        }
-
-        function readDateTime() {
-            const now = new Date();
-            const options = { hour: 'numeric', minute: 'numeric', hour12: true };
-            const dateTimeString = now.toLocaleString('en-MX', options);
-            const synth = window.speechSynthesis;
-            const utterance = new SpeechSynthesisUtterance(`Hora actual: ${dateTimeString}`);
-            synth.speak(utterance);
         }
 
         function saveInformation() {
@@ -281,7 +353,8 @@
             let countdownTime = parseInt(document.getElementById('cooldownInput').value || 30); // Valor predeterminado es 30 segundos
             const countdownTimerElement = document.getElementById('countdownTimer');
 
-            countdownInterval = setInterval(() => {
+            // Función para actualizar el contador y manejar el reinicio si se introduce texto en el campo de "Mensaje Personalizado"
+            function updateCountdown() {
                 countdownTimerElement.textContent = `Próxima detección en: ${countdownTime} segundos`;
                 countdownTime--;
 
@@ -289,7 +362,20 @@
                     clearInterval(countdownInterval);
                     countdownTimerElement.textContent = '';
                 }
-            }, 1000);
+            }
+
+            // Inicializar el contador
+            updateCountdown();
+
+            // Eliminar el evento input si ya está agregado
+            const customMessageInput = document.getElementById('customMessage');
+            customMessageInput.removeEventListener('input', updateCountdown);
+
+            // Agregar el evento input para reiniciar el contador si se introduce texto en el campo de "Mensaje Personalizado"
+            customMessageInput.addEventListener('input', updateCountdown);
+
+            // Establecer el intervalo para actualizar el contador
+            countdownInterval = setInterval(updateCountdown, 1000);
         }
     </script>
 </body>
