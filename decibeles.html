@@ -6,7 +6,7 @@
     <title>Detector y Grabadora de Audio</title>
 </head>
 <body>
-    <h1>Detector de Audio Independenciax mOVIL</h1>
+    <h1>Detector de Audio Independenciax mOVILxx</h1>
     <label for="umbralInput">Umbral de Decibelios:</label>
     <input type="range" id="umbralInput" min="0" max="100" value="10" step="1" oninput="updateUmbral()">
     <span id="umbralValue">1.0</span>
@@ -196,26 +196,41 @@
         function updateEventCounter() {
             eventCounterElement.innerText = `Veces que se ha superado el umbral: ${count}`;
         }
+		
+		
+		
 
         function readEventCount() {
-            pauseAudioDetection();
+    pauseAudioDetection();
 
-            const synth = window.speechSynthesis;
-            const now = new Date();
-            const formattedDateTime = formatDateTime(now);
-            const dBValue = document.getElementById('powerDisplay').innerText.split(' ')[3];
+    const synth = window.speechSynthesis;
+    const now = new Date();
+    const formattedDateTime = formatDateTime(now).split(',')[0];
+    const currentTime = getCurrentTime();
+    const dBValue = document.getElementById('powerDisplay').innerText.split(' ')[3];
+    const customMessage = document.getElementById('customMessage').value || "Mensaje predeterminado";
 
-            const message = `Evento #${count} | potencia ${dBValue} dB | ${formattedDateTime}`;
+    const message = `${customMessage} Evento ${count} ${formattedDateTime} a las ${currentTime}`;
 
-            const utterance = new SpeechSynthesisUtterance(message);
-            utterance.onend = () => {
-                resumeAudioDetection();
-                startSpeechRecognition();
-            };
-            synth.speak(utterance);
+    // Detener el reconocimiento de voz antes de la síntesis de voz
+    stopSpeechRecognition();
 
-            lastSpeechTime = Date.now();
-        }
+    const utterance = new SpeechSynthesisUtterance(message.replace(/,/g, ' |'));
+    utterance.onend = () => {
+        resumeAudioDetection();
+        // Reiniciar el reconocimiento de voz después de que se complete el mensaje
+        startSpeechRecognition();
+    };
+    synth.speak(utterance);
+
+    lastSpeechTime = Date.now();
+}
+
+		
+		
+		
+		
+		
 
         function isSpeechCooldownActive() {
             return Date.now() - lastSpeechTime < speechCooldownDuration;
