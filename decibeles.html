@@ -6,7 +6,7 @@
     <title>Detector y Grabadora de Audio</title>
 </head>
 <body>
-    <h1>Detector de Audio Independenciax mOVILxx</h1>
+    <h1>Detector de Audio Independenciax mOVIL</h1>
     <label for="umbralInput">Umbral de Decibelios:</label>
     <input type="range" id="umbralInput" min="0" max="100" value="10" step="1" oninput="updateUmbral()">
     <span id="umbralValue">1.0</span>
@@ -110,14 +110,21 @@
                         if (dB > umbralDecibelios && !isSpeechCooldownActive()) {
                             count++;
                             const now = new Date();
-                            const formattedDateTime = formatDateTime(now);
-                            const dBValue = document.getElementById('powerDisplay').innerText.split(' ')[3];
-                            const evento = `Evento #${count} | potencia ${dBValue} dB | ${formattedDateTime}`;
+                            const formattedDateTime = formatDateTime(now).split(',')[0]; // Mostrar solo la fecha sin la hora
+                            const hours = now.getHours();
+                            const hourText = hours % 12 === 0 ? 12 : hours % 12;
+                            const minutes = now.getMinutes();
+                            const seconds = now.getSeconds();
+                            const minuteText = minutes < 10 ? `0${minutes}` : minutes;
+                            const secondText = seconds < 10 ? `0${seconds}` : seconds;
+
+                            const ampm = hours >= 12 ? 'PM' : 'AM'; // Obtener AM o PM
+                            const dBValue = document.getElementById('powerDisplay').innerText.split(' ')[3]; // Obtener el valor de potencia
+                            const evento = `${count}|${dBValue}|${formattedDateTime}|${hourText}:${minuteText}:${secondText}|${ampm}`; // Modificar el formato del mensaje
                             logEvent(evento);
                             updateEventCounter();
                             startCountdownTimer();
-                            readEventCount();
-                            speakCustomMessage();
+                            readEventCount();  // Llama a readEventCount solo aquí
                         }
 
                         requestAnimationFrame(detectAudio);
