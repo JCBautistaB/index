@@ -138,31 +138,58 @@
                 });
         }
 
-        function startSpeechRecognition() {
-            recognition = new webkitSpeechRecognition();
-            recognition.continuous = false;
-            recognition.interimResults = false;
-            recognition.lang = 'es-ES';
+        
+		
+		
+		
+		
+		function startSpeechRecognition() {
+    recognition = new webkitSpeechRecognition();
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    recognition.lang = 'es-ES';
 
-            recognition.onresult = function (event) {
-                const transcript = event.results[0][0].transcript.toLowerCase();
-                console.log("Texto transcribido:", transcript);
+    let isStartKeywordDetected = false;
 
-                if (transcript.includes(startKeyword)) {
-                    handleKeywordAction('start');
-                } else if (transcript.includes(stopKeyword)) {
-                    handleKeywordAction('stop');
-                }
-            };
+    recognition.onresult = function (event) {
+        const transcript = event.results[0][0].transcript.toLowerCase();
+        console.log("Texto transcribido:", transcript);
 
-            recognition.onend = function () {
-                if (isRecording) {
-                    recognition.start();
-                }
-            };
+        if (!isStartKeywordDetected) {
+            if (transcript.includes(startKeyword)) {
+                console.log('Inicia detectado');
+                isStartKeywordDetected = true;
+                handleKeywordAction('start');
+            }
+        } else {
+            if (transcript.includes(stopKeyword)) {
+                console.log('Para detectado después de Inicia');
+                isStartKeywordDetected = false;
+                handleKeywordAction('stop');
+            } else if (transcript.includes(startKeyword)) {
+                console.log('Reiniciar detectado');
+                isStartKeywordDetected = true;
+                handleKeywordAction('start');
+            }
+        }
+    };
 
+    recognition.onend = function () {
+        if (isRecording) {
             recognition.start();
         }
+    };
+
+    recognition.start();
+}
+		
+		
+		
+		
+		
+		
+		
+		
 
         function handleKeywordAction(action) {
             if (action === 'start') {
