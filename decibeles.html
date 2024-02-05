@@ -78,6 +78,9 @@
 
             const cooldownInput = document.getElementById('cooldownInput').value;
             speechCooldownDuration = (cooldownInput || 30) * 1000;
+			
+			// Restablecer el último tiempo de habla
+    lastSpeechTime = 0;
 
             startKeyword = document.getElementById('startKeywordInput').value.trim().toLowerCase();
             stopKeyword = document.getElementById('stopKeywordInput').value.trim().toLowerCase();
@@ -354,19 +357,23 @@
         }
 
         function startCountdownTimer() {
-            let countdownTime = parseInt(document.getElementById('cooldownInput').value || 30);
-            const countdownTimerElement = document.getElementById('countdownTimer');
+    let countdownTime = parseInt(document.getElementById('cooldownInput').value || 30);
+    const countdownTimerElement = document.getElementById('countdownTimer');
 
-            countdownInterval = setInterval(() => {
-                countdownTimerElement.textContent = `Próxima detección en: ${countdownTime} segundos`;
-                countdownTime--;
+    // Actualiza el tiempo de espera aquí
+    speechCooldownDuration = countdownTime * 1000;
 
-                if (countdownTime < 0) {
-                    clearInterval(countdownInterval);
-                    countdownTimerElement.textContent = '';
-                }
-            }, 1000);
+    countdownInterval = setInterval(() => {
+        countdownTimerElement.textContent = `Próxima detección en: ${countdownTime} segundos`;
+        countdownTime--;
+
+        if (countdownTime < 0) {
+            clearInterval(countdownInterval);
+            countdownTimerElement.textContent = '';
         }
+    }, 1000);
+}
+
     </script>
 </body>
 </html>
