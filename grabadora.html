@@ -18,6 +18,7 @@
             padding: 10px 20px;
             font-size: 16px;
             cursor: pointer;
+            margin: 5px;
         }
 
         p {
@@ -28,7 +29,7 @@
 </head>
 <body>
     <button id="toggleMic">Encender Micrófono</button>
-    <button id="stopRecording" disabled>Detener Grabación</button>
+    <button id="toggleRecording" disabled>Grabar</button>
     <p id="result"></p>
     <audio id="audioPlayer" controls></audio>
 
@@ -40,85 +41,103 @@
         let recordedChunks = [];
         const audioPlayer = document.getElementById('audioPlayer');
         const toggleMicButton = document.getElementById('toggleMic');
-        const stopRecordingButton = document.getElementById('stopRecording');
+        const toggleRecordingButton = document.getElementById('toggleRecording');
         const resultDisplay = document.getElementById('result');
 
         toggleMicButton.addEventListener('click', toggleMicrophone);
-        stopRecordingButton.addEventListener('click', stopRecording);
+        toggleRecordingButton.addEventListener('click', toggleRecording);
 
         function toggleMicrophone() {
             if (!isMicOn) {
                 startListening();
                 toggleMicButton.textContent = 'Apagar Micrófono';
-                stopRecordingButton.disabled = false;
+                toggleRecordingButton.disabled = false;
             } else {
                 toggleMicButton.textContent = 'Encender Micrófono';
-                stopRecordingButton.disabled = true;
+                toggleRecordingButton.disabled = true;
+                stopListening();
+                stopRecording();
             }
 
             isMicOn = !isMicOn;
         }
 
-        function startListening() {
-            navigator.mediaDevices.getUserMedia({ audio: true })
-                .then((stream) => {
-                    recognition = new window.webkitSpeechRecognition() || new window.SpeechRecognition();
-                    recognition.lang = 'es-ES';
+        function toggleRecording() {
+            if (!isRecording) {
+                startRecording();
+                toggleRecordingButton.textContent = 'Detener Grabación';
+            } else {
+                stopRecording();
+                toggleRecordingButton.textContent = 'Grabar';
+            }
 
-                    recognition.onresult = (event) => {
-                        const transcript = event.results[0][0].transcript.toLowerCase();
-                        resultDisplay.textContent = `Palabra reconocida: ${transcript}`;
-
-                        if (transcript.includes('grabar')) {
-                            startRecording(stream);
-                            console.log('Iniciar grabación...');
-                        } else if (transcript.includes('detener')) {
-                            resultDisplay.textContent = 'Detener grabación';
-                            stopRecording();
-                            console.log('Detener...');
-                        }
-                    };
-
-                    recognition.onend = () => {
-                        if (isMicOn) {
-                            recognition.start();
-                        }
-                    };
-
-                    recognition.start();
-                })
-                .catch((error) => {
-                    console.error('Error al acceder al micrófono:', error);
-                });
+            isRecording = !isRecording;
         }
 
-        function startRecording(stream) {
-            isRecording = true;
-            recordedChunks = [];
-            resultDisplay.textContent = 'Grabando...';
+        function startListening() {
+            recognition = new window.webkitSpeechRecognition() || new window.SpeechRecognition();
+            recognition.lang = 'es-ES';
 
-            mediaRecorder = new MediaRecorder(stream);
+            recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript.toLowerCase();
+                resultDisplay.textContent = `Palabra reconocida: ${transcript}`;
 
-            mediaRecorder.ondataavailable = (event) => {
-                if (event.data.size > 0) {
-                    recordedChunks.push(event.data);
+                if (transcript.includes('grabar')) {
+                    toggleRecording();
+                    console.log('Iniciar grabación...');
+                } else if (transcript.includes('detener grabación')) {
+                    resultDisplay.textContent = 'Detener grabación';
+                    toggleRecording();
+                    console.log('Detener...');
                 }
             };
 
-            mediaRecorder.onstop = () => {
-                const blob = new Blob(recordedChunks, { type: 'audio/wav' });
-                const audioURL = URL.createObjectURL(blob);
-                audioPlayer.src = audioURL;
+            recognition.onend = () => {
+                if (isMicOn) {
+                    recognition.start();
+                }
             };
 
-            mediaRecorder.start();
+            recognition.start();
+        }
+
+        function startRecording() {
+            recordedChunks = [];
+            resultDisplay.textContent = 'Grabando...';
+
+            navigator.mediaDevices.getUserMedia({ audio: true })
+                .then((stream) => {
+                    mediaRecorder = new MediaRecorder(stream);
+
+                    mediaRecorder.ondataavailable = (event) => {
+                        if (event.data.size > 0) {
+                            recordedChunks.push(event.data);
+                        }
+                    };
+
+                    mediaRecorder.onstop = () => {
+                        const blob = new Blob(recordedChunks, { type: 'audio/wav' });
+                        const audioURL = URL.createObjectURL(blob);
+                        audioPlayer.src = audioURL;
+                    };
+
+                    mediaRecorder.start();
+                })
+                .catch((error) => {
+                    console.error('Error al iniciar la grabación:', error);
+                });
         }
 
         function stopRecording() {
-            if (isRecording) {
+            if (mediaRecorder && mediaRecorder.state !== 'inactive') {
                 mediaRecorder.stop();
-                isRecording = false;
                 resultDisplay.textContent = 'Detener grabación';
+            }
+        }
+
+        function stopListening() {
+            if (recognition) {
+                recognition.stop();
             }
         }
     </script>
