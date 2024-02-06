@@ -6,6 +6,40 @@
   <title>Vibrar Teléfono</title>
 </head>
 <body>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vibrar Teléfono</title>
+</head>
+<body>
+
+<button onclick="vibrarTelefono()">Hazme Vibrar</button>
+
+<script>
+  function vibrarTelefono() {
+    // Verificar si el navegador es compatible con la vibración
+    if ("vibrate" in navigator) {
+      // Hacer que el teléfono vibre durante 1000 milisegundos (1 segundo)
+      navigator.vibrate(1000);
+      
+      // Cambiar el texto del botón mientras vibra
+      document.querySelector('button').textContent = 'Vibrando...';
+      
+      // Después de 1 segundo, restablecer el texto del botón
+      setTimeout(function() {
+        document.querySelector('button').textContent = 'Hazme Vibrar';
+      }, 1000);
+    } else {
+      // Mostrar un mensaje si la vibración no es compatible
+      alert("Lo siento, tu dispositivo no es compatible con la vibración.");
+    }
+  }
+</script>
+
+</body>
+</html>
 
 <script>
   // Verificar si el navegador es compatible con la vibración
