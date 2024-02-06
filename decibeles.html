@@ -69,6 +69,8 @@
             if (customMessage.trim() !== '') {
                 const utterance = new SpeechSynthesisUtterance(customMessage);
                 speechSynthesis.speak(utterance);
+				// Restablecer el último tiempo de habla
+    lastSpeechTime = 0;
             }
         }
 
