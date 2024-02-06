@@ -4,74 +4,77 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Send Notification</title>
-<style>
-  #notificationLog {
-    height: 200px;
-    overflow-y: scroll;
-  }
-</style>
 </head>
 <body>
 <h1>Send Notification</h1>
 <div id="notificationLog"></div>
 <textarea id="messageInput" placeholder="Type a message..."></textarea>
-<button onclick="sendMessage()">Send Notification</button>
+<button onclick="sendNotification()">Send Notification</button>
 
 <script>
-  // ID único para identificar a cada cliente
-  const clientId = Math.random().toString(36).substring(7);
+const http = require('http');
+const fs = require('fs');
+const WebSocket = require('ws');
 
-  // WebSocket server URL
-  const wsServerUrl = 'ws://localhost:8080';
+// Crear servidor HTTP
+const server = http.createServer((req, res) => {
+  if (req.url === '/') {
+    fs.readFile(__dirname + '/index.html', 'utf8', (err, data) => {
+      if (err) {
+        res.writeHead(500);
+        return res.end('Error loading index.html');
+      }
+      res.writeHead(200, {'Content-Type': 'text/html'});
+      res.end(data);
+    });
+  }
+});
 
-  // Conexión WebSocket
-  const socket = new WebSocket(wsServerUrl);
+// Iniciar servidor HTTP en el puerto 8080
+server.listen(8080, () => {
+  console.log('Server running on http://localhost:8080');
+});
 
-  // Cuando se abre la conexión WebSocket
-  socket.onopen = function(event) {
-    console.log('WebSocket connected');
-  };
+// Crear servidor WebSocket
+const wss = new WebSocket.Server({ server });
 
-  // Cuando se recibe un mensaje del servidor
-  socket.onmessage = function(event) {
-    const data = JSON.parse(event.data);
-    if (data.clientId !== clientId) {
-      appendMessage(data.message);
-    }
-  };
+// Cuando se establece una conexión WebSocket
+wss.on('connection', function connection(ws) {
+  console.log('Client connected');
+
+  // Cuando se recibe un mensaje del cliente
+  ws.on('message', function incoming(message) {
+    // Reenviar el mensaje a todos los clientes conectados
+    wss.clients.forEach(function each(client) {
+      if (client !== ws && client.readyState === WebSocket.OPEN) {
+        client.send(message);
+      }
+    });
+  });
 
   // Cuando se cierra la conexión WebSocket
-  socket.onclose = function(event) {
-    console.log('WebSocket closed');
-  };
+  ws.on('close', function close() {
+    console.log('Client disconnected');
+  });
+});
 
-  // Cuando se produce un error en la conexión WebSocket
-  socket.onerror = function(error) {
-    console.error('WebSocket error:', error);
-  };
+// Función para mostrar el mensaje en el registro de notificaciones
+function appendMessage(message) {
+  const notificationLog = document.getElementById('notificationLog');
+  const messageElement = document.createElement('div');
+  messageElement.textContent = message;
+  notificationLog.appendChild(messageElement);
+}
 
-  // Función para enviar un mensaje al servidor
-  function sendMessage() {
-    const message = document.getElementById('messageInput').value;
-    if (message.trim() !== '') {
-      const data = {
-        clientId: clientId,
-        message: message
-      };
-      socket.send(JSON.stringify(data));
-      appendMessage(message);
-      document.getElementById('messageInput').value = '';
-    }
+// Función para enviar una notificación a través de WebSocket
+function sendNotification() {
+  const message = document.getElementById('messageInput').value.trim();
+  if (message !== '') {
+    ws.send(message);
+    document.getElementById('messageInput').value = '';
+    appendMessage(message);
   }
-
-  // Función para mostrar el mensaje en el registro de notificaciones
-  function appendMessage(message) {
-    const notificationLog = document.getElementById('notificationLog');
-    const messageElement = document.createElement('div');
-    messageElement.textContent = message;
-    notificationLog.appendChild(messageElement);
-    notificationLog.scrollTop = notificationLog.scrollHeight;
-  }
+}
 </script>
 </body>
 </html>
