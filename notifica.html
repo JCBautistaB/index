@@ -4,43 +4,74 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Send Notification</title>
-<script>
-  // Función para enviar una notificación a través de WebSocket
-  function sendNotification() {
-    // Crear una conexión WebSocket
-    var socket = new WebSocket('ws://localhost:8080');
-
-    // Cuando la conexión se establece con éxito
-    socket.onopen = function(event) {
-      console.log('WebSocket connected');
-      
-      // Enviar el mensaje de notificación
-      socket.send(JSON.stringify({
-        title: 'New Notification',
-        body: 'You have a new notification!',
-        sound: true,
-        vibration: true
-      }));
-    };
-
-    // Cuando se recibe un mensaje del servidor
-    socket.onmessage = function(event) {
-      console.log('Message from server:', event.data);
-    };
-
-    // Cuando se cierra la conexión WebSocket
-    socket.onclose = function(event) {
-      console.log('WebSocket closed');
-    };
-
-    // Cuando se produce un error en la conexión WebSocket
-    socket.onerror = function(error) {
-      console.error('WebSocket error:', error);
-    };
+<style>
+  #notificationLog {
+    height: 200px;
+    overflow-y: scroll;
   }
-</script>
+</style>
 </head>
 <body>
-<button onclick="sendNotification()">Send Notification</button>
+<h1>Send Notification</h1>
+<div id="notificationLog"></div>
+<textarea id="messageInput" placeholder="Type a message..."></textarea>
+<button onclick="sendMessage()">Send Notification</button>
+
+<script>
+  // ID único para identificar a cada cliente
+  const clientId = Math.random().toString(36).substring(7);
+
+  // WebSocket server URL
+  const wsServerUrl = 'ws://localhost:8080';
+
+  // Conexión WebSocket
+  const socket = new WebSocket(wsServerUrl);
+
+  // Cuando se abre la conexión WebSocket
+  socket.onopen = function(event) {
+    console.log('WebSocket connected');
+  };
+
+  // Cuando se recibe un mensaje del servidor
+  socket.onmessage = function(event) {
+    const data = JSON.parse(event.data);
+    if (data.clientId !== clientId) {
+      appendMessage(data.message);
+    }
+  };
+
+  // Cuando se cierra la conexión WebSocket
+  socket.onclose = function(event) {
+    console.log('WebSocket closed');
+  };
+
+  // Cuando se produce un error en la conexión WebSocket
+  socket.onerror = function(error) {
+    console.error('WebSocket error:', error);
+  };
+
+  // Función para enviar un mensaje al servidor
+  function sendMessage() {
+    const message = document.getElementById('messageInput').value;
+    if (message.trim() !== '') {
+      const data = {
+        clientId: clientId,
+        message: message
+      };
+      socket.send(JSON.stringify(data));
+      appendMessage(message);
+      document.getElementById('messageInput').value = '';
+    }
+  }
+
+  // Función para mostrar el mensaje en el registro de notificaciones
+  function appendMessage(message) {
+    const notificationLog = document.getElementById('notificationLog');
+    const messageElement = document.createElement('div');
+    messageElement.textContent = message;
+    notificationLog.appendChild(messageElement);
+    notificationLog.scrollTop = notificationLog.scrollHeight;
+  }
+</script>
 </body>
 </html>
