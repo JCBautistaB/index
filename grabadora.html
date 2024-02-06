@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Control de Micrófono</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        p {
+            margin-top: 20px;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+    <button id="toggleMic">Encender Micrófono</button>
+    <button id="stopRecording" disabled>Detener Grabación</button>
+    <p id="result"></p>
+    <audio id="audioPlayer" controls></audio>
+
+    <script>
+        let isMicOn = false;
+        let isRecording = false;
+        let recognition;
+        let mediaRecorder;
+        let recordedChunks = [];
+        const audioPlayer = document.getElementById('audioPlayer');
+        const toggleMicButton = document.getElementById('toggleMic');
+        const stopRecordingButton = document.getElementById('stopRecording');
+        const resultDisplay = document.getElementById('result');
+
+        toggleMicButton.addEventListener('click', toggleMicrophone);
+        stopRecordingButton.addEventListener('click', stopRecording);
+
+        function toggleMicrophone() {
+            if (!isMicOn) {
+                startListening();
+                toggleMicButton.textContent = 'Apagar Micrófono';
+                stopRecordingButton.disabled = false;
+            } else {
+                toggleMicButton.textContent = 'Encender Micrófono';
+                stopRecordingButton.disabled = true;
+            }
+
+            isMicOn = !isMicOn;
+        }
+
+        function startListening() {
+            navigator.mediaDevices.getUserMedia({ audio: true })
+                .then((stream) => {
+                    recognition = new window.webkitSpeechRecognition() || new window.SpeechRecognition();
+                    recognition.lang = 'es-ES';
+
+                    recognition.onresult = (event) => {
+                        const transcript = event.results[0][0].transcript.toLowerCase();
+                        resultDisplay.textContent = `Palabra reconocida: ${transcript}`;
+
+                        if (transcript.includes('grabar')) {
+                            startRecording(stream);
+                            console.log('Iniciar grabación...');
+                        } else if (transcript.includes('detener')) {
+                            resultDisplay.textContent = 'Detener grabación';
+                            stopRecording();
+                            console.log('Detener...');
+                        }
+                    };
+
+                    recognition.onend = () => {
+                        if (isMicOn) {
+                            recognition.start();
+                        }
+                    };
+
+                    recognition.start();
+                })
+                .catch((error) => {
+                    console.error('Error al acceder al micrófono:', error);
+                });
+        }
+
+        function startRecording(stream) {
+            isRecording = true;
+            recordedChunks = [];
+            resultDisplay.textContent = 'Grabando...';
+
+            mediaRecorder = new MediaRecorder(stream);
+
+            mediaRecorder.ondataavailable = (event) => {
+                if (event.data.size > 0) {
+                    recordedChunks.push(event.data);
+                }
+            };
+
+            mediaRecorder.onstop = () => {
+                const blob = new Blob(recordedChunks, { type: 'audio/wav' });
+                const audioURL = URL.createObjectURL(blob);
+                audioPlayer.src = audioURL;
+            };
+
+            mediaRecorder.start();
+        }
+
+        function stopRecording() {
+            if (isRecording) {
+                mediaRecorder.stop();
+                isRecording = false;
+                resultDisplay.textContent = 'Detener grabación';
+            }
+        }
+    </script>
+</body>
+</html>
