@@ -3,50 +3,41 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Send Notification</title>
-<!-- Importa los módulos necesarios del SDK de Firebase -->
-<script type="module">
-  import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.2/firebase-app.js';
-  import { getAnalytics } from 'https://www.gstatic.com/firebasejs/9.6.2/firebase-analytics.js';
-  import { getMessaging, getToken } from 'https://www.gstatic.com/firebasejs/9.6.2/firebase-messaging.js';
-
-  // Configuración de Firebase
-  const firebaseConfig = {
-    apiKey: "AIzaSyCGca6zMrmDSFDmgY2Aa2D1QQy6l3R4iL8",
-    authDomain: "notificacion-43b1a.firebaseapp.com",
-    projectId: "notificacion-43b1a",
-    storageBucket: "notificacion-43b1a.appspot.com",
-    messagingSenderId: "824026018877",
-    appId: "1:824026018877:web:6826336bba5c15bc25a654",
-    measurementId: "G-27L5MJ7JMJ"
-  };
-
-  // Inicializa Firebase
-  const app = initializeApp(firebaseConfig);
-  const analytics = getAnalytics(app);
-  const messaging = getMessaging(app);
-
-  // Solicita permiso para recibir notificaciones
-  messaging.requestPermission()
-    .then(() => {
-      console.log('Permission granted');
-      return getToken(messaging);
-    })
-    .then((token) => {
-      console.log('Token:', token);
-    })
-    .catch((error) => {
-      console.error('Permission denied:', error);
-    });
-</script>
+<title>Chat en Tiempo Real</title>
 </head>
 <body>
-<h1>Send Notification 1</h1>
-<div id="notificationLog"></div>
-<textarea id="messageInput" placeholder="Type a message..."></textarea>
-<button onclick="sendNotification()">Send Notification</button>
+<h1>Chat en Tiempo Real</h1>
+<div id="chatLog"></div>
+<textarea id="messageInput" placeholder="Escribe un mensaje..."></textarea>
+<button onclick="sendMessage()">Enviar</button>
 
-<!-- Agrega el SDK de Firebase para analíticas (opcional) -->
-<script src="https://www.gstatic.com/firebasejs/9.6.2/firebase-analytics.js"></script>
+<script>
+// Crear WebSocket
+const socket = new WebSocket('ws://187.189.88.39:8080');
+
+// Al recibir un mensaje del servidor
+socket.onmessage = function(event) {
+  const message = event.data;
+  appendMessage(message);
+};
+
+// Función para enviar un mensaje al servidor
+function sendMessage() {
+  const message = document.getElementById('messageInput').value.trim();
+  if (message !== '') {
+    socket.send(message);
+    document.getElementById('messageInput').value = '';
+    appendMessage('Yo: ' + message); // Agregar el mensaje enviado al chat log
+  }
+}
+
+// Función para agregar un mensaje al chat log
+function appendMessage(message) {
+  const chatLog = document.getElementById('chatLog');
+  const messageElement = document.createElement('div');
+  messageElement.textContent = message;
+  chatLog.appendChild(messageElement);
+}
+</script>
 </body>
 </html>
