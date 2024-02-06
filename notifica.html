@@ -1,87 +1,46 @@
-const express = require('express');
-const bodyParser = require('body-parser');
-const admin = require('firebase-admin');
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Send Notification</title>
+<script>
+  // Función para enviar una notificación a través de WebSocket
+  function sendNotification() {
+    // Crear una conexión WebSocket
+    var socket = new WebSocket('ws://localhost:8080');
 
-// Configura Firebase Admin SDK con tus credenciales
-const serviceAccount = require('./path/to/serviceAccountKey.json');
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount)
-});
-
-const app = express();
-app.use(bodyParser.json());
-
-// Servir la página HTML
-app.get('/', (req, res) => {
-  res.send(`
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Send Notification</title>
-    </head>
-    <body>
-      <button onclick="sendNotification()">Send Notification</button>
+    // Cuando la conexión se establece con éxito
+    socket.onopen = function(event) {
+      console.log('WebSocket connected');
       
-      <script>
-        function sendNotification() {
-          fetch('/send-notification', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              title: 'New Notification',
-              body: 'You have a new notification!',
-              sound: true,
-              vibration: true
-            })
-          })
-          .then(response => {
-            if (response.ok) {
-              console.log('Notification sent successfully');
-            } else {
-              console.error('Failed to send notification');
-            }
-          })
-          .catch(error => {
-            console.error('Error sending notification:', error);
-          });
-        }
-      </script>
-    </body>
-    </html>
-  `);
-});
+      // Enviar el mensaje de notificación
+      socket.send(JSON.stringify({
+        title: 'New Notification',
+        body: 'You have a new notification!',
+        sound: true,
+        vibration: true
+      }));
+    };
 
-// Manejar la solicitud de enviar notificación
-app.post('/send-notification', (req, res) => {
-  const message = {
-    notification: {
-      title: req.body.title,
-      body: req.body.body
-    },
-    android: {
-      notification: {
-        sound: req.body.sound ? 'default' : null,
-        vibration: req.body.vibration ? [200, 100, 200] : null
-      }
-    },
-    topic: 'all'
-  };
+    // Cuando se recibe un mensaje del servidor
+    socket.onmessage = function(event) {
+      console.log('Message from server:', event.data);
+    };
 
-  admin.messaging().send(message)
-    .then(() => {
-      res.sendStatus(200);
-    })
-    .catch(error => {
-      console.error('Error sending message:', error);
-      res.status(500).send('Error sending message');
-    });
-});
+    // Cuando se cierra la conexión WebSocket
+    socket.onclose = function(event) {
+      console.log('WebSocket closed');
+    };
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
+    // Cuando se produce un error en la conexión WebSocket
+    socket.onerror = function(error) {
+      console.error('WebSocket error:', error);
+    };
+  }
+</script>
+</head>
+<body>
+<button onclick="sendNotification()">Send Notification</button>
+</body>
+</html>
