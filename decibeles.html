@@ -29,12 +29,6 @@
     <hr>
 
     <h1>Grabadora de Audio</h1>
-    <label for="startKeywordInput">Palabra Clave para 'Inicia':</label>
-    <input type="text" id="startKeywordInput" placeholder="inicia">
-    <br/>
-    <label for="stopKeywordInput">Palabra Clave para 'Alto':</label>
-    <input type="text" id="stopKeywordInput" placeholder="para">
-    <br/>
     <button id="startRecord" onclick="startRecording()">Iniciar Grabación</button>
     <button id="stopRecord" onclick="stopRecording()" disabled>Detener Grabación</button>
     <span id="recordingIndicator" style="color: red; font-weight: bold;"></span>
@@ -83,9 +77,6 @@
 			
 			// Restablecer el último tiempo de habla
     lastSpeechTime = 0;
-
-            startKeyword = document.getElementById('startKeywordInput').value.trim().toLowerCase();
-            stopKeyword = document.getElementById('stopKeywordInput').value.trim().toLowerCase();
 
             navigator.mediaDevices.getUserMedia({ audio: true })
                 .then(function (stream) {
@@ -358,23 +349,30 @@
             isRecording = false;
         }
 
-        function startCountdownTimer() {
-    let countdownTime = parseInt(document.getElementById('cooldownInput').value || 30);
-    const countdownTimerElement = document.getElementById('countdownTimer');
+       function startCountdownTimer() {
+    // Verificar si ya hay una cuenta regresiva en curso
+    if (!countdownInterval) {
+        let countdownTime = parseInt(document.getElementById('cooldownInput').value || 30);
+        const countdownTimerElement = document.getElementById('countdownTimer');
 
-    // Actualiza el tiempo de espera aquí
-    speechCooldownDuration = countdownTime * 1000;
+        // Actualiza el tiempo de espera aquí
+        speechCooldownDuration = countdownTime * 1000;
 
-    countdownInterval = setInterval(() => {
-        countdownTimerElement.textContent = `Próxima detección en: ${countdownTime} segundos`;
-        countdownTime--;
+        countdownInterval = setInterval(() => {
+            countdownTimerElement.textContent = `Próxima detección en: ${countdownTime} segundos`;
+            countdownTime--;
 
-        if (countdownTime < 0) {
-            clearInterval(countdownInterval);
-            countdownTimerElement.textContent = '';
-        }
-    }, 1000);
+            if (countdownTime < 0) {
+                clearInterval(countdownInterval);
+                countdownTimerElement.textContent = '';
+
+                // Restablecer la variable del intervalo
+                countdownInterval = null;
+            }
+        }, 1000);
+    }
 }
+
 
     </script>
 </body>
