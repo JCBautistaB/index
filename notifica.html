@@ -19,7 +19,7 @@ const WebSocket = require('ws');
 // Crear servidor HTTP
 const server = http.createServer((req, res) => {
   if (req.url === '/') {
-    fs.readFile(__dirname + '/index.html', 'utf8', (err, data) => {
+    fs.readFile(__dirname + '/notifica.html', 'utf8', (err, data) => {
       if (err) {
         res.writeHead(500);
         return res.end('Error loading index.html');
@@ -32,7 +32,7 @@ const server = http.createServer((req, res) => {
 
 // Iniciar servidor HTTP en el puerto 8080
 server.listen(8080, () => {
-  console.log('Server running on http://localhost:8080');
+  console.log('Server running on http://187.189.88.39');
 });
 
 // Crear servidor WebSocket
