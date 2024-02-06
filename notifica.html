@@ -1,40 +1,87 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Send Notification</title>
-</head>
-<body>
-<button onclick="sendNotification()">Send Notification</button>
+const express = require('express');
+const bodyParser = require('body-parser');
+const admin = require('firebase-admin');
 
-<script>
-// Función para enviar la solicitud de notificación al servidor backend
-function sendNotification() {
-    // Realiza una solicitud al servidor backend para enviar la notificación push
-    fetch('/send-notification', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            title: 'New Notification',
-            body: 'You have a new notification!',
-            sound: true, // Habilita el sonido
-            vibration: true // Habilita la vibración
-        })
-    })
-    .then(response => {
-        if (response.ok) {
-            console.log('Notification sent successfully');
-        } else {
-            console.error('Failed to send notification');
+// Configura Firebase Admin SDK con tus credenciales
+const serviceAccount = require('./path/to/serviceAccountKey.json');
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount)
+});
+
+const app = express();
+app.use(bodyParser.json());
+
+// Servir la página HTML
+app.get('/', (req, res) => {
+  res.send(`
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Send Notification</title>
+    </head>
+    <body>
+      <button onclick="sendNotification()">Send Notification</button>
+      
+      <script>
+        function sendNotification() {
+          fetch('/send-notification', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              title: 'New Notification',
+              body: 'You have a new notification!',
+              sound: true,
+              vibration: true
+            })
+          })
+          .then(response => {
+            if (response.ok) {
+              console.log('Notification sent successfully');
+            } else {
+              console.error('Failed to send notification');
+            }
+          })
+          .catch(error => {
+            console.error('Error sending notification:', error);
+          });
         }
+      </script>
+    </body>
+    </html>
+  `);
+});
+
+// Manejar la solicitud de enviar notificación
+app.post('/send-notification', (req, res) => {
+  const message = {
+    notification: {
+      title: req.body.title,
+      body: req.body.body
+    },
+    android: {
+      notification: {
+        sound: req.body.sound ? 'default' : null,
+        vibration: req.body.vibration ? [200, 100, 200] : null
+      }
+    },
+    topic: 'all'
+  };
+
+  admin.messaging().send(message)
+    .then(() => {
+      res.sendStatus(200);
     })
     .catch(error => {
-        console.error('Error sending notification:', error);
+      console.error('Error sending message:', error);
+      res.status(500).send('Error sending message');
     });
-}
-</script>
-</body>
-</html>
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+});
