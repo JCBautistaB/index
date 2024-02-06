@@ -12,61 +12,17 @@
 <button onclick="sendNotification()">Send Notification</button>
 
 <script>
-const http = require('http');
-const fs = require('fs');
-const WebSocket = require('ws');
+const ws = new WebSocket('ws://187.189.88.39:8080'); // Cambiar la IP y el puerto según tu configuración
 
-// Crear servidor HTTP
-const server = http.createServer((req, res) => {
-  if (req.url === '/') {
-    fs.readFile(__dirname + '/notifica.html', 'utf8', (err, data) => {
-      if (err) {
-        res.writeHead(500);
-        return res.end('Error loading index.html');
-      }
-      res.writeHead(200, {'Content-Type': 'text/html'});
-      res.end(data);
-    });
-  }
-});
+ws.onopen = function() {
+  console.log('WebSocket connected');
+};
 
-// Iniciar servidor HTTP en el puerto 8080
-server.listen(8080, () => {
-  console.log('Server running on http://187.189.88.39');
-});
+ws.onmessage = function(event) {
+  const message = event.data;
+  appendMessage(message);
+};
 
-// Crear servidor WebSocket
-const wss = new WebSocket.Server({ server });
-
-// Cuando se establece una conexión WebSocket
-wss.on('connection', function connection(ws) {
-  console.log('Client connected');
-
-  // Cuando se recibe un mensaje del cliente
-  ws.on('message', function incoming(message) {
-    // Reenviar el mensaje a todos los clientes conectados
-    wss.clients.forEach(function each(client) {
-      if (client !== ws && client.readyState === WebSocket.OPEN) {
-        client.send(message);
-      }
-    });
-  });
-
-  // Cuando se cierra la conexión WebSocket
-  ws.on('close', function close() {
-    console.log('Client disconnected');
-  });
-});
-
-// Función para mostrar el mensaje en el registro de notificaciones
-function appendMessage(message) {
-  const notificationLog = document.getElementById('notificationLog');
-  const messageElement = document.createElement('div');
-  messageElement.textContent = message;
-  notificationLog.appendChild(messageElement);
-}
-
-// Función para enviar una notificación a través de WebSocket
 function sendNotification() {
   const message = document.getElementById('messageInput').value.trim();
   if (message !== '') {
@@ -74,6 +30,13 @@ function sendNotification() {
     document.getElementById('messageInput').value = '';
     appendMessage(message);
   }
+}
+
+function appendMessage(message) {
+  const notificationLog = document.getElementById('notificationLog');
+  const messageElement = document.createElement('div');
+  messageElement.textContent = message;
+  notificationLog.appendChild(messageElement);
 }
 </script>
 </body>
