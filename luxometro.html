@@ -32,7 +32,7 @@
 </head>
 <body>
 <div id="container">
-    <h1>Medidor de Luz ZETA 1<i id="icon" class="fas fa-seedling"></i></h1>
+    <h1>Medidor de Luz ZETA<i id="icon" class="fas fa-seedling"></i></h1>
     <div>
         <select id="cameraSelect">
              <option value="environment">Cámara Trasera</option>     
@@ -46,6 +46,9 @@
     </div>
     <div id="lightChartContainer">
         <canvas id="lightChart" width="400" height="200"></canvas>
+    </div>
+    <div>
+        <button onclick="manualExposureAdjustment()">Ajuste Manual de Exposición</button>
     </div>
 </div>
 <script>
@@ -116,6 +119,25 @@
         pixelData.push(Math.round(averageIntensity));
         pixelChart.data.labels.push(new Date().toLocaleTimeString());
         pixelChart.update();
+    }
+
+    function manualExposureAdjustment() {
+        var constraints = {
+            video: { 
+                facingMode: cameraSelect.value,
+                advanced: [{ exposureMode: 'manual' }, { exposureCompensation: 0 }]
+            }
+        };
+
+        navigator.mediaDevices.getUserMedia(constraints)
+        .then(function (stream) {
+            var video = document.getElementById('video');
+            video.srcObject = stream;
+            video.play();
+        })
+        .catch(function (err) {
+            console.log('Error: ' + err);
+        });
     }
 
     // Iniciar con la cámara predeterminada
