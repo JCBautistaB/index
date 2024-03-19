@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -43,7 +43,7 @@
         <video id="video" autoplay></video>
     </div>
     <div id="lightIntensity">
-        <p>Intensidad de luz: <span id="lightValue">0</span> Lux</p>
+        <p>Intensidad de luz: <span id="lightValue">0</span> </p>
     </div>
     <div id="lightChartContainer">
         <canvas id="lightChart" width="400" height="200"></canvas>
@@ -74,7 +74,7 @@
     });
 
     var cameraSelect = document.getElementById('cameraSelect');
-    var videoConstraints = { facingMode: 'user' }; // Default to front camera
+    var videoConstraints = { facingMode: 'environment' }; // Cambiado a 'environment'
     cameraSelect.addEventListener('change', function() {
         if (this.value === 'front') {
             videoConstraints = { facingMode: 'user' };
@@ -117,7 +117,7 @@
         lightChart.update();
     }
 
-    // Start with default camera
+    // Iniciar con la cámara predeterminada
     startVideo();
 </script>
 </body>
