@@ -131,7 +131,7 @@
 
             var avgLuminance = luminance / (canvas.width * canvas.height);
             var lux = Math.round(avgLuminance / 255 * 1000); // Convert luminance to lux
-            document.getElementById('lux-value').innerText = 'Intensidad de Luz (en pixeles): ' + lux;
+            document.getElementById('lux-value').innerText = 'Intensidad de Luz (en pixeles) <br/> ' + lux;
             showMessage(lux); // Mostrar el mensaje según el valor de lux
         }
 
