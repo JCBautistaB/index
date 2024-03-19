@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Luxómetro ZETA</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+    #container {
+        max-width: 600px;
+        margin: 0 auto;
+        text-align: center;
+    }
+    video {
+        width: 100%;
+        max-width: 400px;
+        display: block;
+        margin: 0 auto;
+    }
+    #lightChart {
+        margin: 20px auto;
+    }
+    #lightIntensity {
+        font-size: 24px;
+    }
+</style>
+</head>
+<body>
+<div id="container">
+    <h1>Luxómetro ZETA</h1>
+    <div>
+        <video id="video" autoplay></video>
+    </div>
+    <div id="lightIntensity">
+        <p>Intensidad de luz: <span id="lightValue">0</span> Lux</p>
+    </div>
+    <div id="lightChartContainer">
+        <canvas id="lightChart" width="400" height="200"></canvas>
+    </div>
+</div>
+<script>
+    var lightData = [];
+    var lightChart = new Chart(document.getElementById('lightChart').getContext('2d'), {
+        type: 'line',
+        data: {
+            labels: [],
+            datasets: [{
+                label: 'Intensidad de luz',
+                data: lightData,
+                fill: false,
+                borderColor: 'rgb(75, 192, 192)',
+                tension: 0.1
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+
+    navigator.mediaDevices.getUserMedia({ video: true })
+    .then(function (stream) {
+        var video = document.getElementById('video');
+        video.srcObject = stream;
+        video.play();
+        setInterval(function() {
+            measureLight();
+        }, 1000);
+    })
+    .catch(function (err) {
+        console.log('Error: ' + err);
+    });
+
+    function measureLight() {
+        var canvas = document.createElement('canvas');
+        var video = document.getElementById('video');
+        var ctx = canvas.getContext('2d');
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        var lightIntensity = 0;
+        for (var i = 0; i < imageData.data.length; i += 4) {
+            lightIntensity += imageData.data[i] + imageData.data[i + 1] + imageData.data[i + 2];
+        }
+        lightIntensity /= (imageData.data.length / 4 * 255 * 3); // Normalize
+        var intensityDisplay = document.getElementById('lightValue');
+        intensityDisplay.innerText = lightIntensity.toFixed(2);
+        lightData.push(lightIntensity.toFixed(2));
+        lightChart.data.labels.push(new Date().toLocaleTimeString());
+        lightChart.update();
+    }
+</script>
+</body>
+</html>
