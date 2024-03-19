@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,7 +11,6 @@
         max-width: 600px;
         margin: 0 auto;
         text-align: center;
-        position: relative; /* Para posicionar el div que contiene la imagen */
     }
     video {
         width: 100%;
@@ -19,28 +18,19 @@
         display: block;
         margin: 0 auto;
     }
-    #lightMask {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        width: 50px;
-        height: 50px;
-        background-color: rgba(0, 0, 0, 0.5); /* Color semitransparente */
-        pointer-events: none; /* Permitir eventos a través de la máscara */
-        border-radius: 50%; /* Forma circular para la máscara */
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        transform: translate(-50%, -50%); /* Centrar la máscara */
+    #lightChart {
+        margin: 20px auto;
     }
-    #lightMask p {
-        color: white;
-        font-size: 12px;
-        margin: 0;
+    #lightIntensity {
+        font-size: 24px;
     }
     #icon {
         font-size: 48px;
         color: #007bff; /* Cambia el color según tu preferencia */
+    }
+    #highLightIndicator {
+        color: red;
+        font-weight: bold;
     }
 </style>
 </head>
@@ -52,14 +42,41 @@
              <option value="environment">Cámara Trasera</option>     
         </select>
     </div>
-    <div id="lightMask" style="display:none;">
-        <p id="lightValue">0 Lux</p>
-    </div>
     <div>
         <video id="video" autoplay></video>
     </div>
+    <div id="lightIntensity">
+        <p>Intensidad de luz (en pixeles): <span id="pixelValue">0</span></p>
+        <p id="highLightIndicator" style="display:none;">¡La luz es alta!</p>
+    </div>
+    <div id="lightChartContainer">
+        <canvas id="lightChart" width="400" height="200"></canvas>
+    </div>
 </div>
 <script>
+    var pixelData = [];
+
+    var pixelChart = new Chart(document.getElementById('lightChart').getContext('2d'), {
+        type: 'line',
+        data: {
+            labels: [],
+            datasets: [{
+                label: 'Intensidad de luz (en pixeles)',
+                data: pixelData,
+                fill: false,
+                borderColor: 'rgb(75, 192, 192)',
+                tension: 0.1
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+
     var cameraSelect = document.getElementById('cameraSelect');
     cameraSelect.addEventListener('change', function() {
         startVideo();
@@ -75,9 +92,6 @@
             var video = document.getElementById('video');
             video.srcObject = stream;
             video.play();
-            video.addEventListener('play', function() {
-                document.getElementById('lightMask').style.display = 'block'; // Mostrar la máscara después de que el video comienza a reproducirse
-            });
             setInterval(function() {
                 measureLight();
             }, 1000);
@@ -88,21 +102,28 @@
     }
 
     function measureLight() {
-        var video = document.getElementById('video');
         var canvas = document.createElement('canvas');
+        var video = document.getElementById('video');
         var ctx = canvas.getContext('2d');
-        ctx.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
-        
-        var pixelData = ctx.getImageData(video.videoWidth/2 - 25, video.videoHeight/2 - 25, 50, 50).data;
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
         var totalIntensity = 0;
-
-        for (var i = 0; i < pixelData.length; i += 4) {
-            totalIntensity += pixelData[i] + pixelData[i + 1] + pixelData[i + 2];
+        for (var i = 0; i < imageData.data.length; i += 4) {
+            totalIntensity += imageData.data[i] + imageData.data[i + 1] + imageData.data[i + 2];
+        }
+        var averageIntensity = totalIntensity / (imageData.data.length / 4); // Promedio de intensidad de píxeles
+        var pixelDisplay = document.getElementById('pixelValue');
+        pixelDisplay.innerText = Math.round(averageIntensity);
+        
+        if (averageIntensity > 500) { // Definimos un umbral de luz alta (puedes ajustarlo según tu necesidad)
+            document.getElementById('highLightIndicator').style.display = 'block';
+        } else {
+            document.getElementById('highLightIndicator').style.display = 'none';
         }
 
-        var averageIntensity = totalIntensity / (pixelData.length / 4); // Promedio de intensidad de píxeles
-        var lightValueDisplay = document.getElementById('lightValue');
-        lightValueDisplay.innerText = Math.round(averageIntensity) + ' Lux';
+        pixelData.push(Math.round(averageIntensity));
+        pixelChart.data.labels.push(new Date().toLocaleTimeString());
+        pixelChart.update();
     }
 
     // Iniciar con la cámara predeterminada
