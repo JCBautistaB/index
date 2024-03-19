@@ -28,10 +28,6 @@
         font-size: 48px;
         color: #007bff; /* Cambia el color según tu preferencia */
     }
-    #exposureSlider {
-        width: 80%;
-        margin-top: 10px;
-    }
 </style>
 </head>
 <body>
@@ -51,12 +47,9 @@
     <div id="lightChartContainer">
         <canvas id="lightChart" width="400" height="200"></canvas>
     </div>
-    <input type="range" min="-10" max="10" value="0" id="exposureSlider">
-    <div id="exposureValue">Valor de Exposición: 0</div>
 </div>
 <script>
     var pixelData = [];
-    var exposureValue = 0;
 
     var pixelChart = new Chart(document.getElementById('lightChart').getContext('2d'), {
         type: 'line',
@@ -80,17 +73,8 @@
     });
 
     var cameraSelect = document.getElementById('cameraSelect');
-    var exposureSlider = document.getElementById('exposureSlider');
-    var exposureValueDisplay = document.getElementById('exposureValue');
-
     cameraSelect.addEventListener('change', function() {
         startVideo();
-    });
-
-    exposureSlider.addEventListener('input', function() {
-        exposureValue = parseInt(this.value);
-        exposureValueDisplay.textContent = 'Valor de Exposición: ' + exposureValue;
-        adjustExposure();
     });
 
     function startVideo() {
@@ -129,14 +113,6 @@
         pixelData.push(Math.round(averageIntensity));
         pixelChart.data.labels.push(new Date().toLocaleTimeString());
         pixelChart.update();
-    }
-
-    function adjustExposure() {
-        var video = document.getElementById('video');
-        var settings = video.srcObject.getVideoTracks()[0].getSettings();
-        settings.exposureMode = 'manual';
-        settings.exposureCompensation = exposureValue;
-        video.srcObject.getVideoTracks()[0].applyConstraints({ advanced: [settings] });
     }
 
     // Iniciar con la cámara predeterminada
