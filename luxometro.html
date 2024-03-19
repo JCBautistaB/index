@@ -5,33 +5,26 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Luxómetro</title>
 <style>
-    #video-container {
-        position: relative;
+    #video {
         width: 100%;
         max-width: 600px;
         margin: 0 auto;
         display: block;
-    }
-    #video {
-        width: 100%;
-        display: block;
+        position: relative;
     }
     #lux-value {
         font-size: 24px;
         text-align: center;
         margin-top: 20px;
     }
-    #measurement-area {
+    .measurement-area {
         position: absolute;
         border: 2px solid red;
     }
 </style>
 </head>
 <body>
-<div id="video-container">
-    <video id="video" autoplay></video>
-    <canvas id="measurement-area"></canvas>
-</div>
+<video id="video" autoplay></video>
 <div id="lux-value">Lux: --</div>
 <script>
     navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
@@ -48,15 +41,30 @@
     });
 
     function measureLux(stream) {
-        var canvas = document.getElementById('measurement-area');
-        var ctx = canvas.getContext('2d');
         var video = document.getElementById('video');
+        var luxValue = document.getElementById('lux-value');
+        var measurementArea = document.createElement('div');
+        measurementArea.className = 'measurement-area';
+        video.parentNode.insertBefore(measurementArea, video.nextSibling);
 
         function calculateLux() {
             var areaSize = 100; // Size of the area to measure (100x100px)
             var startX = (video.videoWidth - areaSize) / 2;
             var startY = (video.videoHeight - areaSize) / 2;
 
+            // Center the measurement area
+            var videoRect = video.getBoundingClientRect();
+            var offsetX = (videoRect.width - areaSize) / 2;
+            var offsetY = (videoRect.height - areaSize) / 2;
+
+            // Position and size the measurement area
+            measurementArea.style.left = (videoRect.left + offsetX) + 'px';
+            measurementArea.style.top = (videoRect.top + offsetY) + 'px';
+            measurementArea.style.width = areaSize + 'px';
+            measurementArea.style.height = areaSize + 'px';
+
+            var canvas = document.createElement('canvas');
+            var ctx = canvas.getContext('2d');
             canvas.width = areaSize;
             canvas.height = areaSize;
             ctx.drawImage(video, startX, startY, areaSize, areaSize, 0, 0, canvas.width, canvas.height);
@@ -70,23 +78,10 @@
 
             var avgLuminance = luminance / (canvas.width * canvas.height);
             var lux = Math.round(avgLuminance / 255 * 1000); // Convert luminance to lux
-            document.getElementById('lux-value').innerText = 'Lux: ' + lux;
+            luxValue.innerText = 'Lux: ' + lux;
         }
 
         setInterval(calculateLux, 1000); // Update lux value every second
-
-        function drawMeasurementArea() {
-            var areaSize = 100;
-            var startX = (video.videoWidth - areaSize) / 2;
-            var startY = (video.videoHeight - areaSize) / 2;
-
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.strokeStyle = 'red';
-            ctx.lineWidth = 2;
-            ctx.strokeRect(startX, startY, areaSize, areaSize);
-        }
-
-        drawMeasurementArea();
     }
 </script>
 </body>
