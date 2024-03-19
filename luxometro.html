@@ -21,20 +21,22 @@
     }
     #lightMask {
         position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
+        top: 50%;
+        left: 50%;
+        width: 50px;
+        height: 50px;
         background-color: rgba(0, 0, 0, 0.5); /* Color semitransparente */
         pointer-events: none; /* Permitir eventos a través de la máscara */
         border-radius: 50%; /* Forma circular para la máscara */
         display: flex;
         justify-content: center;
         align-items: center;
+        transform: translate(-50%, -50%); /* Centrar la máscara */
     }
     #lightMask p {
         color: white;
-        font-size: 24px;
+        font-size: 12px;
+        margin: 0;
     }
     #icon {
         font-size: 48px;
@@ -44,14 +46,14 @@
 </head>
 <body>
 <div id="container">
-    <h1>Medidor de Luz ZETA 1<i id="icon" class="fas fa-seedling"></i></h1>
+    <h1>Medidor de Luz ZETA<i id="icon" class="fas fa-seedling"></i></h1>
     <div>
         <select id="cameraSelect">
              <option value="environment">Cámara Trasera</option>     
         </select>
     </div>
     <div id="lightMask" style="display:none;">
-        <p>Área central de la luz</p>
+        <p id="lightValue">0 Lux</p>
     </div>
     <div>
         <video id="video" autoplay></video>
@@ -76,12 +78,30 @@
             video.addEventListener('play', function() {
                 document.getElementById('lightMask').style.display = 'block'; // Mostrar la máscara después de que el video comienza a reproducirse
             });
+            setInterval(function() {
+                measureLight();
+            }, 1000);
         })
         .catch(function (err) {
             console.log('Error: ' + err);
         });
     }
-    
+
+    function measureLight() {
+        var video = document.getElementById('video');
+        var canvas = document.createElement('canvas');
+        var ctx = canvas.getContext('2d');
+        ctx.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
+        var imageData = ctx.getImageData(video.videoWidth/2 - 25, video.videoHeight/2 - 25, 50, 50);
+        var totalIntensity = 0;
+        for (var i = 0; i < imageData.data.length; i += 4) {
+            totalIntensity += imageData.data[i] + imageData.data[i + 1] + imageData.data[i + 2];
+        }
+        var averageIntensity = totalIntensity / (imageData.data.length / 4); // Promedio de intensidad de píxeles
+        var lightValueDisplay = document.getElementById('lightValue');
+        lightValueDisplay.innerText = Math.round(averageIntensity) + ' Lux';
+    }
+
     // Iniciar con la cámara predeterminada
     startVideo();
 </script>
