@@ -21,12 +21,45 @@
         position: absolute;
         border: 2px solid red;
     }
+    #notes-container {
+        text-align: center;
+        margin-top: 20px;
+    }
+    #notes-input {
+        width: 80%;
+        padding: 10px;
+        margin-bottom: 10px;
+    }
 </style>
 </head>
 <body>
 <video id="video" autoplay></video>
 <div id="lux-value">Luxómetro Seta &#127812;</div>
+<div id="notes-container">
+    <input type="text" id="notes-input" placeholder="Escribe tus apuntes aquí...">
+    <button id="save-button">Guardar</button>
+</div>
 <script>
+    // Función para guardar los apuntes en el almacenamiento local
+    function saveNotes() {
+        var notes = document.getElementById('notes-input').value;
+        localStorage.setItem('lux_meter_notes', notes);
+        alert('Apuntes guardados correctamente.');
+    }
+
+    // Función para cargar los apuntes guardados previamente
+    function loadNotes() {
+        var savedNotes = localStorage.getItem('lux_meter_notes');
+        if (savedNotes) {
+            document.getElementById('notes-input').value = savedNotes;
+        }
+    }
+
+    // Cargar los apuntes al cargar la página
+    window.onload = function() {
+        loadNotes();
+    };
+
     navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
     .then(function(stream) {
         var video = document.getElementById('video');
@@ -83,6 +116,9 @@
 
         setInterval(calculateLux, 1000); // Update lux value every second
     }
+    
+    // Event listener para el botón de guardar
+    document.getElementById('save-button').addEventListener('click', saveNotes);
 </script>
 </body>
 </html>
