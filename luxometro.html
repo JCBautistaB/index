@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Luxómetro SETA &#127812;</title>
+<title>Luxómetro</title>
 <style>
     #video {
         width: 100%;
@@ -30,11 +30,17 @@
         padding: 10px;
         margin-bottom: 10px;
     }
+    #lux-message {
+        font-size: 18px;
+        text-align: center;
+        margin-top: 10px;
+    }
 </style>
 </head>
 <body>
 <video id="video" autoplay></video>
-<div id="lux-value">Luxómetro SETA &#127812;</div>
+<div id="lux-value">Luxómetro Seta &#127812;</div>
+<div id="lux-message"></div>
 <div id="notes-container">
     <input type="text" id="notes-input" placeholder="Escribe tus apuntes aquí...">
     <button id="save-button">Guardar</button>
@@ -52,6 +58,21 @@
         var savedNotes = localStorage.getItem('lux_meter_notes');
         if (savedNotes) {
             document.getElementById('notes-input').value = savedNotes;
+        }
+    }
+
+    // Función para mostrar el mensaje según el valor de lux
+    function showMessage(lux) {
+        var messageElement = document.getElementById('lux-message');
+        if (lux < 201) {
+            messageElement.style.color = 'red';
+            messageElement.innerText = 'Falta de luz';
+        } else if (lux >= 201 && lux <= 800) {
+            messageElement.style.color = 'green';
+            messageElement.innerText = 'Luz adecuada';
+        } else {
+            messageElement.style.color = 'red';
+            messageElement.innerText = 'Exceso de luz';
         }
     }
 
@@ -75,7 +96,6 @@
 
     function measureLux(stream) {
         var video = document.getElementById('video');
-        var luxValue = document.getElementById('lux-value');
         var measurementArea = document.createElement('div');
         measurementArea.className = 'measurement-area';
         video.parentNode.insertBefore(measurementArea, video.nextSibling);
@@ -111,7 +131,8 @@
 
             var avgLuminance = luminance / (canvas.width * canvas.height);
             var lux = Math.round(avgLuminance / 255 * 1000); // Convert luminance to lux
-            luxValue.innerText = 'Intensidad de Luz: ' + lux;
+            document.getElementById('lux-value').innerText = 'Intensidad de Luz: ' + lux;
+            showMessage(lux); // Mostrar el mensaje según el valor de lux
         }
 
         setInterval(calculateLux, 1000); // Update lux value every second
