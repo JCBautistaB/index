@@ -64,10 +64,10 @@
     // Función para mostrar el mensaje según el valor de lux
     function showMessage(lux) {
         var messageElement = document.getElementById('lux-message');
-        if (lux < 301) {
+        if (lux < 500) {
             messageElement.style.color = 'red';
             messageElement.innerText = 'Falta de luz';
-        } else if (lux >= 301 && lux <= 800) {
+        } else if (lux >= 500 && lux <= 800) {
             messageElement.style.color = 'green';
             messageElement.innerText = 'Luz adecuada';
         } else {
