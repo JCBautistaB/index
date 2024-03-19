@@ -3,131 +3,91 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Medidor de Luz ZETA</title>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<title>Luxómetro</title>
 <style>
-    #container {
+    #video-container {
+        position: relative;
+        width: 100%;
         max-width: 600px;
         margin: 0 auto;
-        text-align: center;
-    }
-    video {
-        width: 100%;
-        max-width: 200px;
         display: block;
-        margin: 0 auto;
     }
-    #lightChart {
-        margin: 20px auto;
+    #video {
+        width: 100%;
+        display: block;
     }
-    #lightIntensity {
+    #lux-value {
         font-size: 24px;
+        text-align: center;
+        margin-top: 20px;
     }
-    #icon {
-        font-size: 48px;
-        color: #007bff; /* Cambia el color según tu preferencia */
-    }
-    #highLightIndicator {
-        color: red;
-        font-weight: bold;
+    #measurement-area {
+        position: absolute;
+        border: 2px solid red;
     }
 </style>
 </head>
 <body>
-<div id="container">
-    <h1>Medidor de Luz ZETA<i id="icon" class="fas fa-seedling"></i></h1>
-    <div>
-        <select id="cameraSelect">
-             <option value="environment">Cámara Trasera</option>     
-        </select>
-    </div>
-    <div>
-        <video id="video" autoplay></video>
-    </div>
-    <div id="lightIntensity">
-        <p>Intensidad de luz (en pixeles): <span id="pixelValue">0</span></p>
-        <p id="highLightIndicator" style="display:none;">¡La luz es alta!</p>
-    </div>
-    <div id="lightChartContainer">
-        <canvas id="lightChart" width="400" height="200"></canvas>
-    </div>
+<div id="video-container">
+    <video id="video" autoplay></video>
+    <canvas id="measurement-area"></canvas>
 </div>
+<div id="lux-value">Lux: --</div>
 <script>
-    var pixelData = [];
-
-    var pixelChart = new Chart(document.getElementById('lightChart').getContext('2d'), {
-        type: 'line',
-        data: {
-            labels: [],
-            datasets: [{
-                label: 'Intensidad de luz (en pixeles)',
-                data: pixelData,
-                fill: false,
-                borderColor: 'rgb(75, 192, 192)',
-                tension: 0.1
-            }]
-        },
-        options: {
-            scales: {
-                y: {
-                    beginAtZero: true
-                }
-            }
-        }
-    });
-
-    var cameraSelect = document.getElementById('cameraSelect');
-    cameraSelect.addEventListener('change', function() {
-        startVideo();
-    });
-
-    function startVideo() {
-        var constraints = {
-            video: { facingMode: cameraSelect.value }
-        };
-
-        navigator.mediaDevices.getUserMedia(constraints)
-        .then(function (stream) {
-            var video = document.getElementById('video');
-            video.srcObject = stream;
-            video.play();
-            setInterval(function() {
-                measureLight();
-            }, 1000);
-        })
-        .catch(function (err) {
-            console.log('Error: ' + err);
-        });
-    }
-
-    function measureLight() {
-        var canvas = document.createElement('canvas');
+    navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
+    .then(function(stream) {
         var video = document.getElementById('video');
+        video.srcObject = stream;
+        video.onloadedmetadata = function(e) {
+            video.play();
+            measureLux(stream);
+        };
+    })
+    .catch(function(err) {
+        console.error('Error accessing the camera:', err);
+    });
+
+    function measureLux(stream) {
+        var canvas = document.getElementById('measurement-area');
         var ctx = canvas.getContext('2d');
-        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-        var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        var totalIntensity = 0;
-        for (var i = 0; i < imageData.data.length; i += 4) {
-            totalIntensity += imageData.data[i] + imageData.data[i + 1] + imageData.data[i + 2];
-        }
-        var averageIntensity = totalIntensity / (imageData.data.length / 4); // Promedio de intensidad de píxeles
-        var pixelDisplay = document.getElementById('pixelValue');
-        pixelDisplay.innerText = Math.round(averageIntensity);
-        
-        if (averageIntensity > 500) { // Definimos un umbral de luz alta (puedes ajustarlo según tu necesidad)
-            document.getElementById('highLightIndicator').style.display = 'block';
-        } else {
-            document.getElementById('highLightIndicator').style.display = 'none';
+        var video = document.getElementById('video');
+
+        function calculateLux() {
+            var areaSize = 100; // Size of the area to measure (100x100px)
+            var startX = (video.videoWidth - areaSize) / 2;
+            var startY = (video.videoHeight - areaSize) / 2;
+
+            canvas.width = areaSize;
+            canvas.height = areaSize;
+            ctx.drawImage(video, startX, startY, areaSize, areaSize, 0, 0, canvas.width, canvas.height);
+            
+            var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            var luminance = 0;
+
+            for (var i = 0; i < imageData.data.length; i += 4) {
+                luminance += 0.2126 * imageData.data[i] + 0.7152 * imageData.data[i + 1] + 0.0722 * imageData.data[i + 2];
+            }
+
+            var avgLuminance = luminance / (canvas.width * canvas.height);
+            var lux = Math.round(avgLuminance / 255 * 1000); // Convert luminance to lux
+            document.getElementById('lux-value').innerText = 'Lux: ' + lux;
         }
 
-        pixelData.push(Math.round(averageIntensity));
-        pixelChart.data.labels.push(new Date().toLocaleTimeString());
-        pixelChart.update();
+        setInterval(calculateLux, 1000); // Update lux value every second
+
+        function drawMeasurementArea() {
+            var areaSize = 100;
+            var startX = (video.videoWidth - areaSize) / 2;
+            var startY = (video.videoHeight - areaSize) / 2;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.strokeStyle = 'red';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(startX, startY, areaSize, areaSize);
+        }
+
+        drawMeasurementArea();
     }
-
-    // Iniciar con la cámara predeterminada
-    startVideo();
 </script>
 </body>
 </html>
