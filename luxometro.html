@@ -28,6 +28,10 @@
         font-size: 48px;
         color: #007bff; /* Cambia el color según tu preferencia */
     }
+    #highLightIndicator {
+        color: red;
+        font-weight: bold;
+    }
 </style>
 </head>
 <body>
@@ -43,6 +47,7 @@
     </div>
     <div id="lightIntensity">
         <p>Intensidad de luz (en pixeles): <span id="pixelValue">0</span></p>
+        <p id="highLightIndicator" style="display:none;">¡La luz es alta!</p>
     </div>
     <div id="lightChartContainer">
         <canvas id="lightChart" width="400" height="200"></canvas>
@@ -110,6 +115,12 @@
         var pixelDisplay = document.getElementById('pixelValue');
         pixelDisplay.innerText = Math.round(averageIntensity);
         
+        if (averageIntensity > 200) { // Definimos un umbral de luz alta (puedes ajustarlo según tu necesidad)
+            document.getElementById('highLightIndicator').style.display = 'block';
+        } else {
+            document.getElementById('highLightIndicator').style.display = 'none';
+        }
+
         pixelData.push(Math.round(averageIntensity));
         pixelChart.data.labels.push(new Date().toLocaleTimeString());
         pixelChart.update();
