@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Luxómetro</title>
+<title>Luxómetro ZETA</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 <style>
@@ -34,6 +34,12 @@
 <div id="container">
     <h1>Luxómetro ZETA <i id="icon" class="fas fa-seedling"></i></h1>
     <div>
+        <select id="cameraSelect">
+            <option value="front">Cámara Frontal</option>
+            <option value="back">Cámara Trasera</option>
+        </select>
+    </div>
+    <div>
         <video id="video" autoplay></video>
     </div>
     <div id="lightIntensity">
@@ -45,6 +51,7 @@
 </div>
 <script>
     var lightData = [];
+
     var lightChart = new Chart(document.getElementById('lightChart').getContext('2d'), {
         type: 'line',
         data: {
@@ -66,18 +73,31 @@
         }
     });
 
-    navigator.mediaDevices.getUserMedia({ video: true })
-    .then(function (stream) {
-        var video = document.getElementById('video');
-        video.srcObject = stream;
-        video.play();
-        setInterval(function() {
-            measureLight();
-        }, 1000);
-    })
-    .catch(function (err) {
-        console.log('Error: ' + err);
+    var cameraSelect = document.getElementById('cameraSelect');
+    var videoConstraints = { facingMode: 'user' }; // Default to front camera
+    cameraSelect.addEventListener('change', function() {
+        if (this.value === 'front') {
+            videoConstraints = { facingMode: 'user' };
+        } else {
+            videoConstraints = { facingMode: { exact: 'environment' } };
+        }
+        startVideo();
     });
+
+    function startVideo() {
+        navigator.mediaDevices.getUserMedia({ video: videoConstraints })
+        .then(function (stream) {
+            var video = document.getElementById('video');
+            video.srcObject = stream;
+            video.play();
+            setInterval(function() {
+                measureLight();
+            }, 1000);
+        })
+        .catch(function (err) {
+            console.log('Error: ' + err);
+        });
+    }
 
     function measureLight() {
         var canvas = document.createElement('canvas');
@@ -96,6 +116,9 @@
         lightChart.data.labels.push(new Date().toLocaleTimeString());
         lightChart.update();
     }
+
+    // Start with default camera
+    startVideo();
 </script>
 </body>
 </html>
