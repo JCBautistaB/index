@@ -115,7 +115,7 @@
         var pixelDisplay = document.getElementById('pixelValue');
         pixelDisplay.innerText = Math.round(averageIntensity);
         
-        if (averageIntensity > 400) { // Definimos un umbral de luz alta (puedes ajustarlo según tu necesidad)
+        if (averageIntensity > 500) { // Definimos un umbral de luz alta (puedes ajustarlo según tu necesidad)
             document.getElementById('highLightIndicator').style.display = 'block';
         } else {
             document.getElementById('highLightIndicator').style.display = 'none';
