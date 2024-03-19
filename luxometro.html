@@ -79,7 +79,11 @@
 
     function startVideo() {
         var constraints = {
-            video: { facingMode: cameraSelect.value }
+            video: { 
+                facingMode: cameraSelect.value,
+                exposureMode: 'manual',
+                exposureCompensation: 0 // Puedes ajustar este valor según sea necesario
+            }
         };
 
         navigator.mediaDevices.getUserMedia(constraints)
