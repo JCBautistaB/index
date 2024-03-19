@@ -48,7 +48,7 @@
         video.parentNode.insertBefore(measurementArea, video.nextSibling);
 
         function calculateLux() {
-            var areaSize = 50; // Size of the area to measure (50x50px)
+            var areaSize = 60; // Size of the area to measure (60x60px)
             var startX = (video.videoWidth - areaSize) / 2;
             var startY = (video.videoHeight - areaSize) / 2;
 
@@ -78,7 +78,7 @@
 
             var avgLuminance = luminance / (canvas.width * canvas.height);
             var lux = Math.round(avgLuminance / 255 * 1000); // Convert luminance to lux
-            luxValue.innerText = 'Lux: ' + lux;
+            luxValue.innerText = 'Intensidad de Luz: ' + lux;
         }
 
         setInterval(calculateLux, 1000); // Update lux value every second
