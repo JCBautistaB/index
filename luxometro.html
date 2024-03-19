@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -35,15 +35,15 @@
     <h1>Luxómetro ZETA <i id="icon" class="fas fa-seedling"></i></h1>
     <div>
         <select id="cameraSelect">
-<option value="back">Cámara Trasera</option>
-            <option value="front">Cámara Frontal</option>            
+            <option value="user">Cámara Frontal</option>
+            <option value="environment">Cámara Trasera</option>
         </select>
     </div>
     <div>
         <video id="video" autoplay></video>
     </div>
     <div id="lightIntensity">
-        <p>Intensidad de luz: <span id="lightValue">0</span> </p>
+        <p>Intensidad de luz: <span id="lightValue">0</span> Lux</p>
     </div>
     <div id="lightChartContainer">
         <canvas id="lightChart" width="400" height="200"></canvas>
@@ -74,18 +74,16 @@
     });
 
     var cameraSelect = document.getElementById('cameraSelect');
-    var videoConstraints = { facingMode: 'environment' }; // Cambiado a 'environment'
     cameraSelect.addEventListener('change', function() {
-        if (this.value === 'front') {
-            videoConstraints = { facingMode: 'user' };
-        } else {
-            videoConstraints = { facingMode: { exact: 'environment' } };
-        }
         startVideo();
     });
 
     function startVideo() {
-        navigator.mediaDevices.getUserMedia({ video: videoConstraints })
+        var constraints = {
+            video: { facingMode: cameraSelect.value }
+        };
+
+        navigator.mediaDevices.getUserMedia(constraints)
         .then(function (stream) {
             var video = document.getElementById('video');
             video.srcObject = stream;
