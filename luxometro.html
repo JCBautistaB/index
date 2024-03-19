@@ -92,12 +92,15 @@
         var canvas = document.createElement('canvas');
         var ctx = canvas.getContext('2d');
         ctx.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
-        var imageData = ctx.getImageData(video.videoWidth/2 - 25, video.videoHeight/2 - 25, 50, 50);
+        
+        var pixelData = ctx.getImageData(video.videoWidth/2 - 25, video.videoHeight/2 - 25, 50, 50).data;
         var totalIntensity = 0;
-        for (var i = 0; i < imageData.data.length; i += 4) {
-            totalIntensity += imageData.data[i] + imageData.data[i + 1] + imageData.data[i + 2];
+
+        for (var i = 0; i < pixelData.length; i += 4) {
+            totalIntensity += pixelData[i] + pixelData[i + 1] + pixelData[i + 2];
         }
-        var averageIntensity = totalIntensity / (imageData.data.length / 4); // Promedio de intensidad de píxeles
+
+        var averageIntensity = totalIntensity / (pixelData.length / 4); // Promedio de intensidad de píxeles
         var lightValueDisplay = document.getElementById('lightValue');
         lightValueDisplay.innerText = Math.round(averageIntensity) + ' Lux';
     }
