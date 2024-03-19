@@ -32,7 +32,7 @@
 </head>
 <body>
 <div id="container">
-    <h1>Medidor de Luz ZETA<i id="icon" class="fas fa-seedling"></i></h1>
+    <h1>Medidor de Luz ZETA 1<i id="icon" class="fas fa-seedling"></i></h1>
     <div>
         <select id="cameraSelect">
              <option value="environment">Cámara Trasera</option>     
@@ -82,10 +82,7 @@
 
     function startVideo() {
         var constraints = {
-            video: { 
-                facingMode: cameraSelect.value,
-                advanced: [{ exposureMode: 'manual' }, { exposureCompensation: 0 }]
-            }
+            video: { facingMode: cameraSelect.value }
         };
 
         navigator.mediaDevices.getUserMedia(constraints)
@@ -122,22 +119,11 @@
     }
 
     function manualExposureAdjustment() {
-        var constraints = {
-            video: { 
-                facingMode: cameraSelect.value,
-                advanced: [{ exposureMode: 'manual' }, { exposureCompensation: 0 }]
-            }
-        };
-
-        navigator.mediaDevices.getUserMedia(constraints)
-        .then(function (stream) {
-            var video = document.getElementById('video');
-            video.srcObject = stream;
-            video.play();
-        })
-        .catch(function (err) {
-            console.log('Error: ' + err);
-        });
+        var video = document.getElementById('video');
+        var settings = video.srcObject.getVideoTracks()[0].getSettings();
+        settings.exposureMode = 'manual';
+        settings.exposureCompensation = 0;
+        video.srcObject.getVideoTracks()[0].applyConstraints({ advanced: [settings] });
     }
 
     // Iniciar con la cámara predeterminada
