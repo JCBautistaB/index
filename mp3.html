@@ -112,13 +112,19 @@ const visualize = () => {
   requestAnimationFrame(visualize);
 };
 
-const startRecording = async () => {
+const initVisualizer = async () => {
   const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-  mediaRecorder = new MediaRecorder(stream);
   const audioContext = new AudioContext();
   const source = audioContext.createMediaStreamSource(stream);
   analyser = audioContext.createAnalyser();
   source.connect(analyser);
+  visualize();
+};
+
+const startRecording = async () => {
+  await initVisualizer();
+  const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+  mediaRecorder = new MediaRecorder(stream);
 
   mediaRecorder.ondataavailable = (e) => {
     chunks.push(e.data);
@@ -129,7 +135,6 @@ const startRecording = async () => {
     const audioURL = URL.createObjectURL(blob);
     audioPlayer.src = audioURL;
     audioPlayer.style.display = 'block';
-    visualize();
   };
 
   mediaRecorder.start();
@@ -145,9 +150,6 @@ const stopRecording = () => {
 
 document.getElementById('startRecording').addEventListener('click', startRecording);
 document.getElementById('stopRecording').addEventListener('click', stopRecording);
-
-// Llamar a visualize() después de que la página se haya cargado
-window.onload = visualize;
 </script>
 </body>
 </html>
