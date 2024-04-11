@@ -124,12 +124,10 @@ const startRecording = async () => {
 
   mediaRecorder.onstop = async () => {
     const blob = new Blob(chunks, { type: 'audio/wav' });
-    const audioURL = URL.createObjectURL(blob);
+    const mp3Blob = await convertToMp3(blob);
+    const mp3URL = URL.createObjectURL(mp3Blob);
 
-    const convertedBlob = await convertToMp3(blob);
-    const convertedURL = URL.createObjectURL(convertedBlob);
-
-    audioPlayer.src = convertedURL;
+    audioPlayer.src = mp3URL;
     audioPlayer.style.display = 'block';
   };
 
@@ -155,14 +153,19 @@ const initVisualizer = async () => {
 
 const convertToMp3 = async (blob) => {
   return new Promise((resolve, reject) => {
-    const mp3Converter = new Mp3Converter();
-    mp3Converter.convert(blob, (err, mp3Blob) => {
-      if (err) {
-        reject(err);
-      } else {
+    const reader = new FileReader();
+    reader.readAsArrayBuffer(blob);
+    reader.onloadend = () => {
+      const arrayBuffer = reader.result;
+      const mp3Converter = new Mp3Converter();
+      mp3Converter.encode(arrayBuffer, { format: 'mp3', bitrate: 128 }, (encoded) => {
+        const mp3Blob = new Blob([encoded], { type: 'audio/mp3' });
         resolve(mp3Blob);
-      }
-    });
+      });
+    };
+    reader.onerror = (error) => {
+      reject(error);
+    };
   });
 };
 
