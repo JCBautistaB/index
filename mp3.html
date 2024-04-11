@@ -74,6 +74,7 @@ let chunks = [];
 let audioPlayer = document.getElementById('audioPlayer');
 let canvas = document.getElementById('waveform');
 let canvasCtx = canvas.getContext('2d');
+let analyser;
 
 const visualize = () => {
   const WIDTH = canvas.width;
@@ -144,6 +145,9 @@ const stopRecording = () => {
 
 document.getElementById('startRecording').addEventListener('click', startRecording);
 document.getElementById('stopRecording').addEventListener('click', stopRecording);
+
+// Llamar a visualize() después de que la página se haya cargado
+window.onload = visualize;
 </script>
 </body>
 </html>
