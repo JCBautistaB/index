@@ -4,21 +4,120 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Grabadora de Audio</title>
-<script src="https://cdn.jsdelivr.net/npm/mp3-converter.js"></script>
+<style>
+body {
+  font-family: Arial, sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  margin: 0;
+  background-color: #f0f0f0;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border: 2px solid #333;
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 10px;
+}
+
+h1 {
+  margin-top: 0;
+}
+
+button {
+  margin: 10px;
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  border: none;
+  border-radius: 5px;
+  background-color: #007bff;
+  color: #fff;
+}
+
+button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+#audioPlayer {
+  width: 300px;
+  margin-top: 20px;
+}
+
+canvas {
+  width: 300px;
+  height: 100px;
+  background-color: #eee;
+  margin-top: 20px;
+}
+</style>
 </head>
 <body>
-<h1>Grabadora de Audio</h1>
-<button id="startRecording">Comenzar Grabación</button>
-<button id="stopRecording" disabled>Detener Grabación</button>
-<a id="downloadLink" download="grabacion.mp3" style="display: none;">Descargar Grabación</a>
+<div class="container">
+  <h1>Grabadora de Audio</h1>
+  <button id="startRecording">Comenzar Grabación</button>
+  <button id="stopRecording" disabled>Detener Grabación</button>
+  <audio id="audioPlayer" controls style="display: none;"></audio>
+  <canvas id="waveform"></canvas>
+</div>
 
 <script>
 let mediaRecorder;
 let chunks = [];
+let audioPlayer = document.getElementById('audioPlayer');
+let canvas = document.getElementById('waveform');
+let canvasCtx = canvas.getContext('2d');
+
+const visualize = () => {
+  const WIDTH = canvas.width;
+  const HEIGHT = canvas.height;
+  canvasCtx.clearRect(0, 0, WIDTH, HEIGHT);
+
+  const bufferLength = analyser.frequencyBinCount;
+  const dataArray = new Uint8Array(bufferLength);
+
+  analyser.getByteTimeDomainData(dataArray);
+
+  canvasCtx.lineWidth = 2;
+  canvasCtx.strokeStyle = 'rgb(0, 0, 0)';
+  canvasCtx.beginPath();
+
+  const sliceWidth = (WIDTH * 1.0) / bufferLength;
+  let x = 0;
+
+  for (let i = 0; i < bufferLength; i++) {
+    const v = dataArray[i] / 128.0;
+    const y = (v * HEIGHT) / 2;
+
+    if (i === 0) {
+      canvasCtx.moveTo(x, y);
+    } else {
+      canvasCtx.lineTo(x, y);
+    }
+
+    x += sliceWidth;
+  }
+
+  canvasCtx.lineTo(canvas.width, canvas.height / 2);
+  canvasCtx.stroke();
+
+  requestAnimationFrame(visualize);
+};
 
 const startRecording = async () => {
   const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
   mediaRecorder = new MediaRecorder(stream);
+  const audioContext = new AudioContext();
+  const source = audioContext.createMediaStreamSource(stream);
+  analyser = audioContext.createAnalyser();
+  source.connect(analyser);
 
   mediaRecorder.ondataavailable = (e) => {
     chunks.push(e.data);
@@ -27,20 +126,9 @@ const startRecording = async () => {
   mediaRecorder.onstop = () => {
     const blob = new Blob(chunks, { type: 'audio/wav' });
     const audioURL = URL.createObjectURL(blob);
-    const downloadLink = document.getElementById('downloadLink');
-    downloadLink.href = audioURL;
-    downloadLink.style.display = 'block';
-    downloadLink.onclick = () => {
-      const convertedAudioBlob = Mp3Converter.convert(blob);
-      const convertedAudioURL = URL.createObjectURL(convertedAudioBlob);
-      const a = document.createElement('a');
-      a.style.display = 'none';
-      a.href = convertedAudioURL;
-      a.download = 'grabacion.mp3';
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(convertedAudioURL);
-    };
+    audioPlayer.src = audioURL;
+    audioPlayer.style.display = 'block';
+    visualize();
   };
 
   mediaRecorder.start();
