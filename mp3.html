@@ -68,7 +68,6 @@ canvas {
   <canvas id="waveform"></canvas>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/mp3-converter.js"></script>
 <script>
 let mediaRecorder;
 let chunks = [];
@@ -117,20 +116,19 @@ const startRecording = async () => {
   await initVisualizer();
   const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
   mediaRecorder = new MediaRecorder(stream);
-
+  
   mediaRecorder.ondataavailable = (e) => {
     chunks.push(e.data);
   };
-
-  mediaRecorder.onstop = async () => {
-    const blob = new Blob(chunks, { type: 'audio/wav' });
-    const mp3Blob = await convertToMp3(blob);
-    const mp3URL = URL.createObjectURL(mp3Blob);
-
-    audioPlayer.src = mp3URL;
+  
+  mediaRecorder.onstop = () => {
+    const blob = new Blob(chunks, { type: 'audio/mp3' });
+    const audioURL = URL.createObjectURL(blob);
+    
+    audioPlayer.src = audioURL;
     audioPlayer.style.display = 'block';
   };
-
+  
   mediaRecorder.start();
   document.getElementById('startRecording').disabled = true;
   document.getElementById('stopRecording').disabled = false;
@@ -149,24 +147,6 @@ const initVisualizer = async () => {
   analyser = audioContext.createAnalyser();
   source.connect(analyser);
   visualize();
-};
-
-const convertToMp3 = async (blob) => {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsArrayBuffer(blob);
-    reader.onloadend = () => {
-      const arrayBuffer = reader.result;
-      const mp3Converter = new Mp3Converter();
-      mp3Converter.encode(arrayBuffer, { format: 'mp3', bitrate: 128 }, (encoded) => {
-        const mp3Blob = new Blob([encoded], { type: 'audio/mp3' });
-        resolve(mp3Blob);
-      });
-    };
-    reader.onerror = (error) => {
-      reject(error);
-    };
-  });
 };
 
 document.getElementById('startRecording').addEventListener('click', startRecording);
