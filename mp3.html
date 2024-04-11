@@ -68,6 +68,7 @@ canvas {
   <canvas id="waveform"></canvas>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/mp3-converter.js"></script>
 <script>
 let mediaRecorder;
 let chunks = [];
@@ -112,15 +113,6 @@ const visualize = () => {
   requestAnimationFrame(visualize);
 };
 
-const initVisualizer = async () => {
-  const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-  const audioContext = new AudioContext();
-  const source = audioContext.createMediaStreamSource(stream);
-  analyser = audioContext.createAnalyser();
-  source.connect(analyser);
-  visualize();
-};
-
 const startRecording = async () => {
   await initVisualizer();
   const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -130,10 +122,14 @@ const startRecording = async () => {
     chunks.push(e.data);
   };
 
-  mediaRecorder.onstop = () => {
+  mediaRecorder.onstop = async () => {
     const blob = new Blob(chunks, { type: 'audio/wav' });
     const audioURL = URL.createObjectURL(blob);
-    audioPlayer.src = audioURL;
+
+    const convertedBlob = await convertToMp3(blob);
+    const convertedURL = URL.createObjectURL(convertedBlob);
+
+    audioPlayer.src = convertedURL;
     audioPlayer.style.display = 'block';
   };
 
@@ -146,6 +142,28 @@ const stopRecording = () => {
   mediaRecorder.stop();
   document.getElementById('startRecording').disabled = false;
   document.getElementById('stopRecording').disabled = true;
+};
+
+const initVisualizer = async () => {
+  const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+  const audioContext = new AudioContext();
+  const source = audioContext.createMediaStreamSource(stream);
+  analyser = audioContext.createAnalyser();
+  source.connect(analyser);
+  visualize();
+};
+
+const convertToMp3 = async (blob) => {
+  return new Promise((resolve, reject) => {
+    const mp3Converter = new Mp3Converter();
+    mp3Converter.convert(blob, (err, mp3Blob) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(mp3Blob);
+      }
+    });
+  });
 };
 
 document.getElementById('startRecording').addEventListener('click', startRecording);
