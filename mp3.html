@@ -1,211 +1,61 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Control de Micrófono</title>
-    <style>
-        body {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            margin: 0;
-        }
-
-        button {
-            padding: 10px 20px;
-            font-size: 16px;
-            cursor: pointer;
-            margin: 5px;
-        }
-
-        p {
-            margin-top: 20px;
-            font-size: 18px;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Grabadora de Audio</title>
+<script src="https://cdn.jsdelivr.net/npm/mp3-converter.js"></script>
 </head>
 <body>
-    <button id="toggleMic">Encender Micrófono</button>
-    <button id="toggleRecording" disabled>Grabar</button>
-    <p id="result"></p>
-    <audio id="audioPlayer" controls></audio>
+<h1>Grabadora de Audio</h1>
+<button id="startRecording">Comenzar Grabación</button>
+<button id="stopRecording" disabled>Detener Grabación</button>
+<a id="downloadLink" download="grabacion.mp3" style="display: none;">Descargar Grabación</a>
 
-    <script src="https://cdn.jsdelivr.net/npm/libmp3lame.js"></script>
-    <script>
-        let isMicOn = false;
-        let isRecording = false;
-        let recognition;
-        let mediaRecorder;
-        let recordedChunks = [];
-        const audioPlayer = document.getElementById('audioPlayer');
-        const toggleMicButton = document.getElementById('toggleMic');
-        const toggleRecordingButton = document.getElementById('toggleRecording');
-        const resultDisplay = document.getElementById('result');
+<script>
+let mediaRecorder;
+let chunks = [];
 
-        toggleMicButton.addEventListener('click', toggleMicrophone);
-        toggleRecordingButton.addEventListener('click', toggleRecording);
+const startRecording = async () => {
+  const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+  mediaRecorder = new MediaRecorder(stream);
 
-        function toggleMicrophone() {
-            if (!isMicOn) {
-                startListening();
-                toggleMicButton.textContent = 'Apagar Micrófono';
-                toggleRecordingButton.disabled = false;
-            } else {
-                toggleMicButton.textContent = 'Encender Micrófono';
-                toggleRecordingButton.disabled = true;
-                stopListening();
-                stopRecording();
-            }
+  mediaRecorder.ondataavailable = (e) => {
+    chunks.push(e.data);
+  };
 
-            isMicOn = !isMicOn;
-        }
+  mediaRecorder.onstop = () => {
+    const blob = new Blob(chunks, { type: 'audio/wav' });
+    const audioURL = URL.createObjectURL(blob);
+    const downloadLink = document.getElementById('downloadLink');
+    downloadLink.href = audioURL;
+    downloadLink.style.display = 'block';
+    downloadLink.onclick = () => {
+      const convertedAudioBlob = Mp3Converter.convert(blob);
+      const convertedAudioURL = URL.createObjectURL(convertedAudioBlob);
+      const a = document.createElement('a');
+      a.style.display = 'none';
+      a.href = convertedAudioURL;
+      a.download = 'grabacion.mp3';
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(convertedAudioURL);
+    };
+  };
 
-        function toggleRecording() {
-            if (!isRecording) {
-                startRecording();
-                toggleRecordingButton.textContent = 'Detener Grabación';
-            } else {
-                stopRecording();
-                toggleRecordingButton.textContent = 'Grabar';
-            }
+  mediaRecorder.start();
+  document.getElementById('startRecording').disabled = true;
+  document.getElementById('stopRecording').disabled = false;
+};
 
-            isRecording = !isRecording;
-        }
+const stopRecording = () => {
+  mediaRecorder.stop();
+  document.getElementById('startRecording').disabled = false;
+  document.getElementById('stopRecording').disabled = true;
+};
 
-        function startListening() {
-            recognition = new window.webkitSpeechRecognition() || new window.SpeechRecognition();
-            recognition.lang = 'es-ES';
-
-            recognition.onresult = (event) => {
-                const transcript = event.results[0][0].transcript.toLowerCase();
-                resultDisplay.textContent = `Palabra reconocida: ${transcript}`;
-
-                if (transcript.includes('grabar')) {
-                    toggleRecording();
-                    console.log('Iniciar grabación...');
-                } else if (transcript.includes('detener grabación')) {
-                    resultDisplay.textContent = 'Detener grabación';
-                    toggleRecording();
-                    console.log('Detener...');
-                }
-            };
-
-            recognition.onend = () => {
-                if (isMicOn) {
-                    recognition.start();
-                }
-            };
-
-            recognition.start();
-        }
-
-        function startRecording() {
-            recordedChunks = [];
-            resultDisplay.textContent = 'Grabando...';
-
-            navigator.mediaDevices.getUserMedia({ audio: true })
-                .then((stream) => {
-                    mediaRecorder = new MediaRecorder(stream);
-
-                    mediaRecorder.ondataavailable = (event) => {
-                        if (event.data.size > 0) {
-                            recordedChunks.push(event.data);
-                        }
-                    };
-
-                    mediaRecorder.onstop = () => {
-                        const blob = new Blob(recordedChunks, { type: 'audio/wav' });
-                        saveMp3(blob);
-                    };
-
-                    mediaRecorder.start();
-                })
-                .catch((error) => {
-                    console.error('Error al iniciar la grabación:', error);
-                });
-        }
-
-        function stopRecording() {
-            if (mediaRecorder && mediaRecorder.state !== 'inactive') {
-                mediaRecorder.stop();
-                resultDisplay.textContent = 'Detener grabación';
-            }
-        }
-
-        function stopListening() {
-            if (recognition) {
-                recognition.stop();
-            }
-        }
-
-        // Función para convertir el archivo de audio a MP3
-        function convertToMp3(blob) {
-            return new Promise((resolve, reject) => {
-                const lame = new lamejs();
-                const reader = new FileReader();
-
-                reader.onload = () => {
-                    const wavData = new Uint8Array(reader.result);
-                    const wav = lame.WavHeader.readHeader(new DataView(wavData.buffer));
-
-                    const channels = wav.channels;
-                    const sampleRate = wav.sampleRate;
-                    const samples = new Int16Array(wavData.buffer, wav.dataOffset, wav.dataLen / 2);
-
-                    const mp3encoder = new lame.Mp3Encoder(channels, sampleRate, 128);
-                    const mp3Data = [];
-
-                    const sampleBlockSize = 1152;
-
-                    for (let i = 0; i < samples.length; i += sampleBlockSize) {
-                        const sampleChunk = samples.subarray(i, i + sampleBlockSize);
-                        const mp3buf = mp3encoder.encodeBuffer(sampleChunk);
-
-                        if (mp3buf.length > 0) {
-                            mp3Data.push(new Int8Array(mp3buf));
-                        }
-                    }
-
-                    const mp3buf = mp3encoder.flush();
-
-                    if (mp3buf.length > 0) {
-                        mp3Data.push(new Int8Array(mp3buf));
-                    }
-
-                    const mp3Blob = new Blob(mp3Data, { type: 'audio/mp3' });
-                    resolve(mp3Blob);
-                };
-
-                reader.onerror = (error) => {
-                    reject(error);
-                };
-
-                reader.readAsArrayBuffer(blob);
-            });
-        }
-
-        // Función para guardar el archivo MP3
-        async function saveMp3(blob) {
-            try {
-                const mp3Blob = await convertToMp3(blob);
-                const audioURL = URL.createObjectURL(mp3Blob);
-
-                // Crear un enlace de descarga
-                const downloadLink = document.createElement('a');
-                downloadLink.href = audioURL;
-                downloadLink.download = 'grabacion.mp3';
-                downloadLink.click();
-
-                // O cargarlo en un reproductor de audio
-                // const audioPlayer = document.getElementById('audioPlayer');
-                // audioPlayer.src = audioURL;
-            } catch (error) {
-                console.error('Error al convertir a MP3:', error);
-            }
-        }
-    </script>
+document.getElementById('startRecording').addEventListener('click', startRecording);
+document.getElementById('stopRecording').addEventListener('click', stopRecording);
+</script>
 </body>
 </html>
