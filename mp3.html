@@ -62,6 +62,10 @@ canvas {
 <body>
 <div class="container">
   <h1>Grabadora de Audio</h1>
+  <div>
+    <label for="audioSource">Seleccionar fuente de audio:</label>
+    <select id="audioSource"></select>
+  </div>
   <button id="startRecording">Comenzar Grabación</button>
   <button id="stopRecording" disabled>Detener Grabación</button>
   <audio id="audioPlayer" controls style="display: none;"></audio>
@@ -75,6 +79,7 @@ let audioPlayer = document.getElementById('audioPlayer');
 let canvas = document.getElementById('waveform');
 let canvasCtx = canvas.getContext('2d');
 let analyser;
+let selectedAudioSource;
 
 const visualize = () => {
   const WIDTH = canvas.width;
@@ -114,7 +119,7 @@ const visualize = () => {
 
 const startRecording = async () => {
   await initVisualizer();
-  const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+  const stream = await navigator.mediaDevices.getUserMedia({ audio: { deviceId: selectedAudioSource ? { exact: selectedAudioSource } : undefined } });
   mediaRecorder = new MediaRecorder(stream);
   
   mediaRecorder.ondataavailable = (e) => {
@@ -141,7 +146,7 @@ const stopRecording = () => {
 };
 
 const initVisualizer = async () => {
-  const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+  const stream = await navigator.mediaDevices.getUserMedia({ audio: { deviceId: selectedAudioSource ? { exact: selectedAudioSource } : undefined } });
   const audioContext = new AudioContext();
   const source = audioContext.createMediaStreamSource(stream);
   analyser = audioContext.createAnalyser();
@@ -149,8 +154,28 @@ const initVisualizer = async () => {
   visualize();
 };
 
+const updateAudioSources = async () => {
+  const devices = await navigator.mediaDevices.enumerateDevices();
+  const audioSources = devices.filter(device => device.kind === 'audioinput');
+  const selectElement = document.getElementById('audioSource');
+  selectElement.innerHTML = '';
+  audioSources.forEach(source => {
+    const option = document.createElement('option');
+    option.value = source.deviceId;
+    option.textContent = source.label || `Audio Source ${selectElement.length + 1}`;
+    selectElement.appendChild(option);
+  });
+};
+
 document.getElementById('startRecording').addEventListener('click', startRecording);
 document.getElementById('stopRecording').addEventListener('click', stopRecording);
+document.getElementById('audioSource').addEventListener('change', (event) => {
+  selectedAudioSource = event.target.value;
+  stopRecording();
+  updateAudioSources();
+});
+
+updateAudioSources();
 </script>
 </body>
 </html>
