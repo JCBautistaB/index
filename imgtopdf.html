@@ -5,38 +5,56 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Convertir Imagen a PDF</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        #preview {
+            margin-top: 20px;
+            max-width: 100%;
+            max-height: 400px;
+        }
+    </style>
 </head>
 <body>
     <h1>Convertir Imagen a PDF</h1>
-    <input type="file" id="imageInput" accept="image/*">
+    <input type="file" id="imageInput" accept="image/*" onchange="previewImage(event)">
+    <div id="previewContainer">
+        <img id="preview" src="" alt="Vista previa de la imagen">
+    </div>
     <button onclick="convertToPDF()">Convertir a PDF</button>
 
     <script>
-        async function convertToPDF() {
-            const { jsPDF } = window.jspdf;
+        function previewImage(event) {
+            const input = event.target;
+            const preview = document.getElementById('preview');
 
-            const input = document.getElementById('imageInput');
             if (input.files && input.files[0]) {
-                const file = input.files[0];
                 const reader = new FileReader();
 
                 reader.onload = function(e) {
-                    const img = new Image();
-                    img.src = e.target.result;
-
-                    img.onload = function() {
-                        const pdf = new jsPDF({
-                            orientation: img.width > img.height ? 'landscape' : 'portrait',
-                            unit: 'px',
-                            format: [img.width, img.height]
-                        });
-
-                        pdf.addImage(img, 'JPEG', 0, 0, img.width, img.height);
-                        pdf.save('imagen.pdf');
-                    };
+                    preview.src = e.target.result;
                 };
 
-                reader.readAsDataURL(file);
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        async function convertToPDF() {
+            const { jsPDF } = window.jspdf;
+
+            const preview = document.getElementById('preview');
+            if (preview.src) {
+                const img = new Image();
+                img.src = preview.src;
+
+                img.onload = function() {
+                    const pdf = new jsPDF({
+                        orientation: img.width > img.height ? 'landscape' : 'portrait',
+                        unit: 'px',
+                        format: [img.width, img.height]
+                    });
+
+                    pdf.addImage(img, 'JPEG', 0, 0, img.width, img.height);
+                    pdf.save('imagen.pdf');
+                };
             } else {
                 alert('Por favor, selecciona una imagen primero.');
             }
