@@ -72,6 +72,10 @@
                         pdf.addPage();
                     }
                     pdf.addImage(imgData, 'JPEG', 0, 0, width, height);
+
+                    // Añadir pie de página
+                    const pageHeight = pdf.internal.pageSize.getHeight();
+                    pdf.text('quetzalarte.com', 10, pageHeight - 10);
                 }
 
                 pdf.save('imagenes.pdf');
