@@ -3,60 +3,80 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Convertir Imagen a PDF</title>
+    <title>Convertir Imágenes a PDF</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
-        #preview {
+        #previewContainer {
             margin-top: 20px;
-            max-width: 100%;
-            max-height: 400px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .preview {
+            max-width: 200px;
+            max-height: 200px;
+            object-fit: cover;
         }
     </style>
 </head>
 <body>
-    <h1>Convertir Imagen a PDF</h1>
-    <input type="file" id="imageInput" accept="image/*" onchange="previewImage(event)">
-    <div id="previewContainer">
-        <img id="preview" src="" alt="Vista previa de la imagen">
-    </div>
+    <h1>Convertir Imágenes a PDF</h1>
+    <input type="file" id="imageInput" accept="image/*" multiple onchange="previewImages(event)">
+    <div id="previewContainer"></div>
     <button onclick="convertToPDF()">Convertir a PDF</button>
 
     <script>
-        function previewImage(event) {
+        function previewImages(event) {
             const input = event.target;
-            const preview = document.getElementById('preview');
+            const previewContainer = document.getElementById('previewContainer');
+            previewContainer.innerHTML = ''; // Limpiar las vistas previas anteriores
 
-            if (input.files && input.files[0]) {
-                const reader = new FileReader();
+            if (input.files) {
+                Array.from(input.files).forEach(file => {
+                    const reader = new FileReader();
 
-                reader.onload = function(e) {
-                    preview.src = e.target.result;
-                };
+                    reader.onload = function(e) {
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        img.className = 'preview';
+                        previewContainer.appendChild(img);
+                    };
 
-                reader.readAsDataURL(input.files[0]);
+                    reader.readAsDataURL(file);
+                });
             }
         }
 
         async function convertToPDF() {
             const { jsPDF } = window.jspdf;
+            const previewContainer = document.getElementById('previewContainer');
+            const images = previewContainer.getElementsByTagName('img');
 
-            const preview = document.getElementById('preview');
-            if (preview.src) {
-                const img = new Image();
-                img.src = preview.src;
+            if (images.length > 0) {
+                const pdf = new jsPDF();
 
-                img.onload = function() {
-                    const pdf = new jsPDF({
-                        orientation: img.width > img.height ? 'landscape' : 'portrait',
-                        unit: 'px',
-                        format: [img.width, img.height]
-                    });
+                for (let i = 0; i < images.length; i++) {
+                    const img = images[i];
+                    const canvas = document.createElement('canvas');
+                    const context = canvas.getContext('2d');
 
-                    pdf.addImage(img, 'JPEG', 0, 0, img.width, img.height);
-                    pdf.save('imagen.pdf');
-                };
+                    canvas.width = img.naturalWidth;
+                    canvas.height = img.naturalHeight;
+                    context.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+                    const imgData = canvas.toDataURL('image/jpeg');
+                    const width = pdf.internal.pageSize.getWidth();
+                    const height = (canvas.height * width) / canvas.width;
+
+                    if (i > 0) {
+                        pdf.addPage();
+                    }
+                    pdf.addImage(imgData, 'JPEG', 0, 0, width, height);
+                }
+
+                pdf.save('imagenes.pdf');
             } else {
-                alert('Por favor, selecciona una imagen primero.');
+                alert('Por favor, selecciona al menos una imagen.');
             }
         }
     </script>
