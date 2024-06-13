@@ -3,25 +3,77 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Convertir Imágenes a PDF</title>
+    <title>Convertir Imágenes a PDF - Álbum de Fotos</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        h1 {
+            color: #333;
+        }
+        .input-group {
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        .input-group label {
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .input-group input, .input-group textarea {
+            padding: 10px;
+            width: 300px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
         #previewContainer {
             margin-top: 20px;
             display: flex;
             flex-wrap: wrap;
             gap: 10px;
+            justify-content: center;
         }
         .preview {
             max-width: 200px;
             max-height: 200px;
             object-fit: cover;
+            border: 2px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            color: #fff;
+            background-color: #007bff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        button:hover {
+            background-color: #0056b3;
         }
     </style>
 </head>
 <body>
-    <h1>Convertir Imágenes a PDF</h1>
-    <input type="file" id="imageInput" accept="image/*" multiple onchange="previewImages(event)">
+    <h1>Crear Álbum de Fotos en PDF</h1>
+    <div class="input-group">
+        <label for="imageInput">Seleccionar Imágenes:</label>
+        <input type="file" id="imageInput" accept="image/*" multiple onchange="previewImages(event)">
+    </div>
+    <div class="input-group">
+        <label for="footerText">Texto del Pie de Página:</label>
+        <input type="text" id="footerText" placeholder="Ingrese el texto del pie de página">
+    </div>
     <div id="previewContainer"></div>
     <button onclick="convertToPDF()">Convertir a PDF</button>
 
@@ -51,6 +103,7 @@
             const { jsPDF } = window.jspdf;
             const previewContainer = document.getElementById('previewContainer');
             const images = previewContainer.getElementsByTagName('img');
+            const footerText = document.getElementById('footerText').value || 'quetzalarte.com';
 
             if (images.length > 0) {
                 const pdf = new jsPDF();
@@ -75,10 +128,10 @@
 
                     // Añadir pie de página
                     const pageHeight = pdf.internal.pageSize.getHeight();
-                    pdf.text('quetzalarte.com', 10, pageHeight - 10);
+                    pdf.text(footerText, 10, pageHeight - 10);
                 }
 
-                pdf.save('imagenes.pdf');
+                pdf.save('album_fotos.pdf');
             } else {
                 alert('Por favor, selecciona al menos una imagen.');
             }
