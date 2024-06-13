@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Convertir Imágenes a PDF - Álbum de Fotos</title>
+    <title>Crear Álbum de Fotos Editable en PDF</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.plugin.acroform.min.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -28,7 +29,7 @@
             margin-bottom: 5px;
             font-weight: bold;
         }
-        .input-group input, .input-group textarea {
+        .input-group input {
             padding: 10px;
             width: 300px;
             border: 1px solid #ccc;
@@ -65,7 +66,7 @@
     </style>
 </head>
 <body>
-    <h1>Crear Álbum de Fotos en PDF</h1>
+    <h1>Crear Álbum de Fotos Editable en PDF</h1>
     <div class="input-group">
         <label for="imageInput">Seleccionar Imágenes:</label>
         <input type="file" id="imageInput" accept="image/*" multiple onchange="previewImages(event)">
@@ -101,13 +102,14 @@
 
         async function convertToPDF() {
             const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF();
+            pdf.setFontSize(10);
+
             const previewContainer = document.getElementById('previewContainer');
             const images = previewContainer.getElementsByTagName('img');
             const footerText = document.getElementById('footerText').value || 'quetzalarte.com';
 
             if (images.length > 0) {
-                const pdf = new jsPDF();
-
                 for (let i = 0; i < images.length; i++) {
                     const img = images[i];
                     const canvas = document.createElement('canvas');
@@ -129,6 +131,15 @@
                     // Añadir pie de página
                     const pageHeight = pdf.internal.pageSize.getHeight();
                     pdf.text(footerText, 10, pageHeight - 10);
+
+                    // Añadir campo de texto
+                    pdf.setFontSize(12);
+                    pdf.text('Comentario:', 10, pageHeight - 30);
+                    pdf.setFontSize(10);
+                    pdf.addField(new jsPDF.AcroForm.TextField({
+                        rect: [10, pageHeight - 40, width - 20, 10],
+                        name: `Comentario${i + 1}`
+                    }));
                 }
 
                 pdf.save('album_fotos.pdf');
