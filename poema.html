@@ -1,4 +1,4 @@
-c<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -37,6 +37,7 @@ c<!DOCTYPE html>
             background-color: #fff;
             border-radius: 10px;
             min-height: 100px;
+            text-align: left; /* Alinear el texto a la izquierda para que los puntos estén alineados */
         }
 
         #microfono-container {
@@ -112,7 +113,7 @@ c<!DOCTYPE html>
 
 <script>
     let recognition;
-    let savedText = '';
+    let savedText = ''; // Inicializamos savedText como una cadena vacía para almacenar el texto reconocido
     let isRecording = false;
     let recordingIndicator = document.getElementById('recording-indicator');
     let outputElement = document.getElementById('output');
@@ -136,9 +137,9 @@ c<!DOCTYPE html>
 
             recognition.onresult = function(event) {
                 const transcript = event.results[event.results.length - 1][0].transcript.toLowerCase();
-                console.log('Transcripción: ', transcript);
-                savedText += transcript + ' '; // Agrega el texto reconocido
-                updateOutput(); // Actualiza el contenido de #output
+              
+                savedText += transcript.trim() + '.<br><br>'; 
+                outputElement.innerHTML += savedText;
             };
 
             recognition.onerror = function(event) {
@@ -167,28 +168,6 @@ c<!DOCTYPE html>
             isRecording = false;
         }
     }
-    
-  function updateOutput() {
-    // Eliminar el punto final (si existe)
-    savedText = savedText.trim();
-    if (savedText.endsWith('.')) {
-        savedText = savedText.slice(0, -1); // Elimina el último punto
-    }
-    // Concatenar '.' y un salto de párrafo al final de savedText
-    savedText += '.<br><br>';
-    outputElement.innerHTML += savedText;
-}
-
-    
-</script>
-
-<script>
-    let mediaRecorder;
-    let audioChunks = [];
-
-    const startButton = document.getElementById('startButton');
-    const stopButton = document.getElementById('stopButton');
-    const audioPlayer = document.getElementById('audioPlayer');
 
     function startRecording() {
         navigator.mediaDevices.getUserMedia({ audio: true })
@@ -220,5 +199,6 @@ c<!DOCTYPE html>
         stopButton.style.display = 'none';
     }
 </script>
+
 </body>
 </html>
