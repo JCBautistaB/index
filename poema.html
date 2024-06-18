@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+d<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -113,7 +113,7 @@
 
 <script>
     let recognition;
-    let savedText = ''; // Inicializamos savedText como una cadena vacía para almacenar el texto reconocido
+    let savedText = document.getElementById('output').innerHTML; // Guardamos el contenido original del #output
     let isRecording = false;
     let recordingIndicator = document.getElementById('recording-indicator');
     let outputElement = document.getElementById('output');
@@ -139,7 +139,7 @@
                 const transcript = event.results[event.results.length - 1][0].transcript.toLowerCase();
               
                 savedText += transcript.trim() + '.<br><br>'; 
-                outputElement.innerHTML += savedText;
+                outputElement.innerHTML = savedText; // Actualizamos el #output con el contenido actualizado
             };
 
             recognition.onerror = function(event) {
