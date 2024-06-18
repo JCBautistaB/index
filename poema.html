@@ -123,6 +123,7 @@
             if (!recognition) {
                 recognition = new webkitSpeechRecognition() || new SpeechRecognition();
                 recognition.lang = 'es-ES';
+                recognition.continuous = true; // Mantener activo el reconocimiento
 
                 recognition.onstart = function() {
                     console.log('¡Reconocimiento de voz iniciado!');
@@ -132,7 +133,7 @@
                 };
 
                 recognition.onresult = function(event) {
-                    const transcript = event.results[0][0].transcript.toLowerCase();
+                    const transcript = event.results[event.results.length - 1][0].transcript.toLowerCase();
                     console.log('Transcripción: ', transcript);
                     savedText += transcript + ' ';
                     outputElement.innerHTML = savedText + '<br>';
@@ -149,7 +150,6 @@
                     console.log('Reconocimiento de voz finalizado.');
                     microfonoElement.classList.remove('active');
                     estadoMicrofonoElement.textContent = 'Apagado';
-                    savedText += '<br>';
                     recordingIndicator.style.display = 'none';
                 };
 
