@@ -169,10 +169,16 @@ a<!DOCTYPE html>
     }
     
     function updateOutput() {
-    // Agrega '.-' al final de savedText para cumplir con el requisito
-    const formattedText = savedText.trim() + '.-<br>';
-    outputElement.innerHTML = formattedText;
+    // Eliminar el punto al final del texto si existe
+    savedText = savedText.trim();
+    if (savedText.endsWith('.')) {
+        savedText = savedText.slice(0, -1); // Elimina el último punto
+    }
+    // Concatenar '.-' al final de savedText para cumplir con el requisito
+    savedText += '.- ';
+    outputElement.innerHTML += savedText;
 }
+
 </script>
 
 <script>
