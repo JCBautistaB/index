@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+h<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -94,16 +94,16 @@
 <body>
 <h1>Crear Poema con Reconocimiento de Voz<span id="recording-indicator"></span></h1>
 
-    <div id="microfono-container" onclick="toggleRecognition()">
-        <div id="microfono">🎙️</div>
-        <div id="estado-microfono">Apagado | Hablar y Escribir</div>
-    </div>
+<div id="microfono-container" onclick="toggleRecognition()">
+    <div id="microfono">🎙️</div>
+    <div id="estado-microfono">Apagado | Hablar y Escribir</div>
+</div>
 
-    <div id="output">
-      Bajo el manto del cielo radiante,  el sol despierta con su luz vibrante.  Sus rayos danzan, cálidos abrazos,  pintando el día con destellos abrazos.<br/>
-      En el lienzo del cielo azul profundo,  el sol es el artista, el ser fecundo.  Ilumina montañas y valles serenos,  tejiendo auroras con sus dedos buenos.<br/>
-      En el alba, besa las flores del rocío,  susurra secretos al viento y al río.  Cautiva con sus tonos dorados,  los campos, los mares, los cielos amados.<br/>
-    </div>
+<div id="output">
+  Bajo el manto del cielo radiante,  el sol despierta con su luz vibrante.  Sus rayos danzan, cálidos abrazos,  pintando el día con destellos abrazos.<br/>
+  En el lienzo del cielo azul profundo,  el sol es el artista, el ser fecundo.  Ilumina montañas y valles serenos,  tejiendo auroras con sus dedos buenos.<br/>
+  En el alba, besa las flores del rocío,  susurra secretos al viento y al río.  Cautiva con sus tonos dorados,  los campos, los mares, los cielos amados.<br/>
+</div>
 
 <button id="startButton" onclick="startRecording()">Iniciar Grabación</button>
 <button id="stopButton" onclick="stopRecording()">Detener Grabación</button>
@@ -111,96 +111,74 @@
 <audio id="audioPlayer" controls></audio>
 
 <script>
-        let recognition;
-        let savedText = '';
-        let recordingIndicator = document.getElementById('recording-indicator');
+    let recognition;
+    let savedText = '';
+    let isRecording = false;
+    let recordingIndicator = document.getElementById('recording-indicator');
+    let outputElement = document.getElementById('output');
 
-        function toggleRecognition() {
-            const microfonoElement = document.getElementById('microfono');
-            const estadoMicrofonoElement = document.getElementById('estado-microfono');
-            const outputElement = document.getElementById('output');
+    function toggleRecognition() {
+        const microfonoElement = document.getElementById('microfono');
+        const estadoMicrofonoElement = document.getElementById('estado-microfono');
 
-            if (!recognition) {
-                recognition = new webkitSpeechRecognition() || new SpeechRecognition();
-                recognition.lang = 'es-ES';
-                recognition.continuous = true; // Mantener activo el reconocimiento
+        if (!recognition) {
+            recognition = new webkitSpeechRecognition() || new SpeechRecognition();
+            recognition.lang = 'es-ES';
+            recognition.continuous = true; // Mantener activo el reconocimiento
 
-                recognition.onstart = function() {
-                    console.log('¡Reconocimiento de voz iniciado!');
-                    microfonoElement.classList.add('active');
-                    estadoMicrofonoElement.textContent = 'Encendido';
-                    recordingIndicator.style.display = 'block';
-                };
+            recognition.onstart = function() {
+                console.log('¡Reconocimiento de voz iniciado!');
+                microfonoElement.classList.add('active');
+                estadoMicrofonoElement.textContent = 'Encendido';
+                recordingIndicator.style.display = 'block';
+                isRecording = true;
+            };
 
-                recognition.onresult = function(event) {
-                    const transcript = event.results[event.results.length - 1][0].transcript.toLowerCase();
-                    console.log('Transcripción: ', transcript);
-                    savedText += transcript + ' ';
-                    outputElement.innerHTML = savedText + '<br>';
-                };
+            recognition.onresult = function(event) {
+                const transcript = event.results[event.results.length - 1][0].transcript.toLowerCase();
+                console.log('Transcripción: ', transcript);
+                savedText += transcript + ' ';
+                outputElement.innerHTML = savedText + '<br>';
+                resetSilenceTimeout(); // Reiniciar temporizador de silencio
+            };
 
-                recognition.onerror = function(event) {
-                    console.error('Error de reconocimiento: ', event.error);
-                    microfonoElement.classList.remove('active');
-                    estadoMicrofonoElement.textContent = 'Error';
-                    recordingIndicator.style.display = 'none';
-                };
+            recognition.onerror = function(event) {
+                console.error('Error de reconocimiento: ', event.error);
+                microfonoElement.classList.remove('active');
+                estadoMicrofonoElement.textContent = 'Error';
+                recordingIndicator.style.display = 'none';
+                isRecording = false;
+            };
 
-                recognition.onend = function() {
-                    console.log('Reconocimiento de voz finalizado.');
-                    microfonoElement.classList.remove('active');
-                    estadoMicrofonoElement.textContent = 'Apagado';
-                    recordingIndicator.style.display = 'none';
-                };
-
-                recognition.start();
-            } else {
-                recognition.stop();
-                recognition = null;
+            recognition.onend = function() {
+                console.log('Reconocimiento de voz finalizado.');
                 microfonoElement.classList.remove('active');
                 estadoMicrofonoElement.textContent = 'Apagado';
                 recordingIndicator.style.display = 'none';
+                isRecording = false;
+                savedText += '<br>';
+            };
+
+            recognition.start();
+        } else {
+            recognition.stop();
+            recognition = null;
+            microfonoElement.classList.remove('active');
+            estadoMicrofonoElement.textContent = 'Apagado';
+            recordingIndicator.style.display = 'none';
+            isRecording = false;
+        }
+    }
+
+    function resetSilenceTimeout() {
+        clearTimeout(silenceTimeout);
+        silenceTimeout = setTimeout(function() {
+            if (isRecording) {
+                savedText += '<br>';
+                outputElement.innerHTML = savedText;
             }
-        }
-    </script>
-
-<script>
-        let mediaRecorder;
-        let audioChunks = [];
-
-        const startButton = document.getElementById('startButton');
-        const stopButton = document.getElementById('stopButton');
-        const audioPlayer = document.getElementById('audioPlayer');
-
-        function startRecording() {
-            navigator.mediaDevices.getUserMedia({ audio: true })
-                .then(stream => {
-                    mediaRecorder = new MediaRecorder(stream);
-
-                    mediaRecorder.ondataavailable = event => {
-                        if (event.data.size > 0) {
-                            audioChunks.push(event.data);
-                        }
-                    };
-
-                    mediaRecorder.onstop = () => {
-                        const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
-                        const audioUrl = URL.createObjectURL(audioBlob);
-                        audioPlayer.src = audioUrl;
-                    };
-
-                    mediaRecorder.start();
-                    startButton.style.display = 'none';
-                    stopButton.style.display = 'inline-block';
-                })
-                .catch(error => console.error('Error al acceder al micrófono: ', error));
-        }
-
-        function stopRecording() {
-            mediaRecorder.stop();
-            startButton.style.display = 'inline-block';
-            stopButton.style.display = 'none';
-        }
-    </script>
+        }, 3000); // 3000 milisegundos = 3 segundos
+    }
+</script>
 </body>
 </html>
