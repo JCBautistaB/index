@@ -109,10 +109,12 @@
 
 <script>
     let recognition;
-    let savedText = document.getElementById('output').innerHTML; // Guardamos el contenido original del #output
+    let savedText = ''; // Inicializamos savedText vacío para empezar a grabar desde cero
     let isRecording = false;
     let recordingIndicator = document.getElementById('recording-indicator');
     let outputElement = document.getElementById('output');
+    let mediaRecorder;
+    let audioChunks = [];
 
     function toggleRecognition() {
         const microfonoElement = document.getElementById('microfono');
@@ -133,8 +135,7 @@
 
             recognition.onresult = function(event) {
                 const transcript = event.results[event.results.length - 1][0].transcript.toLowerCase();
-              
-                savedText += transcript.trim() + '.<br><br>'; 
+                savedText += transcript.trim() + '. '; // Agregamos un punto y espacio después de cada transcripción
                 outputElement.innerHTML = savedText; // Actualizamos el #output con el contenido actualizado
             };
 
