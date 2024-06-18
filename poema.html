@@ -1,4 +1,4 @@
-i<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -137,12 +137,8 @@ i<!DOCTYPE html>
             recognition.onresult = function(event) {
                 const transcript = event.results[event.results.length - 1][0].transcript.toLowerCase();
                 console.log('Transcripción: ', transcript);
-                savedText += transcript + ' ';
-                outputElement.innerHTML = savedText + '<br>'; // Añade un salto de línea
-                if (!isRecording) {
-                    savedText += '</p>'; // Añade </p> al final del texto
-                    outputElement.innerHTML = savedText;
-                }
+                savedText += transcript + ' '; // Agrega el texto reconocido
+                updateOutput(); // Actualiza el contenido de #output
             };
 
             recognition.onerror = function(event) {
@@ -170,6 +166,12 @@ i<!DOCTYPE html>
             recordingIndicator.style.display = 'none';
             isRecording = false;
         }
+    }
+
+    function updateOutput() {
+        // Agrega </p> al final de savedText para formar párrafos
+        const formattedText = savedText.trim() + '</p><br>';
+        outputElement.innerHTML = formattedText;
     }
 </script>
 
