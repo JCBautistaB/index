@@ -1,4 +1,4 @@
-h<!DOCTYPE html>
+i<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -138,8 +138,11 @@ h<!DOCTYPE html>
                 const transcript = event.results[event.results.length - 1][0].transcript.toLowerCase();
                 console.log('Transcripción: ', transcript);
                 savedText += transcript + ' ';
-                outputElement.innerHTML = savedText + '<br>';
-                resetSilenceTimeout(); // Reiniciar temporizador de silencio
+                outputElement.innerHTML = savedText + '<br>'; // Añade un salto de línea
+                if (!isRecording) {
+                    savedText += '</p>'; // Añade </p> al final del texto
+                    outputElement.innerHTML = savedText;
+                }
             };
 
             recognition.onerror = function(event) {
@@ -156,7 +159,6 @@ h<!DOCTYPE html>
                 estadoMicrofonoElement.textContent = 'Apagado';
                 recordingIndicator.style.display = 'none';
                 isRecording = false;
-                savedText += '<br>';
             };
 
             recognition.start();
@@ -169,15 +171,44 @@ h<!DOCTYPE html>
             isRecording = false;
         }
     }
+</script>
 
-    function resetSilenceTimeout() {
-        clearTimeout(silenceTimeout);
-        silenceTimeout = setTimeout(function() {
-            if (isRecording) {
-                savedText += '<br>';
-                outputElement.innerHTML = savedText;
-            }
-        }, 3000); // 3000 milisegundos = 3 segundos
+<script>
+    let mediaRecorder;
+    let audioChunks = [];
+
+    const startButton = document.getElementById('startButton');
+    const stopButton = document.getElementById('stopButton');
+    const audioPlayer = document.getElementById('audioPlayer');
+
+    function startRecording() {
+        navigator.mediaDevices.getUserMedia({ audio: true })
+            .then(stream => {
+                mediaRecorder = new MediaRecorder(stream);
+
+                mediaRecorder.ondataavailable = event => {
+                    if (event.data.size > 0) {
+                        audioChunks.push(event.data);
+                    }
+                };
+
+                mediaRecorder.onstop = () => {
+                    const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                    const audioUrl = URL.createObjectURL(audioBlob);
+                    audioPlayer.src = audioUrl;
+                };
+
+                mediaRecorder.start();
+                startButton.style.display = 'none';
+                stopButton.style.display = 'inline-block';
+            })
+            .catch(error => console.error('Error al acceder al micrófono: ', error));
+    }
+
+    function stopRecording() {
+        mediaRecorder.stop();
+        startButton.style.display = 'inline-block';
+        stopButton.style.display = 'none';
     }
 </script>
 </body>
