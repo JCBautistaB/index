@@ -1,4 +1,4 @@
-b<!DOCTYPE html>
+c<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -168,17 +168,18 @@ b<!DOCTYPE html>
         }
     }
     
-    function updateOutput() {
-    // Eliminar el punto al final del texto si existe
+  function updateOutput() {
+    // Eliminar el punto final (si existe)
     savedText = savedText.trim();
     if (savedText.endsWith('.')) {
         savedText = savedText.slice(0, -1); // Elimina el último punto
     }
-    // Concatenar '.-' al final de savedText para cumplir con el requisito
-    savedText += '.- ';
+    // Concatenar '.' y un salto de párrafo al final de savedText
+    savedText += '.<br><br>';
     outputElement.innerHTML += savedText;
 }
 
+    
 </script>
 
 <script>
