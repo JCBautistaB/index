@@ -87,37 +87,56 @@
             margin-bottom: 20px;
         }
         .news {
-            background-color: white;
+            
             padding: 20px;
             border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            
+        }
+        .news article {
+            margin-bottom: 20px;
+            border: 1px solid #2e7d32; /* Borde verde oscuro */
+            padding: 10px;
+            border-radius: 8px;
+box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Sombras */
+        }
+        .news article img {
+            max-width: 100%;
+            height: auto;
+        }
+        .news article h2 {
+            margin-top: 10px;
+            color: #2e7d32; /* Verde oscuro */
+        }
+        .news article h3 {
+            margin-top: 0;
+            color: #388e3c; /* Verde intermedio */
+            font-size: 16px;
         }
         .latest-news {
-            background-color: white;
+            
             padding: 20px;
             border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Sombras */
         }
         .ads {
             background-color: white;
             padding: 20px;
             border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Sombras */
         }
-        .news article, .latest-news article, .ads article {
+        .latest-news article, .ads article {
             margin-bottom: 20px;
         }
-        .news article img,
         .latest-news article img,
         .ads article img {
             max-width: 100%;
             height: auto;
         }
-        .news article h2, .latest-news article h2, .ads article h2 {
+        .latest-news article h2, .ads article h2 {
             margin-top: 10px;
             color: #2e7d32; /* Verde oscuro */
         }
-        .news article h3, .latest-news article h3, .ads article h3 {
+        .latest-news article h3, .ads article h3 {
             margin-top: 0;
             color: #388e3c; /* Verde intermedio */
             font-size: 16px;
@@ -208,11 +227,6 @@
             <article>
                 <img src="https://images.telediario.mx/RS4g19NFNDh0llcgCz7VYW3bug0=/948x533/uploads/media/2023/04/28/moctezuma-ii-emperador-mexica.jpg" alt="imagen">
                 <h2>Título de la Última Noticia 2</h2>
-                <p>Resumen de la noticia. <a href="#">Leer más</a></p>
-            </article>
-            <article>
-                <img src="https://images.telediario.mx/RS4g19NFNDh0llcgCz7VYW3bug0=/948x533/uploads/media/2023/04/28/moctezuma-ii-emperador-mexica.jpg" alt="imagen">
-                <h2>Título de la Última Noticia 3</h2>
                 <p>Resumen de la noticia. <a href="#">Leer más</a></p>
             </article>
         </section>
