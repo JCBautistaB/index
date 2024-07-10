@@ -1,5 +1,214 @@
-Inicio
-Noticias
-Deportes
-Entretenimiento
-Contacto
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Noticias con Dany</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        header {
+            background-color: #2e7d32; /* Verde oscuro */
+            color: white;
+            padding: 20px 0;
+            text-align: center;
+            position: relative; /* Añadido para alinear el buscador */
+        }
+        header h1 {
+            margin-bottom: 10px;
+        }
+        .search-form {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        .search-form input[type="text"] {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            width: 250px;
+            margin-right: 10px;
+            font-size: 16px;
+        }
+        .search-form button {
+            padding: 12px 24px;
+            background-color: #4caf50; /* Verde */
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+        .search-form button:hover {
+            background-color: #388e3c; /* Verde intermedio */
+        }
+        nav ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            background-color: #388e3c; /* Verde intermedio */
+        }
+        nav ul li {
+            margin: 0 15px;
+        }
+        nav ul li a {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+            padding: 12px 24px;
+            border: 1px solid transparent;
+            border-radius: 4px;
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+        }
+        nav ul li a:hover {
+            background-color: white;
+            color: #2e7d32; /* Verde oscuro */
+            border-color: white;
+        }
+        main {
+            display: flex;
+            justify-content: space-between;
+            padding: 20px;
+            flex-wrap: wrap;
+        }
+        .news, .latest-news, .ads {
+            flex: 1;
+            margin: 10px;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .news article, .latest-news article, .ads article {
+            margin-bottom: 20px;
+        }
+        .news article img,
+        .latest-news article img,
+        .ads article img {
+            max-width: 100%;
+            height: auto;
+        }
+        .news article h2, .latest-news article h2, .ads article h2 {
+            margin-top: 10px;
+            color: #2e7d32; /* Verde oscuro */
+        }
+        .news article h3, .latest-news article h3, .ads article h3 {
+            margin-top: 0;
+            color: #388e3c; /* Verde intermedio */
+            font-size: 16px;
+        }
+        footer {
+            background-color: #2e7d32; /* Verde oscuro */
+            color: white;
+            text-align: center;
+            padding: 20px 0;
+            margin-top: 20px;
+        }
+        @media (max-width: 768px) {
+            nav ul {
+                display: none;
+                flex-direction: column;
+                align-items: center;
+                background-color: #388e3c; /* Verde intermedio */
+            }
+            nav ul li {
+                margin: 10px 0;
+            }
+            nav ul.showing {
+                display: flex;
+            }
+            .menu-toggle {
+                display: block;
+                position: absolute;
+                top: 20px;
+                right: 20px;
+            }
+            main {
+                flex-direction: column;
+            }
+            .news, .latest-news, .ads {
+                margin: 10px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Noticias con Dany</h1>
+        <form action="#" method="get" class="search-form">
+            <input type="text" name="search" id="search" placeholder="Buscar noticias...">
+            <button type="submit">Buscar</button>
+        </form>
+        <nav>
+            <div class="menu-toggle" onclick="toggleMenu()">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+            <ul id="menu">
+                <li><a href="#">Inicio</a></li>
+                <li><a href="#">Noticias</a></li>
+                <li><a href="#">Deportes</a></li>
+                <li><a href="#">Entretenimiento</a></li>
+                <li><a href="#">Contacto</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <section class="news">
+            <article>
+                <img src="https://images.telediario.mx/RS4g19NFNDh0llcgCz7VYW3bug0=/948x533/uploads/media/2023/04/28/moctezuma-ii-emperador-mexica.jpg" alt="imagen">
+                <h2>Título de la Noticia</h2>
+                <p>Resumen de la noticia. <a href="#">Leer más</a></p>
+            </article>
+            <article>
+                <img src="https://images.telediario.mx/RS4g19NFNDh0llcgCz7VYW3bug0=/948x533/uploads/media/2023/04/28/moctezuma-ii-emperador-mexica.jpg" alt="imagen">
+                <h2>Título de la Noticia</h2>
+                <p>Resumen de la noticia. <a href="#">Leer más</a></p>
+            </article>
+        </section>
+        <section class="latest-news">
+            <h3>Últimas Noticias</h3>
+            <article>
+                <img src="https://images.telediario.mx/RS4g19NFNDh0llcgCz7VYW3bug0=/948x533/uploads/media/2023/04/28/moctezuma-ii-emperador-mexica.jpg" alt="imagen">
+                <h2>Título de la Noticia</h2>
+                <p>Resumen de la noticia. <a href="#">Leer más</a></p>
+            </article>
+            <article>
+                <img src="https://images.telediario.mx/RS4g19NFNDh0llcgCz7VYW3bug0=/948x533/uploads/media/2023/04/28/moctezuma-ii-emperador-mexica.jpg" alt="imagen">
+                <h2>Título de la Noticia</h2>
+                <p>Resumen de la noticia. <a href="#">Leer más</a></p>
+            </article>
+        </section>
+        <section class="ads">
+            <h3>Publicidad</h3>
+            <article>
+                <h2>Producto o Servicio</h2>
+                <p>Descripción del producto o servicio. <a href="#">Más info</a></p>
+            </article>
+            <article>
+                <h2>Producto o Servicio</h2>
+                <p>Descripción del producto o servicio. <a href="#">Más info</a></p>
+            </article>
+        </section>
+    </main>
+    <footer>
+        <p>&copy; 2024 Noticias con Dany. Todos los derechos reservados.</p>
+    </footer>
+    <script>
+        function toggleMenu() {
+            var menu = document.getElementById('menu');
+            menu.classList.toggle('showing');
+        }
+    </script>
+</body>
+</html>
