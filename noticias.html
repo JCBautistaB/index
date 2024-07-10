@@ -84,7 +84,21 @@
         }
         .news, .latest-news, .ads {
             flex: 1;
-            margin: 10px;
+            margin-bottom: 20px;
+        }
+        .news {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .latest-news {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .ads {
             background-color: white;
             padding: 20px;
             border-radius: 8px;
@@ -139,6 +153,7 @@
             }
             .news, .latest-news, .ads {
                 margin: 10px 0;
+                flex-basis: 100%; /* Ocupar todo el ancho en pantallas pequeñas */
             }
         }
     </style>
@@ -169,12 +184,17 @@
         <section class="news">
             <article>
                 <img src="https://images.telediario.mx/RS4g19NFNDh0llcgCz7VYW3bug0=/948x533/uploads/media/2023/04/28/moctezuma-ii-emperador-mexica.jpg" alt="imagen">
-                <h2>Título de la Noticia</h2>
+                <h2>Título de la Noticia 1</h2>
                 <p>Resumen de la noticia. <a href="#">Leer más</a></p>
             </article>
             <article>
                 <img src="https://images.telediario.mx/RS4g19NFNDh0llcgCz7VYW3bug0=/948x533/uploads/media/2023/04/28/moctezuma-ii-emperador-mexica.jpg" alt="imagen">
-                <h2>Título de la Noticia</h2>
+                <h2>Título de la Noticia 2</h2>
+                <p>Resumen de la noticia. <a href="#">Leer más</a></p>
+            </article>
+            <article>
+                <img src="https://images.telediario.mx/RS4g19NFNDh0llcgCz7VYW3bug0=/948x533/uploads/media/2023/04/28/moctezuma-ii-emperador-mexica.jpg" alt="imagen">
+                <h2>Título de la Noticia 3</h2>
                 <p>Resumen de la noticia. <a href="#">Leer más</a></p>
             </article>
         </section>
@@ -182,23 +202,28 @@
             <h3>Últimas Noticias</h3>
             <article>
                 <img src="https://images.telediario.mx/RS4g19NFNDh0llcgCz7VYW3bug0=/948x533/uploads/media/2023/04/28/moctezuma-ii-emperador-mexica.jpg" alt="imagen">
-                <h2>Título de la Noticia</h2>
+                <h2>Título de la Última Noticia 1</h2>
                 <p>Resumen de la noticia. <a href="#">Leer más</a></p>
             </article>
             <article>
                 <img src="https://images.telediario.mx/RS4g19NFNDh0llcgCz7VYW3bug0=/948x533/uploads/media/2023/04/28/moctezuma-ii-emperador-mexica.jpg" alt="imagen">
-                <h2>Título de la Noticia</h2>
+                <h2>Título de la Última Noticia 2</h2>
+                <p>Resumen de la noticia. <a href="#">Leer más</a></p>
+            </article>
+            <article>
+                <img src="https://images.telediario.mx/RS4g19NFNDh0llcgCz7VYW3bug0=/948x533/uploads/media/2023/04/28/moctezuma-ii-emperador-mexica.jpg" alt="imagen">
+                <h2>Título de la Última Noticia 3</h2>
                 <p>Resumen de la noticia. <a href="#">Leer más</a></p>
             </article>
         </section>
         <section class="ads">
             <h3>Publicidad</h3>
             <article>
-                <h2>Producto o Servicio</h2>
+                <h2>Producto o Servicio 1</h2>
                 <p>Descripción del producto o servicio. <a href="#">Más info</a></p>
             </article>
             <article>
-                <h2>Producto o Servicio</h2>
+                <h2>Producto o Servicio 2</h2>
                 <p>Descripción del producto o servicio. <a href="#">Más info</a></p>
             </article>
         </section>
