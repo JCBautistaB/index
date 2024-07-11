@@ -1,1 +1,353 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Noticias con Dany</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        header {
+            background-color: #2e7d32;
+            color: white;
+            padding: 20px 0;
+            text-align: center;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 20px;
+        }
+        header h1 {
+            margin: 0;
+            display: flex;
+            align-items: center;
+        }
+        header h1 i {
+            margin-right: 10px;
+        }
+        .social-icons {
+            display: flex;
+            align-items: center;
+        }
+        .social-icons a {
+            color: #2e7d32;
+            text-decoration: none;
+            font-size: 20px;
+            margin-left: 10px;
+        }
+        .social-icons a:hover {
+            color: #388e3c;
+        }
+        .search-form {
+            display: flex;
+            align-items: center;
+            width: 100%;
+        }
+        .search-form input[type="text"] {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            width: 100%;
+            margin-right: 10px;
+            font-size: 16px;
+        }
+        .search-form button {
+            padding: 12px;
+            background-color: #4caf50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .search-form button:hover {
+            background-color: #388e3c;
+        }
+        .search-form button i {
+            font-size: 20px;
+        }
+        nav ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            background-color: #388e3c;
+        }
+        nav ul li {
+            margin: 0 15px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        nav ul li a {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+            padding: 10px 15px;
+            display: block;
+        }
+        nav ul li:hover {
+            background-color: #2e7d32;
+        }
+        .menu-toggle {
+            display: none;
+            cursor: pointer;
+        }
+        .menu-toggle span {
+            background: white;
+            display: block;
+            height: 3px;
+            width: 25px;
+            margin: 5px 0;
+        }
+        main {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        .ad-banner {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .ad-banner img {
+            max-width: 100%;
+            height: auto;
+        }
+        .content {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            width: 100%;
+        }
+        .column {
+            flex: 1;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .news, .latest-news, .ads, .form-container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            width: 100%;
+        }
+        .news article, .latest-news article, .ads article {
+            margin-bottom: 20px;
+        }
+        .news article img, .latest-news article img, .ads article img {
+            max-width: 100%;
+            height: auto;
+        }
+        .news article h2, .latest-news article h2, .ads article h2 {
+            margin-top: 10px;
+            color: #2e7d32;
+        }
+        .news article p, .latest-news article p, .ads article p {
+            color: #388e3c;
+        }
+        footer {
+            background-color: #2e7d32;
+            color: white;
+            text-align: center;
+            padding: 20px 0;
+            margin-top: 20px;
+        }
+        @media (max-width: 768px) {
+            nav ul {
+                display: none;
+                flex-direction: column;
+                align-items: center;
+                background-color: #388e3c;
+            }
+            nav ul li {
+                margin: 10px 0;
+            }
+            nav ul.showing {
+                display: flex;
+            }
+            .menu-toggle {
+                display: block;
+                position: absolute;
+                top: 20px;
+                right: 20px;
+            }
+            .content {
+                flex-direction: column;
+            }
+            .column {
+                margin: 10px 0;
+                flex-basis: 100%;
+            }
+            header {
+                flex-direction: column;
+            }
+        }
+        .form-container h2 {
+            color: #2e7d32;
+        }
+        .form-container form {
+            display: flex;
+            flex-direction: column;
+        }
+        .form-container form label {
+            margin: 10px 0 5px;
+            font-weight: bold;
+        }
+        .form-container form input[type="text"],
+        .form-container form textarea,
+        .form-container form input[type="file"],
+        .form-container form input[type="date"],
+        .form-container form input[type="time"],
+        .form-container form input[type="number"],
+        .form-container form select {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+        .form-container form button {
+            padding: 12px;
+            background-color: #4caf50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+        .form-container form button:hover {
+            background-color: #388e3c;
+        }
+    </style>
+    <!-- Enlace a Font Awesome para los iconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <header>
+        <h1><i class="fas fa-newspaper"></i> Noticias con Dany</h1>
+        <div class="social-icons">
+            <a href="#"><i class="fab fa-facebook"></i></a>
+            <a href="#"><i class="fab fa-twitter"></i></a>
+            <a href="#"><i class="fab fa-instagram"></i></a>
+        </div>
+    </header>
+    <nav>
+        <div class="menu-toggle" onclick="toggleMenu()">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+        <ul id="menu">
+            <li><a href="#noticias">Noticias</a></li>
+            <li><a href="#politica">Política</a></li>
+            <li><a href="#deportes">Deportes</a></li>
+            <li><a href="#">Entretenimiento</a></li>
+            <li><a href="#">Nota Roja</a></li>
+        </ul>
+    </nav>
+    <main>
+        <div class="form-container">
+            <h2>Subir Nota Periodística</h2>
+            <form action="#" method="post" enctype="multipart/form-data">
+                <label for="title">Título:</label>
+                <input type="text" id="title" name="title" required>
 
+                <label for="subtitle">Subtítulo:</label>
+                <input type="text" id="subtitle" name="subtitle">
+
+                <label for="link_title">Título del enlace:</label>
+                <input type="text" id="link_title" name="link_title">
+
+                <label for="author">Autor:</label>
+                <input type="text" id="author" name="author" required>
+
+                <label for="photographer">Fotógrafo:</label>
+                <input type="text" id="photographer" name="photographer">
+
+                <label for="date">Fecha:</label>
+                <input type="date" id="date" name="date" required>
+
+                <label for="time">Hora:</label>
+                <input type="time" id="time" name="time" required>
+
+                <label for="id">ID:</label>
+                <input type="text" id="id" name="id" required>
+
+                <label for="category">Categoría:</label>
+                <select id="category" name="category" required>
+                    <option value="noticias">Noticias</option>
+                    <option value="politica">Política</option>
+                    <option value="deportes">Deportes</option>
+                    <option value="entretenimiento">Entretenimiento</option>
+                    <option value="nota-roja">Nota Roja</option>
+                    <option value="podcast">Podcast</option>
+                    <option value="otros">Otros</option>
+                </select>
+
+                <label for="tags">Etiquetas:</label>
+                <input type="text" id="tags" name="tags" placeholder="Ej: economía, deportes, cultura">
+
+                <label for="visits">Número de visitas:</label>
+                <input type="number" id="visits" name="visits" min="0" value="0">
+
+                <label for="content">Contenido:</label>
+                <textarea id="content" name="content" rows="10" required></textarea>
+
+                <label for="image">Imagen:</label>
+                <input type="file" id="image" name="image" accept="image/*">
+
+                <label for="video">Video:</label>
+                <input type="file" id="video" name="video" accept="video/*">
+
+                <label for="audio">Audio:</label>
+                <input type="file" id="audio" name="audio" accept="audio/*">
+
+                <button type="submit">Subir Nota</button>
+            </form>
+        </div>
+
+        <section id="noticias" class="content">
+            <h2><i class="fas fa-globe"></i> Noticias</h2>
+            <div class="column news">
+                <!-- Contenido de Noticias -->
+            </div>
+        </section>
+
+        <section id="politica" class="content">
+            <h2><i class="fas fa-balance-scale"></i> Política</h2>
+            <div class="column latest-news">
+                <!-- Contenido de Política -->
+            </div>
+        </section>
+
+        <section id="deportes" class="content">
+            <h2><i class="fas fa-football-ball"></i> Deportes</h2>
+            <div class="column latest-news">
+                <!-- Contenido de Deportes -->
+            </div>
+        </section>
+    </main>
+    <footer>
+        <p>© 2024 Noticias con Dany. Todos los derechos reservados.</p>
+    </footer>
+
+    <script>
+        function toggleMenu() {
+            const menu = document.getElementById('menu');
+            menu.classList.toggle('showing');
+        }
+    </script>
+</body>
+</html>
