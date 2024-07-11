@@ -85,11 +85,17 @@
         }
         nav ul li {
             margin: 0 15px;
+            transition: background-color 0.3s ease, color 0.3s ease; /* Transiciones */
         }
         nav ul li a {
             color: white;
             text-decoration: none;
             font-weight: bold;
+            padding: 10px 15px; /* Espacio alrededor del texto */
+            display: block;
+        }
+        nav ul li:hover {
+            background-color: #2e7d32; /* Cambio de color en hover */
         }
         .menu-toggle {
             display: none;
@@ -204,7 +210,7 @@
 <body>
     <header>
         <h1><i class="fas fa-newspaper"></i> Noticias con Dany</h1>
-       
+        
     </header>
     <nav>
         <div class="menu-toggle" onclick="toggleMenu()">
@@ -222,18 +228,20 @@
     </nav>
     <main>
         <section class="news">
+            
 
- <div class="social-icons">
+<div class="social-icons">
             <a href="#"><i class="fab fa-facebook" style="color: #2e7d32;"></i></a>
             <a href="#"><i class="fab fa-twitter" style="color: #2e7d32;"></i></a>
-            <a href="#"><i class="fab fa-youtube" style="color: #2e7d32;"></i></a>
+            <a href="#"><i class="fab fa-instagram" style="color: #2e7d32;"></i></a>
         
         <form action="#" method="get" class="search-form">
             <input type="text" name="search" id="search" placeholder="Buscar noticias...">
             <button type="submit"><i class="fas fa-search"></i></button>
         </form></div>
 
-            <article>
+<article>
+
                 <img src="https://images.telediario.mx/RS4g19NFNDh0llcgCz7VYW3bug0=/948x533/uploads/media/2023/04/28/moctezuma-ii-emperador-mexica.jpg" alt="imagen">
                 <h2>Título de la Noticia 1</h2>
                 <p>Resumen de la noticia. <a href="#">Leer más</a></p>
