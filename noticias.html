@@ -37,7 +37,7 @@
             font-size: 16px;
         }
         .search-form button {
-            padding: 12px 24px;
+            padding: 12px;
             background-color: #4caf50; /* Verde */
             color: white;
             border: none;
@@ -45,9 +45,15 @@
             cursor: pointer;
             font-size: 16px;
             transition: background-color 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         .search-form button:hover {
             background-color: #388e3c; /* Verde intermedio */
+        }
+        .search-form button i {
+            font-size: 20px; /* Tamaño del icono */
         }
         nav ul {
             list-style-type: none;
@@ -87,17 +93,15 @@
             margin-bottom: 20px;
         }
         .news {
-            
             padding: 20px;
             border-radius: 8px;
-            
         }
         .news article {
             margin-bottom: 20px;
             border: 1px solid #2e7d32; /* Borde verde oscuro */
             padding: 10px;
             border-radius: 8px;
-box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Sombras */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Sombras */
         }
         .news article img {
             max-width: 100%;
@@ -107,13 +111,10 @@ box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Sombras */
             margin-top: 10px;
             color: #2e7d32; /* Verde oscuro */
         }
-        .news article h3 {
-            margin-top: 0;
+        .news article p {
             color: #388e3c; /* Verde intermedio */
-            font-size: 16px;
         }
         .latest-news {
-            
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Sombras */
@@ -136,10 +137,8 @@ box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Sombras */
             margin-top: 10px;
             color: #2e7d32; /* Verde oscuro */
         }
-        .latest-news article h3, .ads article h3 {
-            margin-top: 0;
+        .latest-news article p, .ads article p {
             color: #388e3c; /* Verde intermedio */
-            font-size: 16px;
         }
         footer {
             background-color: #2e7d32; /* Verde oscuro */
@@ -176,13 +175,15 @@ box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Sombras */
             }
         }
     </style>
+    <!-- Enlace a Font Awesome para los iconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
     <header>
         <h1>Noticias con Dany</h1>
         <form action="#" method="get" class="search-form">
             <input type="text" name="search" id="search" placeholder="Buscar noticias...">
-            <button type="submit">Buscar</button>
+            <button type="submit"><i class="fas fa-search"></i></button>
         </form>
         <nav>
             <div class="menu-toggle" onclick="toggleMenu()">
