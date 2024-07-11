@@ -47,12 +47,13 @@
         .search-form {
             display: flex;
             align-items: center;
+            width: 100%;
         }
         .search-form input[type="text"] {
             padding: 10px;
             border: 1px solid #ccc;
             border-radius: 4px;
-            width: 250px;
+            width: 100%;
             margin-right: 10px;
             font-size: 16px;
         }
@@ -110,60 +111,48 @@
         }
         main {
             display: flex;
-            justify-content: space-between;
+            flex-direction: column;
+            align-items: center;
             padding: 20px;
-            flex-wrap: wrap;
         }
-        .news, .latest-news, .ads {
-            flex: 1;
+        .ad-banner {
+            text-align: center;
             margin-bottom: 20px;
         }
-        .news {
-            padding: 20px;
-            border-radius: 8px;
-        }
-        .news article {
-            margin-bottom: 20px;
-            border: 1px solid #2e7d32; /* Borde verde oscuro */
-            padding: 10px;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Sombras */
-        }
-        .news article img {
+        .ad-banner img {
             max-width: 100%;
             height: auto;
         }
-        .news article h2 {
-            margin-top: 10px;
-            color: #2e7d32; /* Verde oscuro */
+        .content {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            width: 100%;
         }
-        .news article p {
-            color: #388e3c; /* Verde intermedio */
-        }
-        .latest-news {
+        .column {
+            flex: 1;
             padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Sombras */
+            box-sizing: border-box;
         }
-        .ads {
+        .news, .latest-news, .ads {
             background-color: white;
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Sombras */
-        }
-        .latest-news article, .ads article {
             margin-bottom: 20px;
         }
-        .latest-news article img,
-        .ads article img {
+        .news article, .latest-news article, .ads article {
+            margin-bottom: 20px;
+        }
+        .news article img, .latest-news article img, .ads article img {
             max-width: 100%;
             height: auto;
         }
-        .latest-news article h2, .ads article h2 {
+        .news article h2, .latest-news article h2, .ads article h2 {
             margin-top: 10px;
             color: #2e7d32; /* Verde oscuro */
         }
-        .latest-news article p, .ads article p {
+        .news article p, .latest-news article p, .ads article p {
             color: #388e3c; /* Verde intermedio */
         }
         footer {
@@ -192,10 +181,10 @@
                 top: 20px;
                 right: 20px;
             }
-            main {
+            .content {
                 flex-direction: column;
             }
-            .news, .latest-news, .ads {
+            .column {
                 margin: 10px 0;
                 flex-basis: 100%; /* Ocupar todo el ancho en pantallas pequeñas */
             }
@@ -210,7 +199,6 @@
 <body>
     <header>
         <h1><i class="fas fa-newspaper"></i> Noticias con Dany</h1>
-        
     </header>
     <nav>
         <div class="menu-toggle" onclick="toggleMenu()">
@@ -219,72 +207,127 @@
             <span></span>
         </div>
         <ul id="menu">
-            <li><a href="#">Inicio</a></li>
             <li><a href="#">Noticias</a></li>
+            <li><a href="#">Política</a></li>
             <li><a href="#">Deportes</a></li>
             <li><a href="#">Entretenimiento</a></li>
-            <li><a href="#">Contacto</a></li>
+            <li><a href="#">Nota Roja</a></li>
         </ul>
     </nav>
     <main>
-        <section class="news">
+        <div class="ad-banner">
+            <img src="https://noticiasconmoctezuma.com/wp-content/uploads/2024/06/728-x-90.gif" alt="Publicidad">
+        </div>
+        <div class="content">
+            <section class="column news">
+                <form action="#" method="get" class="search-form">
+                    <input type="text" name="search" id="search" placeholder="Buscar noticias...">
+                    <button type="submit"><i class="fas fa-search"></i></button>
+                </form>
+                <article>
+ <img src="https://images.telediario.mx/RS4g19NFNDh0llcgCz7VYW3bug0=/948x533/uploads/media/2023/04/28/moctezuma-ii-emperador-mexica.jpg" alt="imagen">
+                    <h2>Título de la Noticia 1</h2>
 
-        
-        <form action="#" method="get" class="search-form">
-            <input type="text" name="search" id="search" placeholder="Buscar noticias...">
-            <button type="submit"><i class="fas fa-search"></i></button>
-        </form>
+                    <p>Resumen de la noticia. <a href="#">Leer más</a></p>
+                </article>
+                            </section>
+            <section class="column latest-news">
+                <h3>Últimas Noticias</h3>
+                <article>
+                    <img src="https://images.telediario.mx/RS4g19NFNDh0llcgCz7VYW3bug0=/948x533/uploads/media/2023/04/28/moctezuma-ii-emperador-mexica.jpg" alt="imagen">
+                    <h2>Título de la Última Noticia 1</h2>
+                    <p>Resumen de la noticia. <a href="#">Leer más</a></p>
+              </section>
+<section class="column ads">
+    <h3>Publicidad</h3>
+    <article>
+        <h2>Producto o Servicio 1</h2>
+        <p>Descripción del producto o servicio. <a href="#">Más info</a></p>
+    </article>
+   </section>
+</div>
 
-<article>
+<div class="ad-banner">
+            <img src="https://noticiasconmoctezuma.com/wp-content/uploads/2024/06/728-X-90-1.gif" alt="Publicidad">
+        </div>
+        <div class="content">
+            <section class="column news">
+                <form action="#" method="get" class="search-form">
+                    <input type="text" name="search" id="search" placeholder="Buscar noticias...">
+                    <button type="submit"><i class="fas fa-search"></i></button>
+                </form>
+                <article>
+ <img src="https://images.telediario.mx/RS4g19NFNDh0llcgCz7VYW3bug0=/948x533/uploads/media/2023/04/28/moctezuma-ii-emperador-mexica.jpg" alt="imagen">
+                    <h2>Título de la Noticia 1</h2>
 
-                <img src="https://images.telediario.mx/RS4g19NFNDh0llcgCz7VYW3bug0=/948x533/uploads/media/2023/04/28/moctezuma-ii-emperador-mexica.jpg" alt="imagen">
-                <h2>Título de la Noticia 1</h2>
-                <p>Resumen de la noticia. <a href="#">Leer más</a></p>
-            </article>
-            <article>
-                <img src="https://images.telediario.mx/RS4g19NFNDh0llcgCz7VYW3bug0=/948x533/uploads/media/2023/04/28/moctezuma-ii-emperador-mexica.jpg" alt="imagen">
-                <h2>Título de la Noticia 2</h2>
-                <p>Resumen de la noticia. <a href="#">Leer más</a></p>
-            </article>
-            <article>
-                <img src="https://images.telediario.mx/RS4g19NFNDh0llcgCz7VYW3bug0=/948x533/uploads/media/2023/04/28/moctezuma-ii-emperador-mexica.jpg" alt="imagen">
-                <h2>Título de la Noticia 3</h2>
-                <p>Resumen de la noticia. <a href="#">Leer más</a></p>
-            </article>
-        </section>
-        <section class="latest-news">
-            <h3>Últimas Noticias</h3>
-            <article>
-                <img src="https://images.telediario.mx/RS4g19NFNDh0llcgCz7VYW3bug0=/948x533/uploads/media/2023/04/28/moctezuma-ii-emperador-mexica.jpg" alt="imagen">
-                <h2>Título de la Última Noticia 1</h2>
-                <p>Resumen de la noticia. <a href="#">Leer más</a></p>
-            </article>
-            <article>
-                <img src="https://images.telediario.mx/RS4g19NFNDh0llcgCz7VYW3bug0=/948x533/uploads/media/2023/04/28/moctezuma-ii-emperador-mexica.jpg" alt="imagen">
-                <h2>Título de la Última Noticia 2</h2>
-                <p>Resumen de la noticia. <a href="#">Leer más</a></p>
-            </article>
-        </section>
-        <section class="ads">
-            <h3>Publicidad</h3>
-            <article>
-                <h2>Producto o Servicio 1</h2>
-                <p>Descripción del producto o servicio. <a href="#">Más info</a></p>
-            </article>
-            <article>
-                <h2>Producto o Servicio 2</h2>
-                <p>Descripción del producto o servicio. <a href="#">Más info</a></p>
-            </article>
-        </section>
-    </main>
-    <footer>
-        <p>&copy; 2024 Noticias con Dany. Todos los derechos reservados.</p>
-    </footer>
-    <script>
-        function toggleMenu() {
-            var menu = document.getElementById('menu');
-            menu.classList.toggle('showing');
-        }
-    </script>
+                    <p>Resumen de la noticia. <a href="#">Leer más</a></p>
+                </article>
+                            </section>
+            <section class="column latest-news">
+                <h3>Últimas Noticias</h3>
+                <article>
+                    <img src="https://images.telediario.mx/RS4g19NFNDh0llcgCz7VYW3bug0=/948x533/uploads/media/2023/04/28/moctezuma-ii-emperador-mexica.jpg" alt="imagen">
+                    <h2>Título de la Última Noticia 1</h2>
+                    <p>Resumen de la noticia. <a href="#">Leer más</a></p>
+              </section>
+<section class="column ads">
+    <h3>Publicidad</h3>
+    <article>
+        <h2>Producto o Servicio 1</h2>
+        <p>Descripción del producto o servicio. <a href="#">Más info</a></p>
+    </article>
+   </section>
+</div>
+
+<div class="ad-banner">
+            <img src="https://noticiasconmoctezuma.com/wp-content/uploads/2024/06/728-x-90-2.gif" alt="Publicidad">
+        </div>
+
+
+        <div class="content">
+            <section class="column news">
+                <form action="#" method="get" class="search-form">
+                    <input type="text" name="search" id="search" placeholder="Buscar noticias...">
+                    <button type="submit"><i class="fas fa-search"></i></button>
+                </form>
+                <article>
+ <img src="https://images.telediario.mx/RS4g19NFNDh0llcgCz7VYW3bug0=/948x533/uploads/media/2023/04/28/moctezuma-ii-emperador-mexica.jpg" alt="imagen">
+                    <h2>Título de la Noticia 1</h2>
+
+                    <p>Resumen de la noticia. <a href="#">Leer más</a></p>
+                </article>
+                            </section>
+            <section class="column latest-news">
+                <h3>Últimas Noticias</h3>
+                <article>
+                    <img src="https://images.telediario.mx/RS4g19NFNDh0llcgCz7VYW3bug0=/948x533/uploads/media/2023/04/28/moctezuma-ii-emperador-mexica.jpg" alt="imagen">
+                    <h2>Título de la Última Noticia 1</h2>
+                    <p>Resumen de la noticia. <a href="#">Leer más</a></p>
+              </section>
+<section class="column ads">
+    <h3>Publicidad</h3>
+    <article>
+        <h2>Producto o Servicio 1</h2>
+        <p>Descripción del producto o servicio. <a href="#">Más info</a></p>
+    </article>
+   </section>
+</div>
+
+<div class="ad-banner">
+            <img src="https://noticiasconmoctezuma.com/wp-content/uploads/2024/06/728-x-90-4.gif" alt="Publicidad">
+        </div>
+
+
+</main>
+<footer>
+    <p>&copy; 2024 Noticias con Dany. Todos los derechos reservados.</p>
+</footer>
+<script>
+function toggleMenu() {
+    var menu = document.getElementById('menu');
+    menu.classList.toggle('showing');
+}
+</script>
 </body>
 </html>
+
