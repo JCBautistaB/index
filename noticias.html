@@ -15,24 +15,25 @@
         header {
             background-color: #2e7d32; /* Verde oscuro */
             color: white;
-            padding: 20px;
+            padding: 20px 0;
+            text-align: center;
+            position: relative; /* Añadido para alinear el buscador */
             display: flex;
-            justify-content: space-between;
             align-items: center;
+            justify-content: space-between;
+            padding: 10px 20px; /* Ajuste de padding para un diseño más compacto */
         }
         header h1 {
             margin: 0;
             display: flex;
             align-items: center;
         }
-        header h1 img {
+        header h1 i {
             margin-right: 10px;
         }
         .search-form {
             display: flex;
             align-items: center;
-            flex-grow: 1;
-            justify-content: center;
         }
         .search-form input[type="text"] {
             padding: 10px;
@@ -43,7 +44,7 @@
             font-size: 16px;
         }
         .search-form button {
-            padding: 12px 24px;
+            padding: 12px;
             background-color: #4caf50; /* Verde */
             color: white;
             border: none;
@@ -51,12 +52,15 @@
             cursor: pointer;
             font-size: 16px;
             transition: background-color 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         .search-form button:hover {
             background-color: #388e3c; /* Verde intermedio */
         }
-        .login-icon {
-            margin-left: 20px;
+        .search-form button i {
+            font-size: 20px; /* Tamaño del icono */
         }
         nav ul {
             list-style-type: none;
@@ -176,26 +180,21 @@
                 margin: 10px 0;
                 flex-basis: 100%; /* Ocupar todo el ancho en pantallas pequeñas */
             }
+            header {
+                flex-direction: column;
+            }
         }
     </style>
+    <!-- Enlace a Font Awesome para los iconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
     <header>
-        <div class="header-left">
-            <h1>
-                <img src="https://image.flaticon.com/icons/png/512/60/60577.png" alt="icono de noticias" width="30" height="30">
-                Noticias con Dany
-            </h1>
-        </div>
+        <h1><i class="fas fa-newspaper"></i> Noticias con Dany</h1>
         <form action="#" method="get" class="search-form">
             <input type="text" name="search" id="search" placeholder="Buscar noticias...">
-            <button type="submit">Buscar</button>
+            <button type="submit"><i class="fas fa-search"></i></button>
         </form>
-        <div class="login-icon">
-            <a href="#">
-                <img src="https://image.flaticon.com/icons/png/512/1828/1828506.png" alt="icono de login" width="30" height="30">
-            </a>
-        </div>
     </header>
     <nav>
         <div class="menu-toggle" onclick="toggleMenu()">
