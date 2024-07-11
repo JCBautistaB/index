@@ -31,6 +31,19 @@
         header h1 i {
             margin-right: 10px;
         }
+        .social-icons {
+            display: flex;
+            align-items: center;
+        }
+        .social-icons a {
+            color: white;
+            text-decoration: none;
+            font-size: 20px;
+            margin-left: 10px;
+        }
+        .social-icons a:hover {
+            color: #ddd; /* Color de hover */
+        }
         .search-form {
             display: flex;
             align-items: center;
@@ -191,10 +204,7 @@
 <body>
     <header>
         <h1><i class="fas fa-newspaper"></i> Noticias con Dany</h1>
-        <form action="#" method="get" class="search-form">
-            <input type="text" name="search" id="search" placeholder="Buscar noticias...">
-            <button type="submit"><i class="fas fa-search"></i></button>
-        </form>
+       
     </header>
     <nav>
         <div class="menu-toggle" onclick="toggleMenu()">
@@ -212,6 +222,16 @@
     </nav>
     <main>
         <section class="news">
+ <div class="social-icons">
+            <a href="#"><i class="fab fa-facebook"></i></a>
+            <a href="#"><i class="fab fa-twitter"></i></a>
+            <a href="#"><i class="fab fa-instagram"></i></a>
+<a href="#"><i class="fab fa-youtube"></i></a> 
+        
+        <form action="#" method="get" class="search-form">
+            <input type="text" name="search" id="search" placeholder="Buscar noticias...">
+            <button type="submit"><i class="fas fa-search"></i></button>
+        </form></div>
             <article>
                 <img src="https://images.telediario.mx/RS4g19NFNDh0llcgCz7VYW3bug0=/948x533/uploads/media/2023/04/28/moctezuma-ii-emperador-mexica.jpg" alt="imagen">
                 <h2>Título de la Noticia 1</h2>
