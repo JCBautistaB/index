@@ -258,150 +258,185 @@
         </ul>
     </nav>
     <main>
-        <div class="form-container">
-            <h2>Subir una Nota Periodística</h2>
-            <form action="#" method="post" enctype="multipart/form-data">
+        
+       
+<h2>Formulario de Noticias</h2>
+    <form>
+        <ul class="form-list">
+            <li>
                 <label for="id">ID:</label>
-                <input type="text" id="id" name="id" required>
-
-                <label for="title">Título:</label>
-                <input type="text" id="title" name="title" required>
-
-                <label for="subtitle">Subtítulo:</label>
-                <input type="text" id="subtitle" name="subtitle">
-
-                <label for="link-title">Título del enlace:</label>
-                <input type="text" id="link-title" name="link-title">
-
-                <label for="author">Autor:</label>
-                <input type="text" id="author" name="author" required>
-
-                <label for="photographer">Fotógrafo:</label>
-                <input type="text" id="photographer" name="photographer">
-
+                <input type="text" id="id" name="id">
+            </li>
+            <li>
+                <label for="categoria">Categoría:</label>
+                <select id="categoria" name="categoria">
+                    <option value="noticias">Noticias</option>
+                    <option value="política">Política</option>
+                    <option value="deportes">Deportes</option>
+                    <!-- Puedes agregar más opciones aquí -->
+                </select>
+            </li>
+            <li>
+                <label for="categorias_secundarias">Categorías secundarias:</label>
+                <input type="text" id="categorias_secundarias" name="categorias_secundarias">
+            </li>
+            <li>
+                <label for="noticia_relacionada">Noticia relacionada:</label>
+                <input type="text" id="noticia_relacionada" name="noticia_relacionada">
+            </li>
+            <li>
+                <label for="url_amigable">URL amigable:</label>
+                <input type="text" id="url_amigable" name="url_amigable">
+            </li>
+            <li>
+                <label for="titulo">Título:</label>
+                <input type="text" id="titulo" name="titulo">
+            </li>
+            <li>
+                <label for="subtitulo">Subtítulo:</label>
+                <input type="text" id="subtitulo" name="subtitulo">
+            </li>
+            <li>
+                <label for="contenido">Contenido:</label>
+                <textarea id="contenido" name="contenido"></textarea>
+            </li>
+            <li>
+                <label for="resumen">Resumen:</label>
+                <textarea id="resumen" name="resumen"></textarea>
+            </li>
+            <li>
+                <label for="fuente">Fuente:</label>
+                <input type="text" id="fuente" name="fuente">
+            </li>
+            <li>
+                <label for="enlace_externo">Enlace externo:</label>
+                <input type="url" id="enlace_externo" name="enlace_externo">
+            </li>
+            <li>
+                <label for="autor">Autor:</label>
+                <input type="text" id="autor" name="autor">
+            </li>
+            <li>
                 <label for="editor">Editor:</label>
                 <input type="text" id="editor" name="editor">
+            </li>
+            <li>
+                <label for="colaboradores">Colaboradores:</label>
+                <input type="text" id="colaboradores" name="colaboradores">
+            </li>
+            <li>
+                <label for="fotografo">Fotógrafo:</label>
+                <input type="text" id="fotografo" name="fotografo">
+            </li>
+            <li>
+                <label for="imagen">Imagen:</label>
+                <input type="file" id="imagen" name="imagen">
+            </li>
+            <li>
+                <label for="video">Video (.mpg4):</label>
+                <input type="file" id="video" name="video">
+            </li>
+            <li>
+                <label for="video_intro">Introducción para YouTube o redes:</label>
+                <textarea id="video_intro" name="video_intro" placeholder="Introducción del video para YouTube o redes sociales"></textarea>
+            </li>
+            <li>
+                <label for="audio_podcast">Audio (Podcast .mp3 .wav):</label>
+                <input type="file" id="audio_podcast" name="audio_podcast">
+            </li>
+            <li>
+                <label for="audio_redes">Audio (Redes Sociales):</label>
+                 <textarea id="audio_redes" name="audio_redes" placeholder="Introducción audio para redes sociales"></textarea>
+            </li>
 
-                <label for="date">Fecha:</label>
-                <input type="date" id="date" name="date" required>
-
-                <label for="time">Hora:</label>
-                <input type="time" id="time" name="time" required>
-
-                <label for="location">Ubicación:</label>
-                <input type="text" id="location" name="location">
-
-                <label for="language">Idioma:</label>
-                <select id="language" name="language" required>
+            <li>
+                <label for="intro_redes">Redes Sociales:</label>
+                <textarea id="intro_redes" name="intro_redes" placeholder="Introducción para redes sociales"></textarea>
+            </li>
+            <li>
+                <label for="tags">Tags:</label>
+                <input type="text" id="tags" name="tags">
+            </li>
+            <li>
+                <label for="palabras_clave">Palabras clave:</label>
+                <input type="text" id="palabras_clave" name="palabras_clave">
+            </li>
+            <li>
+                <label for="fecha">Fecha:</label>
+                <input type="date" id="fecha" name="fecha">
+            </li>
+            <li>
+                <label for="hora">Hora:</label>
+                <input type="time" id="hora" name="hora">
+            </li>
+            <li>
+                <label for="ubicacion">Ubicación:</label>
+                <input type="text" id="ubicacion" name="ubicacion">
+            </li>
+            <li>
+                <label for="idioma">Idioma:</label>
+                <select id="idioma" name="idioma">
                     <option value="es">Español</option>
-                    <option value="en">Inglés</option>
-                    <option value="fr">Francés</option>
-                    <option value="de">Alemán</option>
-                    <option value="otros">Otros</option>
+                    <!-- Puedes agregar más opciones aquí -->
                 </select>
-
-                <label for="source">Fuente:</label>
-                <input type="text" id="source" name="source">
-
-                <label for="category">Categoría:</label>
-                <select id="category" name="category" required>
-                    <option value="noticias">Noticias</option>
-                    <option value="politica">Política</option>
-                    <option value="deportes">Deportes</option>
-                    <option value="entretenimiento">Entretenimiento</option>
-                    <option value="nota-roja">Nota Roja</option>
-                    <option value="podcast">Podcast</option>
-                    <option value="otros">Otros</option>
+            </li>
+            <li>
+                <label for="numero_visitas">Número de visitas:</label>
+                <input type="number" id="numero_visitas" name="numero_visitas" value="0">
+            </li>
+            <li>
+                <label for="comentarios">Comentarios:</label>
+                <select id="comentarios" name="comentarios">
+                    <option value="permitir">Permitir</option>
+                    <option value="denegar">Denegar</option>
+                    <!-- Puedes agregar más opciones aquí -->
                 </select>
-
-                <label for="tags">Etiquetas:</label>
-                <input type="text" id="tags" name="tags" placeholder="Ej: economía, deportes, cultura">
-
-                <label for="visits">Número de visitas:</label>
-                <input type="number" id="visits" name="visits" min="0" value="0">
-
-                <label for="content">Contenido:</label>
-                <textarea id="content" name="content" rows="10" required></textarea>
-
-                <label for="summary">Resumen:</label>
-                <textarea id="summary" name="summary" rows="3"></textarea>
-
-                <label for="image">Imagen:</label>
-                <input type="file" id="image" name="image" accept="image/*">
-
-                <label for="video">Video:</label>
-                <input type="file" id="video" name="video" accept="video/*">
-
-                <label for="audio">Audio:</label>
-                <input type="file" id="audio" name="audio" accept="audio/*">
-
-                <label for="references">Referencias:</label>
-                <textarea id="references" name="references" rows="3"></textarea>
-
-                <label for="permissions">Permisos:</label>
-                <select id="permissions" name="permissions" required>
-                    <option value="public">Público</option>
-                    <option value="private">Privado</option>
-                    <option value="members">Solo miembros</option>
+            </li>
+            <li>
+                <label for="permisos">Permisos:</label>
+                <select id="permisos" name="permisos">
+                    <option value="publico">Público</option>
+                    <option value="privado">Privado</option>
+                    <option value="suscripcion">Suscripción</option>
+                    <!-- Puedes agregar más opciones aquí -->
                 </select>
-
-                <label for="state">Estado:</label>
-                <select id="state" name="state" required>
-                    <option value="draft">Borrador</option>
-                    <option value="review">En revisión</option>
-                    <option value="published">Publicado</option>
+            </li>
+            <li>
+                <label for="estado">Estado:</label>
+                <select id="estado" name="estado">
+                    <option value="borrador">Borrador</option>
+                    <option value="revisado">Revisado</option>
+                    <!-- Puedes agregar más opciones aquí -->
                 </select>
-
-                <label for="priority">Prioridad:</label>
-                <select id="priority" name="priority">
-                    <option value="high">Alta</option>
-                    <option value="medium">Media</option>
-                    <option value="low">Baja</option>
+            </li>
+            <li>
+                <label for="prioridad">Prioridad:</label>
+                <select id="prioridad" name="prioridad">
+                    <option value="alta">Alta</option>
+                    <option value="normal">Normal</option>
+                    <!-- Puedes agregar más opciones aquí -->
                 </select>
-
-                <label for="license">Licencia:</label>
-                <select id="license" name="license">
+            </li>
+            <li>
+                <label for="licencia">Licencia:</label>
+                <select id="licencia" name="licencia">
                     <option value="cc">Creative Commons</option>
-                    <option value="all-rights">Todos los derechos reservados</option>
-                    <option value="public-domain">Dominio público</option>
+                    <option value="privada">Privada</option>
+                    <!-- Puedes agregar más opciones aquí -->
                 </select>
-
-                <label for="collaborators">Colaboradores:</label>
-                <input type="text" id="collaborators" name="collaborators">
-
-                <label for="analysis">Análisis:</label>
-                <textarea id="analysis" name="analysis" rows="3"></textarea>
-
-                <label for="publish">Publicar:</label>
-                <select id="publish" name="publish" required>
-                    <option value="yes">Sí</option>
-                    <option value="no">No</option>
+            </li>
+            <li>
+                <label for="opcion_publicar">Opción de publicar:</label>
+                <select id="opcion_publicar" name="opcion_publicar">
+                    <option value="revisar">Revisión</option>
+                    <option value="si">Publicar</option>                    
                 </select>
+            </li>
+        </ul>
+        <button type="submit">Enviar</button>
+    </form>
 
-                <button type="submit">Subir Nota</button>
-            </form>
-        </div>
 
-        <section id="noticias" class="content">
-            <h2><i class="fas fa-globe"></i> Noticias</h2>
-            <div class="column news">
-                <!-- Contenido de Noticias -->
-            </div>
-        </section>
-
-        <section id="politica" class="content">
-            <h2><i class="fas fa-balance-scale"></i> Política</h2>
-            <div class="column latest-news">
-                <!-- Contenido de Política -->
-            </div>
-        </section>
-
-        <section id="deportes" class="content">
-            <h2><i class="fas fa-football-ball"></i> Deportes</h2>
-            <div class="column latest-news">
-                <!-- Contenido de Deportes -->
-            </div>
-        </section>
     </main>
     <footer>
         <p>© 2024 Noticias con Dany. Todos los derechos reservados.</p>
