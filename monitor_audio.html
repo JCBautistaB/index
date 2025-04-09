@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Detección de Sonido con Informe</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    #estado { font-weight: bold; margin-bottom: 10px; }
+    .reporte { border: 1px solid #ccc; padding: 10px; margin-top: 10px; border-radius: 8px; }
+    .reporte audio { display: block; margin-top: 5px; }
+  </style>
+</head>
+<body>
+  <h1>Monitor de sonido con alertas</h1>
+  <p id="estado">Esperando sonido...</p>
+  <div id="informes"></div>
+
+  <script>
+    let alertaNumero = 1;
+    let contexto;
+    let microfono;
+    let analyser;
+    let stream;
+    let mediaRecorder;
+    let chunks = [];
+    let grabando = false;
+    let volumenSilencio = 5;
+    let tiempoSilencioMs = 1500;
+    let ultimaVezConSonido = 0;
+
+    async function iniciarMicrofono() {
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        contexto = new AudioContext();
+        microfono = contexto.createMediaStreamSource(stream);
+        analyser = contexto.createAnalyser();
+        analyser.fftSize = 2048;
+        microfono.connect(analyser);
+        esperarSonido();
+      } catch (err) {
+        document.getElementById("estado").innerText = "Error al acceder al micrófono.";
+        console.error(err);
+      }
+    }
+
+    function hablar(texto, callback) {
+      const mensaje = new SpeechSynthesisUtterance(texto);
+      mensaje.lang = "es-MX";
+      mensaje.onend = callback;
+      speechSynthesis.speak(mensaje);
+    }
+
+    function esperarSonido() {
+      const buffer = new Uint8Array(analyser.fftSize);
+
+      function revisar() {
+        analyser.getByteTimeDomainData(buffer);
+        const volumen = buffer.reduce((sum, val) => sum + Math.abs(val - 128), 0) / buffer.length;
+
+        if (volumen > volumenSilencio && !grabando) {
+          procesarAlerta();
+        } else {
+          requestAnimationFrame(revisar);
+        }
+      }
+
+      revisar();
+    }
+
+    function procesarAlerta() {
+      grabando = true;
+      document.getElementById("estado").innerText = `Alerta ${alertaNumero}: Sonido detectado`;
+      hablar(`Alerta ${alertaNumero}`, () => grabarHastaSilencio());
+    }
+
+    function grabarHastaSilencio() {
+      chunks = [];
+      mediaRecorder = new MediaRecorder(stream);
+      mediaRecorder.ondataavailable = e => {
+        if (e.data.size > 0) chunks.push(e.data);
+      };
+
+      const buffer = new Uint8Array(analyser.fftSize);
+      ultimaVezConSonido = Date.now();
+
+      mediaRecorder.start();
+      document.getElementById("estado").innerText = `Grabando Alerta ${alertaNumero}...`;
+
+      function controlarSilencio() {
+        analyser.getByteTimeDomainData(buffer);
+        const volumen = buffer.reduce((sum, val) => sum + Math.abs(val - 128), 0) / buffer.length;
+
+        if (volumen > volumenSilencio) {
+          ultimaVezConSonido = Date.now();
+        }
+
+        const tiempoDesdeUltimoSonido = Date.now() - ultimaVezConSonido;
+
+        if (tiempoDesdeUltimoSonido > tiempoSilencioMs) {
+          detenerGrabacion();
+        } else {
+          requestAnimationFrame(controlarSilencio);
+        }
+      }
+
+      controlarSilencio();
+    }
+
+    function detenerGrabacion() {
+      mediaRecorder.onstop = () => {
+        const blob = new Blob(chunks, { type: 'audio/webm' });
+        const duracion = (Date.now() - ultimaVezConSonido + tiempoSilencioMs) / 1000;
+        crearInforme(alertaNumero, duracion.toFixed(2), blob);
+        alertaNumero++;
+        grabando = false;
+        document.getElementById("estado").innerText = "Esperando nuevo sonido...";
+        esperarSonido();
+      };
+
+      mediaRecorder.stop();
+    }
+
+    function crearInforme(num, duracion, blob) {
+      const url = URL.createObjectURL(blob);
+      const hora = new Date().toLocaleString();
+
+      const div = document.createElement("div");
+      div.className = "reporte";
+      div.innerHTML = `
+        <strong>Alerta ${num}</strong><br>
+        Fecha y hora: ${hora}<br>
+        Duración: ${duracion} segundos<br>
+        <audio controls src="${url}"></audio>
+      `;
+
+      document.getElementById("informes").prepend(div);
+    }
+
+    iniciarMicrofono();
+  </script>
+</body>
+</html>
