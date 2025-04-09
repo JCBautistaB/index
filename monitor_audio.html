@@ -2,17 +2,47 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Monitor de sonido con reproducción</title>
+  <title>Monitor de sonido mejorado</title>
   <style>
     body { font-family: Arial, sans-serif; padding: 20px; }
     #estado { font-weight: bold; margin-bottom: 10px; }
     .reporte { border: 1px solid #ccc; padding: 10px; margin-top: 10px; border-radius: 8px; }
     .reporte audio { display: block; margin-top: 5px; }
+    #contador, #alertaNum, #duracionGrabacion { font-size: 1.2em; margin-top: 10px; }
+    #contador { color: green; }
+    #alertaNum { color: blue; }
+    #duracionGrabacion { color: orange; }
+    #opciones { margin-bottom: 20px; }
+    label { margin-right: 10px; }
+    #barraIntensidad {
+      width: 100%; height: 20px;
+      background: #eee; border: 1px solid #ccc; border-radius: 5px; overflow: hidden;
+      margin: 10px 0;
+    }
+    #nivel {
+      height: 100%; width: 0%;
+      background: linear-gradient(to right, green, yellow, red);
+      transition: width 0.1s;
+    }
+    button { margin-top: 10px; padding: 10px 15px; font-size: 1em; }
   </style>
 </head>
 <body>
-  <h1>Monitor de sonido con alertas</h1>
-  <p id="estado">Esperando sonido...</p>
+  <h1>Monitor de sonido con alertas y reproducción</h1>
+
+  <div id="opciones">
+    <label>
+      <input type="checkbox" id="vozActivada" checked>
+      Activar voz en alertas
+    </label>
+    <button onclick="reproducirGrabacionesManual()">▶ Reproducir alertas grabadas</button>
+  </div>
+
+  <div id="estado">Esperando sonido...</div>
+  <div id="barraIntensidad"><div id="nivel"></div></div>
+  <div id="duracionGrabacion">Duración actual: 0 s</div>
+  <div id="alertaNum">Siguiente alerta: 1</div>
+  <div id="contador">Tiempo hasta reproducción: 60 s</div>
   <div id="informes"></div>
 
   <script>
@@ -22,9 +52,12 @@
     let grabando = false;
     let volumenSilencio = 5;
     let tiempoSilencioMs = 1500;
-    let tiempoParaReproducirTodo = 60000; // 1 minuto de silencio
+    let tiempoParaReproducirTodo = 60000;
     let ultimaActividad = Date.now();
     let grabaciones = [];
+    let temporizador;
+    let duracionGrabacionActual = 0;
+    let intervaloDuracion;
 
     async function iniciarMicrofono() {
       try {
@@ -35,6 +68,7 @@
         analyser.fftSize = 2048;
         microfono.connect(analyser);
         monitorear();
+        iniciarTemporizador();
       } catch (err) {
         document.getElementById("estado").innerText = "Error al acceder al micrófono.";
         console.error(err);
@@ -42,10 +76,19 @@
     }
 
     function hablar(texto, callback) {
+      if (!document.getElementById("vozActivada").checked) return callback();
       const mensaje = new SpeechSynthesisUtterance(texto);
       mensaje.lang = "es-MX";
       mensaje.onend = callback;
       speechSynthesis.speak(mensaje);
+    }
+
+    function iniciarTemporizador() {
+      temporizador = setInterval(() => {
+        const restante = Math.max(0, tiempoParaReproducirTodo - (Date.now() - ultimaActividad));
+        const segundos = Math.ceil(restante / 1000);
+        document.getElementById("contador").innerText = `Tiempo hasta reproducción: ${segundos} s`;
+      }, 1000);
     }
 
     function monitorear() {
@@ -54,7 +97,7 @@
       function revisar() {
         analyser.getByteTimeDomainData(buffer);
         const volumen = buffer.reduce((sum, val) => sum + Math.abs(val - 128), 0) / buffer.length;
-
+        actualizarBarra(volumen);
         const ahora = Date.now();
 
         if (volumen > volumenSilencio && !grabando) {
@@ -63,11 +106,11 @@
         } else if (!grabando && (ahora - ultimaActividad > tiempoParaReproducirTodo) && grabaciones.length > 0) {
           document.getElementById("estado").innerText = "1 minuto de silencio: reproduciendo grabaciones...";
           reproducirGrabaciones(() => {
-            ultimaActividad = Date.now(); // reiniciar contador
+            ultimaActividad = Date.now();
             document.getElementById("estado").innerText = "Esperando nuevo sonido...";
             requestAnimationFrame(revisar);
           });
-          return; // detener el ciclo temporalmente mientras se reproducen
+          return;
         }
 
         requestAnimationFrame(revisar);
@@ -76,9 +119,15 @@
       revisar();
     }
 
+    function actualizarBarra(volumen) {
+      let porcentaje = Math.min(100, (volumen * 2));
+      document.getElementById("nivel").style.width = porcentaje + "%";
+    }
+
     function procesarAlerta() {
       grabando = true;
       document.getElementById("estado").innerText = `Alerta ${alertaNumero}: Sonido detectado`;
+      document.getElementById("alertaNum").innerText = `Siguiente alerta: ${alertaNumero}`;
       hablar(`Alerta ${alertaNumero}`, () => grabarHastaSilencio());
     }
 
@@ -91,6 +140,12 @@
 
       const buffer = new Uint8Array(analyser.fftSize);
       let ultimaVezConSonido = Date.now();
+      duracionGrabacionActual = 0;
+      actualizarDuracion(0);
+      intervaloDuracion = setInterval(() => {
+        duracionGrabacionActual++;
+        actualizarDuracion(duracionGrabacionActual);
+      }, 1000);
 
       mediaRecorder.start();
       document.getElementById("estado").innerText = `Grabando Alerta ${alertaNumero}...`;
@@ -116,7 +171,12 @@
       controlarSilencio();
     }
 
+    function actualizarDuracion(segundos) {
+      document.getElementById("duracionGrabacion").innerText = `Duración actual: ${segundos} s`;
+    }
+
     function detenerGrabacion(finSonido) {
+      clearInterval(intervaloDuracion);
       mediaRecorder.onstop = () => {
         const blob = new Blob(chunks, { type: 'audio/webm' });
         const duracion = (Date.now() - finSonido + tiempoSilencioMs) / 1000;
@@ -125,7 +185,9 @@
         alertaNumero++;
         grabando = false;
         ultimaActividad = Date.now();
+        document.getElementById("alertaNum").innerText = `Siguiente alerta: ${alertaNumero}`;
         document.getElementById("estado").innerText = "Esperando nuevo sonido...";
+        actualizarDuracion(0);
       };
 
       mediaRecorder.stop();
@@ -152,8 +214,8 @@
 
       function reproducirSiguiente() {
         if (i >= grabaciones.length) {
-          grabaciones = []; // limpiar después de reproducir
-          callback();
+          grabaciones = []; // limpiar después
+          if (callback) callback();
           return;
         }
 
@@ -166,6 +228,18 @@
       }
 
       reproducirSiguiente();
+    }
+
+    function reproducirGrabacionesManual() {
+      if (grabaciones.length === 0) {
+        alert("No hay grabaciones pendientes.");
+        return;
+      }
+      document.getElementById("estado").innerText = "Reproduciendo grabaciones manualmente...";
+      reproducirGrabaciones(() => {
+        ultimaActividad = Date.now();
+        document.getElementById("estado").innerText = "Esperando nuevo sonido...";
+      });
     }
 
     iniciarMicrofono();
