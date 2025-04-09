@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Detección de Sonido con Informe</title>
+  <title>Monitor de sonido con reproducción</title>
   <style>
     body { font-family: Arial, sans-serif; padding: 20px; }
     #estado { font-weight: bold; margin-bottom: 10px; }
@@ -17,16 +17,14 @@
 
   <script>
     let alertaNumero = 1;
-    let contexto;
-    let microfono;
-    let analyser;
-    let stream;
-    let mediaRecorder;
-    let chunks = [];
+    let contexto, microfono, analyser, stream;
+    let mediaRecorder, chunks = [];
     let grabando = false;
     let volumenSilencio = 5;
     let tiempoSilencioMs = 1500;
-    let ultimaVezConSonido = 0;
+    let tiempoParaReproducirTodo = 60000; // 1 minuto de silencio
+    let ultimaActividad = Date.now();
+    let grabaciones = [];
 
     async function iniciarMicrofono() {
       try {
@@ -36,7 +34,7 @@
         analyser = contexto.createAnalyser();
         analyser.fftSize = 2048;
         microfono.connect(analyser);
-        esperarSonido();
+        monitorear();
       } catch (err) {
         document.getElementById("estado").innerText = "Error al acceder al micrófono.";
         console.error(err);
@@ -50,18 +48,29 @@
       speechSynthesis.speak(mensaje);
     }
 
-    function esperarSonido() {
+    function monitorear() {
       const buffer = new Uint8Array(analyser.fftSize);
 
       function revisar() {
         analyser.getByteTimeDomainData(buffer);
         const volumen = buffer.reduce((sum, val) => sum + Math.abs(val - 128), 0) / buffer.length;
 
+        const ahora = Date.now();
+
         if (volumen > volumenSilencio && !grabando) {
+          ultimaActividad = ahora;
           procesarAlerta();
-        } else {
-          requestAnimationFrame(revisar);
+        } else if (!grabando && (ahora - ultimaActividad > tiempoParaReproducirTodo) && grabaciones.length > 0) {
+          document.getElementById("estado").innerText = "1 minuto de silencio: reproduciendo grabaciones...";
+          reproducirGrabaciones(() => {
+            ultimaActividad = Date.now(); // reiniciar contador
+            document.getElementById("estado").innerText = "Esperando nuevo sonido...";
+            requestAnimationFrame(revisar);
+          });
+          return; // detener el ciclo temporalmente mientras se reproducen
         }
+
+        requestAnimationFrame(revisar);
       }
 
       revisar();
@@ -81,7 +90,7 @@
       };
 
       const buffer = new Uint8Array(analyser.fftSize);
-      ultimaVezConSonido = Date.now();
+      let ultimaVezConSonido = Date.now();
 
       mediaRecorder.start();
       document.getElementById("estado").innerText = `Grabando Alerta ${alertaNumero}...`;
@@ -92,12 +101,13 @@
 
         if (volumen > volumenSilencio) {
           ultimaVezConSonido = Date.now();
+          ultimaActividad = Date.now();
         }
 
         const tiempoDesdeUltimoSonido = Date.now() - ultimaVezConSonido;
 
         if (tiempoDesdeUltimoSonido > tiempoSilencioMs) {
-          detenerGrabacion();
+          detenerGrabacion(ultimaVezConSonido);
         } else {
           requestAnimationFrame(controlarSilencio);
         }
@@ -106,15 +116,16 @@
       controlarSilencio();
     }
 
-    function detenerGrabacion() {
+    function detenerGrabacion(finSonido) {
       mediaRecorder.onstop = () => {
         const blob = new Blob(chunks, { type: 'audio/webm' });
-        const duracion = (Date.now() - ultimaVezConSonido + tiempoSilencioMs) / 1000;
+        const duracion = (Date.now() - finSonido + tiempoSilencioMs) / 1000;
+        grabaciones.push(blob);
         crearInforme(alertaNumero, duracion.toFixed(2), blob);
         alertaNumero++;
         grabando = false;
+        ultimaActividad = Date.now();
         document.getElementById("estado").innerText = "Esperando nuevo sonido...";
-        esperarSonido();
       };
 
       mediaRecorder.stop();
@@ -134,6 +145,27 @@
       `;
 
       document.getElementById("informes").prepend(div);
+    }
+
+    function reproducirGrabaciones(callback) {
+      let i = 0;
+
+      function reproducirSiguiente() {
+        if (i >= grabaciones.length) {
+          grabaciones = []; // limpiar después de reproducir
+          callback();
+          return;
+        }
+
+        const audio = new Audio(URL.createObjectURL(grabaciones[i]));
+        audio.onended = () => {
+          i++;
+          reproducirSiguiente();
+        };
+        audio.play();
+      }
+
+      reproducirSiguiente();
     }
 
     iniciarMicrofono();
