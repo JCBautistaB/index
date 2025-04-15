@@ -1,0 +1,349 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Monitor de sonido con alertas</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    #estado { font-weight: bold; margin-bottom: 10px; }
+    .reporte { border: 1px solid #ccc; padding: 10px; margin-top: 10px; border-radius: 8px; }
+    .reporte audio { display: block; margin-top: 5px; }
+    #contador, #alertaNum, #duracionGrabacion { font-size: 1.2em; margin-top: 10px; }
+    #contador { color: green; }
+    #alertaNum { color: blue; }
+    #duracionGrabacion { color: orange; }
+    #opciones { margin-bottom: 20px; }
+    label { margin-right: 10px; }
+    #barraIntensidad {
+      width: 100%; height: 20px;
+      background: #eee; border: 1px solid #ccc; border-radius: 5px; overflow: hidden;
+      margin: 10px 0;
+    }
+    #nivel {
+      height: 100%; width: 0%;
+      background: linear-gradient(to right, green, yellow, red);
+      transition: width 0.1s;
+    }
+    button { margin-top: 10px; padding: 10px 15px; font-size: 1em; }
+    #btnDetenerGrabacion {
+      background-color: crimson; color: white;
+      display: none;
+    }
+    #btnIniciarGrabacion {
+      background-color: green; color: white;
+    }
+  </style>
+</head>
+<body>
+  <h1>Monitor de sonido con alertas y control</h1>
+
+  <div id="opciones">
+    <label>
+      <input type="checkbox" id="vozActivada" checked>
+      Activar voz en alertas
+    </label>  
+    <button id="btnIniciarGrabacion" onclick="iniciarGrabacionManual()">● Iniciar Grabación</button>
+    <button id="btnDetenerGrabacion" onclick="detenerGrabacionManual()">🛑 Detener Grabación</button>
+  </div>
+
+  <div id="estado">Esperando sonido...</div>
+  <div id="barraIntensidad"><div id="nivel"></div></div>
+
+  <div>
+    <label for="sensibilidad">Sensibilidad (umbral de volumen): <span id="valorSensibilidad">5</span></label><br>
+    <input type="range" id="sensibilidad" min="1" max="100" value="5" />
+  </div>
+
+  <div id="duracionGrabacion">Duración actual: 0 s</div>
+  <div id="alertaNum">Siguiente alerta: 1</div>
+  <div id="contador">Tiempo hasta reproducción: 1 s</div>
+  <div id="informes"></div>
+
+  <script>
+    let alertaNumero = 1;
+    let contexto, microfono, analyser, stream;
+    let mediaRecorder, chunks = [];
+    let grabando = false;
+    let tiempoSilencioMs = 1500;
+    let tiempoParaReproducirTodo = 1000; // 5 segundos
+    let ultimaActividad = Date.now();
+    let grabaciones = [];
+    let temporizador;
+    let duracionGrabacionActual = 0;
+    let intervaloDuracion;
+    let grabacionManual = false;
+    let reproduciendo = false;
+
+    let volumenSilencio = parseInt(document.getElementById("sensibilidad").value);
+    document.getElementById("sensibilidad").addEventListener("input", () => {
+      volumenSilencio = parseInt(document.getElementById("sensibilidad").value);
+      document.getElementById("valorSensibilidad").innerText = volumenSilencio;
+    });
+
+    async function iniciarMicrofono() {
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        contexto = new AudioContext();
+        microfono = contexto.createMediaStreamSource(stream);
+        analyser = contexto.createAnalyser();
+        analyser.fftSize = 2048;
+        microfono.connect(analyser);
+        monitorear();
+        iniciarTemporizador();
+      } catch (err) {
+        document.getElementById("estado").innerText = "Error al acceder al micrófono.";
+        console.error(err);
+      }
+    }
+
+    function hablar(texto, callback) {
+      if (!document.getElementById("vozActivada").checked) return callback();
+      const mensaje = new SpeechSynthesisUtterance(texto);
+      mensaje.lang = "es-MX";
+      mensaje.onend = callback;
+      speechSynthesis.speak(mensaje);
+    }
+
+    function iniciarTemporizador() {
+      temporizador = setInterval(() => {
+        const restante = Math.max(0, tiempoParaReproducirTodo - (Date.now() - ultimaActividad));
+        const segundos = Math.ceil(restante / 1000);
+        document.getElementById("contador").innerText = `Tiempo hasta reproducción: ${segundos} s`;
+        
+        if (restante <= 0 && grabaciones.length > 0 && !grabando && !reproduciendo) {
+          reproducirGrabaciones();
+        }
+      }, 1000);
+    }
+
+    function monitorear() {
+      const buffer = new Uint8Array(analyser.fftSize);
+
+      function revisar() {
+        analyser.getByteTimeDomainData(buffer);
+
+        // Calcular el volumen como la desviación estándar del buffer
+        const promedio = buffer.reduce((sum, val) => sum + val, 0) / buffer.length;
+        const volumen = Math.sqrt(
+          buffer.reduce((sum, val) => sum + Math.pow(val - promedio, 2), 0) / buffer.length
+        );
+
+        actualizarBarra(volumen);
+
+        const ahora = Date.now();
+
+        // Comparar el volumen con el umbral ajustado
+        if (volumen > volumenSilencio && !grabando) {
+          ultimaActividad = ahora;
+          procesarAlerta();
+        }
+
+        requestAnimationFrame(revisar);
+      }
+
+      revisar();
+    }
+
+    function actualizarBarra(volumen) {
+      let porcentaje = Math.min(100, (volumen * 2));
+      document.getElementById("nivel").style.width = porcentaje + "%";
+    }
+
+    function procesarAlerta() {
+      if (grabacionManual) return;
+      
+      grabando = true;
+      document.getElementById("estado").innerText = `Alerta ${alertaNumero}: Sonido detectado`;
+      document.getElementById("alertaNum").innerText = `Siguiente alerta: ${alertaNumero}`;
+      hablar(`Alerta ${alertaNumero}`, () => grabarHastaSilencio());
+    }
+
+    function iniciarGrabacionManual() {
+      if (grabando) return;
+      
+      grabacionManual = true;
+      grabando = true;
+      alertaNumero++;
+      document.getElementById("estado").innerText = "Grabación manual iniciada";
+      document.getElementById("alertaNum").innerText = `Siguiente alerta: ${alertaNumero}`;
+      document.getElementById("btnIniciarGrabacion").style.display = "none";
+      document.getElementById("btnDetenerGrabacion").style.display = "inline-block";
+      
+      grabarHastaSilencio();
+    }
+
+    function detenerGrabacionManual() {
+      if (!grabando) return;
+      
+      clearInterval(intervaloDuracion);
+      mediaRecorder.stop();
+      grabacionManual = false;
+    }
+
+    function grabarHastaSilencio() {
+      chunks = [];
+      mediaRecorder = new MediaRecorder(stream);
+      mediaRecorder.ondataavailable = e => {
+        if (e.data.size > 0) chunks.push(e.data);
+      };
+
+      mediaRecorder.onstop = () => {
+        finalizarGrabacion();
+      };
+
+      const buffer = new Uint8Array(analyser.fftSize);
+      let ultimaVezConSonido = Date.now();
+      duracionGrabacionActual = 0;
+      actualizarDuracion(0);
+      intervaloDuracion = setInterval(() => {
+        duracionGrabacionActual++;
+        actualizarDuracion(duracionGrabacionActual);
+      }, 1000);
+
+      mediaRecorder.start();
+      document.getElementById("estado").innerText = grabacionManual 
+        ? "Grabación manual en progreso..." 
+        : `Grabando Alerta ${alertaNumero}...`;
+      document.getElementById("btnDetenerGrabacion").style.display = "inline-block";
+
+      function controlarSilencio() {
+        analyser.getByteTimeDomainData(buffer);
+        const volumen = buffer.reduce((sum, val) => sum + Math.abs(val - 128), 0) / buffer.length;
+        
+        if (volumen > volumenSilencio) {
+          ultimaVezConSonido = Date.now();
+        }
+
+        if (!grabacionManual && (Date.now() - ultimaVezConSonido > tiempoSilencioMs)) {
+          clearInterval(intervaloDuracion);
+          mediaRecorder.stop();
+          return;
+        }
+
+        if (grabando) {
+          requestAnimationFrame(controlarSilencio);
+        }
+      }
+
+      if (!grabacionManual) {
+        controlarSilencio();
+      }
+    }
+
+    function finalizarGrabacion() {
+      const blob = new Blob(chunks, { type: "audio/wav" });
+      const url = URL.createObjectURL(blob);
+      
+      grabaciones.push({
+        numero: alertaNumero,
+        url: url,
+        duracion: duracionGrabacionActual,
+        timestamp: new Date().toLocaleTimeString()
+      });
+      
+      agregarReporte(alertaNumero, url, duracionGrabacionActual);
+      
+      if (!grabacionManual) {
+        alertaNumero++;
+        document.getElementById("alertaNum").innerText = `Siguiente alerta: ${alertaNumero}`;
+      }
+      
+      grabando = false;
+      document.getElementById("estado").innerText = "Esperando sonido...";
+      document.getElementById("btnIniciarGrabacion").style.display = "inline-block";
+      document.getElementById("btnDetenerGrabacion").style.display = "none";
+      ultimaActividad = Date.now();
+    }
+
+    function actualizarDuracion(segundos) {
+      document.getElementById("duracionGrabacion").innerText = `Duración actual: ${segundos} s`;
+    }
+
+    function agregarReporte(numero, url, duracion) {
+      const informe = document.createElement("div");
+      informe.className = "reporte";
+      informe.innerHTML = `
+        <strong>Alerta ${numero}</strong> - ${duracion}s (${new Date().toLocaleTimeString()})
+        <audio controls src="${url}"></audio>
+        <button onclick="eliminarGrabacion(${grabaciones.length - 1})">❌ Eliminar</button>
+      `;
+      document.getElementById("informes").prepend(informe);
+    }
+
+    function reproducirGrabaciones(callback) {
+      if (grabaciones.length === 0) {
+        document.getElementById("estado").innerText = "No hay más grabaciones para reproducir";
+        reproduciendo = false;
+        if (callback) callback();
+        return;
+      }
+      
+      reproduciendo = true;
+      const grabacion = grabaciones[0];
+      const audio = new Audio(grabacion.url);
+      
+      audio.onplay = () => {
+        document.getElementById("estado").innerText = `Reproduciendo Alerta ${grabacion.numero}`;
+      };
+      
+      audio.onended = () => {
+        grabaciones.shift();
+        reproducirGrabaciones(callback);
+      };
+      
+      audio.onerror = () => {
+        document.getElementById("estado").innerText = "Error al reproducir grabación";
+        reproduciendo = false;
+      };
+      
+      audio.play().catch(e => {
+        console.error("Error al reproducir:", e);
+        document.getElementById("estado").innerText = "Error al reproducir grabación";
+        reproduciendo = false;
+      });
+    }
+
+    function reproducirGrabacionesManual() {
+      console.log("Intentando reproducir grabaciones...");
+      if (grabando) {
+        document.getElementById("estado").innerText = "No se puede reproducir mientras se graba";
+        console.log("Estado: grabando, no se puede reproducir.");
+        return;
+      }
+
+      if (reproduciendo) {
+        document.getElementById("estado").innerText = "Ya se están reproduciendo grabaciones";
+        console.log("Estado: reproduciendo, no se puede iniciar otra reproducción.");
+        return;
+      }
+
+      if (grabaciones.length > 0) {
+        console.log("Iniciando reproducción de grabaciones:", grabaciones);
+        document.getElementById("estado").innerText = "Reproduciendo todas las grabaciones...";
+        reproducirGrabaciones(() => {
+          document.getElementById("estado").innerText = "Reproducción completada";
+          ultimaActividad = Date.now();
+          reproduciendo = false;
+        });
+      } else {
+        document.getElementById("estado").innerText = "No hay grabaciones para reproducir";
+        console.log("No hay grabaciones en el array.");
+      }
+    }
+
+    function eliminarGrabacion(index) {
+      if (index >= 0 && index < grabaciones.length) {
+        grabaciones.splice(index, 1);
+        document.getElementById("informes").innerHTML = "";
+        grabaciones.forEach((grab, i) => {
+          agregarReporte(grab.numero, grab.url, grab.duracion);
+        });
+      }
+    }
+
+    // Iniciar la aplicación
+    iniciarMicrofono();
+  </script>
+</body>
+</html>
