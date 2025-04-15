@@ -145,7 +145,7 @@
     }
 
     function actualizarBarra(volumen) {
-      let porcentaje = Math.min(100, (volumen * 10));
+      let porcentaje = Math.min(100, (volumen * 1));
       document.getElementById("nivel").style.width = porcentaje + "%";
     }
 
@@ -208,7 +208,7 @@
 
       function controlarSilencio() {
         analyser.getByteTimeDomainData(buffer);
-        const volumen = buffer.reduce((sum, val) => sum + Math.abs(val - 128), 0) / buffer.length;
+        const volumen = buffer.reduce((sum, val) => sum + Math.abs(val - 150), 0) / buffer.length;
         
         if (volumen > volumenSilencio) {
           ultimaVezConSonido = Date.now();
